@@ -1,0 +1,23 @@
+\section{Construction des tables offres, metiers et competences}
+\begin{itemize}
+  \item Présenter le grain de chaque table.
+  \item Expliquer les clés \texttt{job\_id} et \texttt{metier\_id}.
+  \item Présenter la transformation de \texttt{required\_skills} avec \texttt{split()} et \texttt{explode()}.
+  \item Insérer un schéma des relations entre les trois tables.
+  \item Vérifier le nombre de lignes de chaque table.
+\end{itemize}
+\textbf{[TODO — team:data-eng]}
+
+\begin{table}[H]
+\centering
+\caption{Modèle logique des 3 tables}
+\begin{tabular}{lp{3.5cm}p{2.5cm}p{4cm}}
+\toprule
+Table & Grain & Clé & Colonnes principales \\
+\midrule
+offres & 1 ligne = 1 offre & job\_id & \\
+metiers & 1 ligne = 1 métier & metier\_id & \\
+competences & 1 ligne = 1 compétence par offre & job\_id + competence & \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,39 @@
+name: Tâche infra
+description: Déploiement, config, ou durcissement k3d/k8s
+title: "[Infra] "
+labels: ["type:infra"]
+body:
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Composant
+      options:
+        - hdfs
+        - hive
+        - spark
+        - zeppelin
+        - voila
+        - k3d
+        - ci
+        - security
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+    validations:
+      required: true
+  - type: textarea
+    id: criteres
+    attributes:
+      label: Critères d'acceptation
+    validations:
+      required: true
+  - type: checkboxes
+    id: securite
+    attributes:
+      label: Points sécurité
+      options:
+        - label: Pas de secret en clair dans les manifests
+        - label: NetworkPolicy appliquée si le service expose un port

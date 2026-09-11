@@ -1,0 +1,53 @@
+version: "3"
+
+tasks:
+  setup:
+    desc: Installe les dépendances dev, les hooks pre-commit et la baseline secrets
+    cmds:
+      - pip install -r requirements-dev.txt
+      - pre-commit install --install-hooks
+      - pre-commit install --hook-type commit-msg
+      - task: secrets-baseline
+
+  secrets-baseline:
+    internal: true
+    status:
+      - test -f .secrets.baseline
+    cmds:
+      - detect-secrets scan > .secrets.baseline
+
+  lint:
+    desc: Rejoue tous les checks pre-commit
+    cmds:
+      - pre-commit run --all-files
+
+  test:
+    desc: Lance les tests unitaires PySpark
+    cmds:
+      - pip install -r requirements-test.txt
+      - pytest tests/unit/ -v
+
+  test:data:
+    desc: Lance les tests de qualité de données (nécessite le cluster up)
+    cmds:
+      - pytest tests/data_quality/ -v
+
+  report:build:
+    desc: Compile le rapport LaTeX en PDF (tectonic, sans distribution TeX complète)
+    cmds:
+      - tectonic report/rapport.tex --outdir report/
+
+  format:
+    desc: Formate le code Python
+    cmds:
+      - ruff format spark-jobs/scripts voila-app
+
+  k3d:up:
+    desc: Démarre le cluster k3d local
+    cmds:
+      - k3d cluster create bigdata --config infra/k3d/config.yaml
+
+  k3d:down:
+    desc: Détruit le cluster k3d local
+    cmds:
+      - k3d cluster delete bigdata

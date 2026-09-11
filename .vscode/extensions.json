@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "charliermarsh.ruff",
+    "redhat.vscode-yaml",
+    "ms-python.python",
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "editorconfig.editorconfig",
+    "eamodio.gitlens",
+    "hashicorp.terraform"
+  ]
+}

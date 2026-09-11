@@ -1,0 +1,36 @@
+name: Livrable académique
+description: Tâche liée à un livrable noté du sujet (Jour 1/2/3)
+title: "[Academic] "
+labels: ["academic:required"]
+body:
+  - type: dropdown
+    id: jour
+    attributes:
+      label: Jour concerné
+      options:
+        - "Jour 1 — HDFS + Hive RAW"
+        - "Jour 2 — Spark + tables + jointures"
+        - "Jour 3 — Analytics + Zeppelin/DAS"
+        - "Rapport"
+    validations:
+      required: true
+  - type: textarea
+    id: requis
+    attributes:
+      label: Exigence exacte du sujet
+      description: Copier le point du barème/sujet concerné
+    validations:
+      required: true
+  - type: textarea
+    id: criteres
+    attributes:
+      label: Critères d'acceptation
+      description: Comment on sait que c'est fait (requêtes obligatoires, nombre de visualisations, etc.)
+    validations:
+      required: true
+  - type: checkboxes
+    id: livrable
+    attributes:
+      label: Rattaché au rapport ?
+      options:
+        - label: Nécessite une capture/section dans le rapport final

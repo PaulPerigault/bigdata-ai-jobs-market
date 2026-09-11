@@ -1,0 +1,35 @@
+name: Bug
+description: Quelque chose ne fonctionne pas comme attendu
+title: "[Bug] "
+labels: ["type:bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Comportement observé
+    validations:
+      required: true
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Comportement attendu
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Étapes de reproduction
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Composant concerné
+      options:
+        - hdfs
+        - hive
+        - spark
+        - zeppelin
+        - voila
+        - k3d
+        - ci

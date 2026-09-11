@@ -1,0 +1,94 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{amssymb}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+}
+
+\title{Analyse du marché de l'emploi en IA 2025--2026 \\
+  \large HDFS $\cdot$ Hive $\cdot$ Spark $\cdot$ Zeppelin $\cdot$ Data Analytics Studio}
+\author{Paul Périgault}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+Informations & À compléter \\
+\midrule
+Établissement & ESIEA \\
+Module & Fondamentaux du Big Data \\
+Noms et prénoms & Paul Périgault \\
+Groupe & \\
+Année universitaire & 2026--2027 \\
+Date de remise & 21 septembre 2026 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Recommandations de forme (rappel trame officielle)}
+\begin{tabular}{ll}
+\toprule
+Élément & Recommandation \\
+\midrule
+Volume conseillé & 12 à 18 pages hors annexes \\
+Captures & Étapes importantes uniquement, avec titre et commentaire \\
+Code & Extraits utiles dans le corps ; scripts complets en annexe \\
+Résultats & Toujours interpréter les tableaux et graphiques \\
+Conclusion & Répondre clairement à la problématique \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\tableofcontents
+\newpage
+
+% ============================================================
+% Un fichier par section dans report/sections/, \input ci-dessous.
+% Structure alignée sur Trame_Rapport_Projet_BigData_IA_Etudiants.docx
+% (synthèse complète dans docs/sujet-synthese.md). Ne pas réordonner
+% les sections ni en retirer sans revalider contre le docx original.
+% Chaque fichier de section est éditable indépendamment par la personne
+% en charge (voir docs/team-roles.md) sans conflit de merge avec les
+% autres sections.
+% ============================================================
+
+\input{sections/01-introduction}
+\input{sections/02-dataset}
+\input{sections/03-architecture}
+\input{sections/04-hdfs}
+\input{sections/05-hive-raw}
+\input{sections/06-spark-quality}
+\input{sections/07-tables-model}
+\input{sections/08-hive-spark-sql}
+\input{sections/09-analyse-metiers-salaires}
+\input{sections/10-dashboard}
+\input{sections/11-synthese}
+\input{sections/12-recommandations}
+\input{sections/13-limites}
+\input{sections/14-conclusion}
+\input{sections/15-annexes}
+\input{sections/16-matrice-verification}
+
+\end{document}

@@ -1,0 +1,80 @@
+# JetBrains IDE — normalisation fine plutôt que blanket-ignore de .idea/ :
+# fichiers d'état perso/machine ignores, structure/style partages committes.
+# cf. https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf/
+.idea/**/httpRequests/
+.idea/**/caches/
+.idea/**/contentModel.xml
+.idea/**/dataSources/
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/sonarlint/
+.idea/**/replstate.xml
+.idea/*.iml
+.idea/material_theme_project_new.xml
+.idea/go.imports.xml
+*.iws
+out/
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ruff_cache/
+*.egg-info/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
+# k3d / kubeconfig
+kubeconfig*.yaml
+*.kubeconfig
+
+# Secrets
+.env
+.env.*
+*.secrets.yaml
+secrets/
+
+# graphify (graphify-out/ est fait pour etre committe - voir son README)
+graphify-out/cost.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# LaTeX build artifacts (tectonic)
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.synctex.gz
+report/*.fls
+report/*.fdb_latexmk
+report/*.pdf
+
+# Materiel proprietaire du sujet - garde en local si besoin, jamais committe
+docs/sujet/*.pdf
+docs/sujet/*.docx

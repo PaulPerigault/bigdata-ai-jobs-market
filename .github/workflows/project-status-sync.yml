@@ -1,0 +1,76 @@
+name: project-status-sync
+
+# Remplace les "Workflows" du GitHub Project (non scriptables via API à ce
+# jour — voir https://github.com/orgs/community/discussions/194509). Fait
+# la même chose : déplace l'item vers le bon statut selon l'événement.
+
+on:
+  issues:
+    types: [opened, reopened, closed, assigned]
+  pull_request:
+    types: [opened, ready_for_review, converted_to_draft, closed]
+
+env:
+  GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+  PROJECT_OWNER: PaulPerigault
+  PROJECT_NUMBER: 9
+
+jobs:
+  sync-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déterminer le statut cible
+        id: target
+        run: |
+          case "${{ github.event_name }}-${{ github.event.action }}" in
+            issues-opened|issues-reopened) echo "status=Backlog" >> "$GITHUB_OUTPUT" ;;
+            issues-assigned) echo "status=In Progress" >> "$GITHUB_OUTPUT" ;;
+            issues-closed) echo "status=Done" >> "$GITHUB_OUTPUT" ;;
+            pull_request-opened|pull_request-ready_for_review) echo "status=In Review" >> "$GITHUB_OUTPUT" ;;
+            pull_request-converted_to_draft) echo "status=In Progress" >> "$GITHUB_OUTPUT" ;;
+            pull_request-closed) echo "status=Done" >> "$GITHUB_OUTPUT" ;;
+            *) echo "status=" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Résoudre l'id du contenu (issue ou PR)
+        id: content
+        if: steps.target.outputs.status != ''
+        run: |
+          NODE_ID="${{ github.event.issue.node_id || github.event.pull_request.node_id }}"
+          echo "node_id=$NODE_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Ajouter au Project (idempotent) et positionner le Status
+        if: steps.target.outputs.status != ''
+        run: |
+          set -euo pipefail
+
+          PROJECT_ID=$(gh api graphql -f query='
+            query($login:String!, $number:Int!) {
+              user(login:$login) { projectV2(number:$number) { id } }
+            }' -f login="$PROJECT_OWNER" -F number="$PROJECT_NUMBER" --jq '.data.user.projectV2.id')
+
+          ITEM_ID=$(gh api graphql -f query='
+            mutation($project:ID!, $content:ID!) {
+              addProjectV2ItemById(input:{projectId:$project, contentId:$content}) {
+                item { id }
+              }
+            }' -f project="$PROJECT_ID" -f content="${{ steps.content.outputs.node_id }}" \
+            --jq '.data.addProjectV2ItemById.item.id')
+
+          FIELD_JSON=$(gh api graphql -f query='
+            query($project:ID!) {
+              node(id:$project) {
+                ... on ProjectV2 {
+                  field(name:"Status") {
+                    ... on ProjectV2SingleSelectField { id options { id name } }
+                  }
+                }
+              }
+            }' -f project="$PROJECT_ID")
+
+          FIELD_ID=$(echo "$FIELD_JSON" | jq -r '.data.node.field.id')
+          OPTION_ID=$(echo "$FIELD_JSON" | jq -r --arg name "${{ steps.target.outputs.status }}" \
+            '.data.node.field.options[] | select(.name==$name) | .id')
+
+          gh project item-edit --id "$ITEM_ID" --project-id "$PROJECT_ID" \
+            --field-id "$FIELD_ID" --single-select-option-id "$OPTION_ID"

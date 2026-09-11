@@ -1,7 +1,44 @@
 \section{Architecture Big Data retenue}
+
+Le pipeline data suit le schéma imposé par le sujet : dataset CSV
+$\rightarrow$ HDFS \texttt{/raw} $\rightarrow$ Spark (contrôle, nettoyage,
+transformation) $\rightarrow$ HDFS \texttt{/processed} (\texttt{offres},
+\texttt{metiers}, \texttt{competences}) $\rightarrow$ Hive / Spark SQL
+$\rightarrow$ Zeppelin et Data Analytics Studio (KPI, visualisations,
+conclusions métier). Le schéma détaillé (diagramme Mermaid, versions
+pipeline data et infrastructure k3d) est maintenu dans
+\texttt{docs/architecture.md} plutôt que dupliqué en image statique ici —
+il évolue à chaque composant déployé.
+
+\textbf{Rôle de chaque composant} :
 \begin{itemize}
-  \item Insérer un schéma de l'architecture complète.
-  \item Expliquer le rôle de HDFS, Hive, Spark, Zeppelin et Data Analytics Studio.
-  \item Présenter l'organisation raw / processed / output.
+  \item \textbf{HDFS} : stockage distribué, zones \texttt{raw} /
+    \texttt{processed} / \texttt{output}.
+  \item \textbf{Hive Metastore + HiveServer2} (backend Postgres) :
+    catalogue de tables externes sur HDFS, exécution SQL.
+  \item \textbf{Spark Operator} : soumission et cycle de vie des jobs
+    PySpark sur k8s.
+  \item \textbf{Jupyter} : exploration interactive (kernel PySpark
+    connecté au cluster), avant extraction en scripts versionnés.
+  \item \textbf{Zeppelin} (+ Data Analytics Studio si le temps le permet)
+    : dashboard académique obligatoire — requêtes et visualisations.
+  \item \textbf{Voilà} : interface personnelle (portfolio), résultats
+    Hive, servie derrière l'ingress k3s.
 \end{itemize}
-\textbf{[TODO — team:infra]} % schéma : voir docs/architecture.md
+
+\textbf{Organisation HDFS} (\texttt{raw} / \texttt{processed} /
+\texttt{output}) :
+\begin{lstlisting}
+/projet_ia/
+├── raw/                    # CSV brut depose tel quel
+├── processed/
+│   ├── offres/              # 1 ligne par offre
+│   ├── metiers/              # referentiel metiers, metier_id stable
+│   └── competences/           # 1 ligne par offre x competence
+└── output/                  # resultats agreges / exports Zeppelin-DAS
+\end{lstlisting}
+
+Le cluster hébergeant ce pipeline est un cluster k3d local, jetable,
+1 server + 2 agents (\texttt{infra/k3d/config.yaml}) — voir
+\texttt{CLAUDE.md} pour les non-goals explicites (pas de VPS, pas
+d'infrastructure permanente).

@@ -1,0 +1,82 @@
+# Single NameNode (no HA — disposable local cluster, see CLAUDE.md
+# non-goals). Formats itself on first boot only (ENSURE_NAMENODE_DIR),
+# stays formatted across pod restarts thanks to the PVC.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hdfs-namenode
+  namespace: bigdata
+spec:
+  serviceName: hdfs-namenode
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hdfs-namenode
+  template:
+    metadata:
+      labels:
+        app: hdfs-namenode
+    spec:
+      # the apache/hadoop image runs as uid 1000 / gid 100 (non-root), but
+      # local-path PVCs are provisioned owned by root — group-write via
+      # fsGroup isn't enough because chmod requires *ownership* (or root),
+      # not just group access. This initContainer chowns the volume once,
+      # as root, before the non-root main container starts.
+      securityContext:
+        fsGroup: 100
+      initContainers:
+        - name: fix-permissions
+          image: busybox:1.36
+          command: ["sh", "-c", "chown -R 1000:100 /hadoop/dfs/name"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: name-dir
+              mountPath: /hadoop/dfs/name
+      containers:
+        - name: namenode
+          image: apache/hadoop:3.4.2
+          args: ["hdfs", "namenode"]
+          envFrom:
+            - configMapRef:
+                name: hdfs-config
+          env:
+            - name: HDFS-SITE.XML_dfs.namenode.name.dir
+              value: file:///hadoop/dfs/name
+            - name: ENSURE_NAMENODE_DIR
+              value: /hadoop/dfs/name/current
+            # Bind on all interfaces instead of resolving the pod's own
+            # hostname via the headless service — that Service only
+            # publishes an address once the pod is Ready, which itself
+            # depends on the RPC port already being bound (circular
+            # dependency otherwise: "Unresolved address" at startup).
+            - name: HDFS-SITE.XML_dfs.namenode.rpc-bind-host
+              value: "0.0.0.0"
+            - name: HDFS-SITE.XML_dfs.namenode.http-bind-host
+              value: "0.0.0.0"
+          ports:
+            - name: rpc
+              containerPort: 9000
+            - name: web-ui
+              containerPort: 9870
+          volumeMounts:
+            - name: name-dir
+              mountPath: /hadoop/dfs/name
+          readinessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+  volumeClaimTemplates:
+    - metadata:
+        name: name-dir
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

@@ -33,9 +33,16 @@ tasks:
       - pytest tests/data_quality/ -v
 
   report:build:
-    desc: Compile le rapport LaTeX en PDF (tectonic, sans distribution TeX complète)
+    desc: Compile le rapport LaTeX en PDF via Docker (aucun outil à installer sur l'hôte)
     cmds:
-      - tectonic report/rapport.tex --outdir report/
+      - task: report:build-image
+      - docker run --rm -v "$(pwd)/report:/workspace" bigdata-report-builder rapport.tex --outdir .
+
+  report:build-image:
+    internal: true
+    desc: Build l'image Docker du compilateur LaTeX (tectonic pinné, checksum vérifié)
+    cmds:
+      - docker build -t bigdata-report-builder infra/docker/report-builder
 
   format:
     desc: Formate le code Python

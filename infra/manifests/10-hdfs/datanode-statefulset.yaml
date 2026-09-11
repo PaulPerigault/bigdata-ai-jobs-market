@@ -1,0 +1,70 @@
+# 2 DataNodes — matches dfs.replication=2 (infra/manifests/10-hdfs/configmap.yaml)
+# and the 2 k3d agent nodes (infra/k3d/config.yaml), one DataNode per agent
+# in spirit (k8s scheduling isn't pinned 1:1, but resource-wise it fits).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hdfs-datanode
+  namespace: bigdata
+spec:
+  serviceName: hdfs-datanode
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hdfs-datanode
+  template:
+    metadata:
+      labels:
+        app: hdfs-datanode
+    spec:
+      # See namenode-statefulset.yaml for why this initContainer is
+      # needed: DataNode's DiskChecker unconditionally chmods its data
+      # dir at startup, which requires ownership (fsGroup alone isn't
+      # enough — group-write doesn't grant chmod rights).
+      securityContext:
+        fsGroup: 100
+      initContainers:
+        - name: fix-permissions
+          image: busybox:1.36
+          command: ["sh", "-c", "chown -R 1000:100 /hadoop/dfs/data"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: data-dir
+              mountPath: /hadoop/dfs/data
+      containers:
+        - name: datanode
+          image: apache/hadoop:3.4.2
+          args: ["hdfs", "datanode"]
+          envFrom:
+            - configMapRef:
+                name: hdfs-config
+          env:
+            - name: HDFS-SITE.XML_dfs.datanode.data.dir
+              value: file:///hadoop/dfs/data
+          ports:
+            - name: rpc
+              containerPort: 9866
+            - name: web-ui
+              containerPort: 9864
+          volumeMounts:
+            - name: data-dir
+              mountPath: /hadoop/dfs/data
+          readinessProbe:
+            tcpSocket:
+              port: 9866
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9866
+            initialDelaySeconds: 30
+            periodSeconds: 20
+  volumeClaimTemplates:
+    - metadata:
+        name: data-dir
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi

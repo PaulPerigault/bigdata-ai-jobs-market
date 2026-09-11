@@ -63,6 +63,41 @@ qui relève de l'interprétation, et ce que le dataset ne permet pas d'affirmer.
 (`task report:build`) | Pas de Word/docx, pas un seul fichier monolithique
 (conflits de merge à 5) |
 
+## Ingénierie logicielle — non négociable
+
+Ces principes s'appliquent à tout le code produit sur ce projet (infra ET
+PySpark ET scripts), pas seulement au périmètre où ils ont été énoncés :
+
+- **Infra 100% as code** : aucune commande mutative ad-hoc sans fichier
+  versionné derrière (manifest k8s, script `infra/scripts/*.sh`, config
+  `infra/k3d/`). Un `kubectl apply -f` sur un fichier du repo est acceptable,
+  un `kubectl create`/`kubectl exec` mutatif "à la main" sans script versionné
+  ne l'est pas.
+- **Builds via conteneur, pas d'outil installé en dur sur l'hôte** : si un
+  outil de build (compilateur LaTeX, futur linter, etc.) peut tourner dans
+  un conteneur, il doit — voir `infra/docker/report-builder/` comme
+  référence. Objectif : n'importe qui clone le repo et lance `task <cible>`
+  sans rien installer sur sa machine.
+- **Tests en parallèle du code, jamais après-coup** : toute fonction de
+  transformation PySpark notable (nettoyage, construction de table,
+  `split`/`explode`, KPI) a son test unitaire écrit **dans la même PR**
+  qui l'introduit (voir `docs/TESTING.md` niveau 1). Une PR qui ajoute de
+  la logique de transformation sans test associé est incomplète.
+- **Séparation stricte du code, principes SOLID** : responsabilité unique
+  par fichier/module, pas de script monolithique qui mélange lecture,
+  nettoyage, transformation et écriture. Pour PySpark, découpage en
+  modules distincts (io, cleaning, transform par table, KPI) — voir
+  `spark-jobs/scripts/README.md` pour la convention de découpage attendue.
+  Nommage explicite, pas de magie implicite. Un fichier/dossier
+  supplémentaire pour isoler une responsabilité est préférable à un
+  fichier qui grossit.
+- **Titres de PR** : doivent utiliser un des types acceptés par
+  `pr-title-check` (`feat|fix|infra|docs|security|chore|test`), y compris
+  pour les issues labellisées `academic:` dans `docs/issues-seed.yml` —
+  leur titre GitHub garde le préfixe `academic:` (label sémantique pour le
+  barème), mais le titre de la **PR** qui la ferme doit utiliser un type
+  valide (souvent `feat` ou `infra` selon la nature du travail).
+
 ## Équipe (5 personnes)
 
 Répartition par rôle/label plutôt que nominative pour l'instant (pseudos

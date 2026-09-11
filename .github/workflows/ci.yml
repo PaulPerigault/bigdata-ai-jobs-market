@@ -76,7 +76,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Vérifier la présence de manifests à lint
+        id: check
+        run: |
+          if [ -d infra/manifests ] && find infra/manifests -name '*.yml' -o -name '*.yaml' 2>/dev/null | grep -q .; then
+            echo "has_manifests=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_manifests=false" >> "$GITHUB_OUTPUT"
+            echo "infra/manifests/ n'existe pas encore ou est vide — rien à lint (normal avant J2-J3)."
+          fi
       - name: kubeconform
+        if: steps.check.outputs.has_manifests == 'true'
         uses: docker://ghcr.io/yannh/kubeconform:latest
         with:
           args: -summary -output json infra/manifests/

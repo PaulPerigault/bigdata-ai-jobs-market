@@ -26,25 +26,38 @@ GROUP BY is_llm_role;
 -- (Pearson, via CORR() — descriptif, aucun modèle entraîné) entre
 -- salaire, expérience, demande et premium IA.
 SELECT
-    ROUND(CORR(annual_salary_usd, years_of_experience), 3) AS corr_salaire_experience,
-    ROUND(CORR(annual_salary_usd, demand_score), 3) AS corr_salaire_demande,
-    ROUND(CORR(annual_salary_usd, ai_salary_premium_pct), 3) AS corr_salaire_premium,
-    ROUND(CORR(years_of_experience, demand_score), 3) AS corr_experience_demande
+    ROUND(CORR(annual_salary_usd, years_of_experience), 3)
+    AS corr_sal_exp,
+    ROUND(CORR(annual_salary_usd, demand_score), 3)
+    AS corr_sal_demande,
+    ROUND(CORR(annual_salary_usd, ai_salary_premium_pct), 3)
+    AS corr_sal_premium,
+    ROUND(CORR(years_of_experience, demand_score), 3)
+    AS corr_exp_demande
 FROM projet_ia.ai_jobs_raw;
 
 -- Analyse 4 : pays et compétences — compétence n°1 par pays (top 5
 -- paires pays/compétence par volume), via fonction fenêtre.
-SELECT country, competence AS top_competence, nb_offres
+SELECT
+    country,
+    competence AS top_competence,
+    nb_offres
 FROM (
-    SELECT country, competence, nb_offres,
-           ROW_NUMBER() OVER (PARTITION BY country ORDER BY nb_offres DESC) AS rnk
+    SELECT
+        country,
+        competence,
+        nb_offres,
+        ROW_NUMBER() OVER (PARTITION BY country ORDER BY nb_offres DESC) AS rnk
     FROM (
-        SELECT o.country, c.competence, COUNT(DISTINCT o.job_id) AS nb_offres
+        SELECT
+            o.country,
+            c.competence,
+            COUNT(DISTINCT o.job_id) AS nb_offres
         FROM processed.offres AS o
         INNER JOIN processed.competences AS c ON o.job_id = c.job_id
         GROUP BY o.country, c.competence
-    ) t
-) r
+    ) AS t
+) AS r
 WHERE rnk = 1
 ORDER BY nb_offres DESC
 LIMIT 5;

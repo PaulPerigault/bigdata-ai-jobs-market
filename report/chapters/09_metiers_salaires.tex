@@ -253,10 +253,15 @@ dataset ? Analyse descriptive (coefficients de corrélation de Pearson
 via \texttt{CORR()}), aucun modèle entraîné.
 
 \begin{verbatim}
-SELECT ROUND(CORR(annual_salary_usd, years_of_experience), 3) AS corr_salaire_experience,
-       ROUND(CORR(annual_salary_usd, demand_score), 3) AS corr_salaire_demande,
-       ROUND(CORR(annual_salary_usd, ai_salary_premium_pct), 3) AS corr_salaire_premium,
-       ROUND(CORR(years_of_experience, demand_score), 3) AS corr_experience_demande
+SELECT
+    ROUND(CORR(annual_salary_usd, years_of_experience), 3)
+    AS corr_sal_exp,
+    ROUND(CORR(annual_salary_usd, demand_score), 3)
+    AS corr_sal_demande,
+    ROUND(CORR(annual_salary_usd, ai_salary_premium_pct), 3)
+    AS corr_sal_premium,
+    ROUND(CORR(years_of_experience, demand_score), 3)
+    AS corr_exp_demande
 FROM projet_ia.ai_jobs_raw;
 \end{verbatim}
 

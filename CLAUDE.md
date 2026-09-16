@@ -33,7 +33,7 @@ Le rapport a pris du retard sur le code une première fois (Étapes 1 et
 2 rattrapées après coup) — cette section existe pour que ça ne se
 reproduise pas. Elle s'applique à **chaque** étape du plan (Étape 2, 3,
 4, 5...), sans qu'il soit besoin de le redemander à chaque fois : c'est
-la norme du projet. Une étape n'est considérée terminée que si les 4
+la norme du projet. Une étape n'est considérée terminée que si les 5
 conditions suivantes sont remplies :
 
 1. **Le code/l'infra correspondant fonctionne et est testé
@@ -54,6 +54,12 @@ conditions suivantes sont remplies :
    une version idéalisée qui passe sous silence les détours réels.
 4. **`JOURNAL.md` a une entrée pour l'étape** (append-only, comme déjà
    spécifié plus bas).
+5. **`STATUS.md` est mis à jour** : la section « État actuel » reflète
+   le nouvel état réel (fichiers présents, chapitres réellement
+   rédigés vs placeholder, requêtes réellement exécutées), et le ou les
+   tickets correspondants sont déplacés de « Ce qu'il reste à faire »
+   vers « fait » (coché `[x]`). `STATUS.md` doit rester aussi fiable
+   que `CLAUDE.md` — jamais laissé dériver de l'état réel du repo.
 
 Si une étape touche plusieurs chapitres, **tous** doivent être à jour
 avant de passer à l'étape suivante — ne pas en oublier un parce qu'il

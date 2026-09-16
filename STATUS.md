@@ -1,0 +1,239 @@
+# STATUS.md — Suivi du projet
+
+> Document vivant. Reflète l'état réel du repo, pas le plan initial.
+> Mis à jour à chaque étape (voir règle de maintenance en bas de fichier).
+> Dernière mise à jour : cf. dernier commit touchant ce fichier.
+
+## Vue d'ensemble
+
+- **Sujet** : Marché de l'emploi en IA 2025-2026 — HDFS/Hive/Spark/Jupyter
+- **Barème** : /20 — HDFS (2) · Hive RAW+processed (3) · Spark nettoyage (4)
+  · modèle offres-métiers-compétences (3) · Hive SQL/Spark SQL (3)
+  · visualisations (3) · analyse et rapport (2)
+- **Deadline** : 21/09/2026
+- **Repo** : ~/PycharmProjects/bigdata-ai-jobs-market (branche main)
+
+## État actuel — ce qui est FAIT et vérifié en conditions réelles
+
+### Infra (Étape 1) ✅
+- [x] `compose.yaml` + `compose.override.yaml` : HDFS (namenode/datanode
+      bde2020 2.7.4), Hive (metastore+server bde2020 2.3.2, Postgres
+      metastore), Jupyter/PySpark 3.5.0. Images pinnées, healthchecks,
+      `depends_on: condition: service_healthy`.
+- [x] Ports publiés sur `127.0.0.1` uniquement (corrigé suite scan
+      sécurité automatique — étaient sur `0.0.0.0`).
+- [x] `GRANT_SUDO` retiré du conteneur `jupyter` (inutile, surface
+      d'attaque réduite — jamais appliqué aux conteneurs Hadoop).
+- [x] `Taskfile.yml` : `up`, `down`, `ingest`, `etl`, `test`,
+      `hive-shell`, `jupyter` — chacune loggue dans `JOURNAL.md`.
+- [x] `.pre-commit-config.yaml` : gitleaks, sqlfluff (dialecte Hive),
+      ruff (lint + format — pas de black, ruff fait les deux).
+- [x] `.github/workflows/ci.yml` : job `lint` (pre-commit) + `test`
+      (pytest, Spark local, sans dépendance à la stack Compose).
+- [x] `CLAUDE.md` tenu à jour en continu (tags d'images, décisions,
+      section "Definition of Done" ajoutée).
+- [x] Stack vérifiée healthy 6/6 services en conditions réelles.
+
+### Pipeline de données (Étape 2) ✅
+- [x] Ingestion HDFS `/projet_ia/raw` (CSV, 1500 lignes confirmées).
+- [x] Table Hive RAW `ai_jobs_raw` créée — **bug corrigé** :
+      `spark.sql` sur la table Hive ignorait `skip.header.line.count`
+      (1501 lignes au lieu de 1500) ; contournement par
+      `spark.read.csv(header=True)` direct sur HDFS.
+- [x] Table `offres` : 1500 lignes, 0 doublon `job_id`.
+- [x] Table `metiers` : 25 métiers distincts, `metier_id` corrigé en
+      hash déterministe (plus de `monotonically_increasing_id()`).
+- [x] Table `competences` : 9548 liaisons job↔compétence (chiffre exact,
+      pas une approximation).
+- [x] Écriture HDFS `/projet_ia/processed/{offres,metiers,competences}`
+      + tables Hive externes correspondantes.
+- [x] Comptages NULLs/doublons avant-après nettoyage, chiffrés et
+      documentés (chapitre 06 du rapport).
+- [x] Jointure offres↔métiers vérifiée via Beeline (ex. LLM Engineer :
+      75 offres, salaire moyen ~240 960$).
+
+### Rapport LaTeX ✅ (partiel)
+- [x] Restructuré en `report/main.tex` + `report/preamble/` +
+      `report/chapters/*.tex` (15 chapitres), polices Roboto/Poppins
+      versionnées (pas de dépendance système).
+- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 22 pages.
+- [x] Chapitres rédigés avec résultats réels : **03** (architecture +
+      3 corrections sécurité), **04** (ingestion, bug 1501 lignes),
+      **05** (DDL Hive + bug header), **06** (nulls/doublons), **07**
+      (fix metier_id + chiffres tables), **08** (jointure LLM Engineer
+      commentée).
+- [ ] Chapitres encore en placeholder : **01** (introduction), **02**
+      (présentation dataset), **09** à **15** (analyses restantes,
+      dashboard, synthèse, recommandations, limites, conclusion,
+      annexes).
+
+## Ce qu'il reste à faire — prêt à découper en tickets
+
+Chaque bloc ci-dessous correspond à un ticket GitHub/JIRA autonome :
+titre, ce qu'il couvre, critères d'acceptation. Copiable tel quel.
+
+---
+
+**TICKET — Requêtes Hive SQL/Spark SQL manquantes (Jour 2)** — [#103](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/103)
+Label : `pipeline`
+- Jointure offres↔competences comme requête dédiée (pas seulement
+  utilisée en interne pour construire la table).
+- Une requête `GROUP BY` + `HAVING`.
+- Comparaison explicite d'une requête en Hive SQL vs son équivalent
+  Spark SQL (pour la section 8 du rapport).
+Critère d'acceptation : requêtes exécutées, résultats capturés, chapitre
+rapport correspondant mis à jour (DoD).
+
+---
+
+**TICKET — KPI obligatoires Jour 3 (10 KPI)** — [#94](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/94)
+Label : `analytics`
+- Total offres/métiers en KPI de synthèse affiché.
+- Salaire médian (`percentile_approx`), pas seulement moyenne.
+- Top métiers les mieux rémunérés (classement dédié).
+- Top métiers les plus demandés, top compétences.
+- Salaire moyen par pays.
+- Salaire par niveau d'expérience.
+- Répartition télétravail/présentiel (`remote_work`).
+- Analyse LLM/GenAI (`is_llm_role`).
+- Évolution 2025-2026 par période (`posting_year`/`posting_month`).
+Critère d'acceptation : les 10 KPI calculés et documentés, chapitre
+rapport à jour.
+
+---
+
+**TICKET — 4 analyses au choix (minimum)** — [#95](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/95)
+Label : `analytics`
+Choisir parmi : prime salariale IA, comparaison LLM vs autres métiers,
+relation expérience-salaire, pays et compétences, secteur et salaire,
+taille d'entreprise et salaire, métiers en forte croissance.
+Critère d'acceptation : 4 analyses réalisées avec interprétation,
+intégrées au rapport.
+
+---
+
+**TICKET — Dashboard : minimum 6 visualisations** — [#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96)
+Label : `analytics` `dashboard`
+Chaque visualisation : titre, requête source identifiable,
+interprétation chiffrée affichée sous le graphique (pas juste le
+graphique seul).
+Critère d'acceptation : 6+ visualisations dans le notebook Jupyter,
+exportées en figures pour le rapport.
+
+---
+
+**TICKET — Rapport : chapitres 01 (introduction) et 02 (dataset)** — [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97)
+Label : `rapport`
+Rédaction du contexte, de la problématique, des objectifs, et de la
+présentation du dataset (source, volumétrie, variables, premières
+observations qualité).
+Critère d'acceptation : chapitres rédigés, PDF recompile sans erreur.
+
+---
+
+**TICKET — Rapport : chapitres 09-10 (analyses/KPI/dashboard)** — [#98](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/98)
+Label : `rapport`
+Dépend des tickets "KPI obligatoires", "4 analyses au choix",
+"Dashboard". Intégrer résultats réels une fois ces tickets faits.
+Critère d'acceptation : chapitres à jour avec les vrais chiffres, pas
+de placeholder.
+
+---
+
+**TICKET — Rapport : chapitres 11-13 (synthèse, recommandations, limites)** — [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99)
+Label : `rapport`
+- 6 à 10 constats reliés à un indicateur/requête précis chacun.
+- 3 recommandations argumentées (résultat → interprétation →
+  recommandation).
+- Section limites de l'étude distincte (représentativité, volume,
+  limites méthodologiques — ex. le dataset ne permet pas d'affirmer de
+  causalité IA→emploi).
+Critère d'acceptation : sections rédigées, distinctes les unes des
+autres (ne pas mélanger constat et recommandation).
+
+---
+
+**TICKET — Schémas (architecture + modèle 3 tables)** — [#100](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/100)
+Label : `rapport` `figures`
+- Diagramme d'architecture (HDFS→Hive→Spark→Jupyter) pour chapitre 03.
+- Schéma relationnel des 3 tables (offres/metiers/competences, clés)
+  pour chapitre 07.
+Critère d'acceptation : figures dans `report/figures/`, référencées
+dans les chapitres concernés (actuellement en commentaire placeholder).
+
+---
+
+**TICKET — Captures d'écran pour annexes** — [#101](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/101)
+Label : `rapport` `figures`
+Convention de nommage : `etapeX_outil_contenu.png`
+(ex. `etape2_beeline_join.png`, `etape1_task_up_healthy.png`).
+À capturer : `task up` healthy, DESCRIBE des tables Hive, requêtes
+Beeline clés, dashboard Jupyter final.
+Critère d'acceptation : captures dans `report/figures/`, intégrées aux
+annexes du rapport.
+
+> **Vérifié le 2026-09-16** : `report/figures/` est actuellement **vide**
+> (aucun fichier). Toutes les captures mentionnées comme faites dans le
+> repo (JOURNAL.md, chapitres 04/05/08 du rapport) n'ont en réalité
+> **jamais été prises** — elles n'existent que sous forme de sorties
+> texte (logs beeline, `docker ps`), pas d'images. Manquent
+> précisément :
+> - `etape1_task_up_healthy.png` — `docker ps` montrant les 6 services
+>   `healthy` (chapitre 03/annexes).
+> - `etape2_hive_raw_describe.png` — `DESCRIBE FORMATTED
+>   projet_ia.ai_jobs_raw` via Beeline (chapitre 05).
+> - `etape2_beeline_join_llm_engineer.png` — la requête de jointure
+>   `offres`↔`metiers` et son résultat (top métiers, LLM Engineer en
+>   tête) citée au chapitre 08.
+> - `etape2_hdfs_processed_tree.png` — `hdfs dfs -ls -R
+>   /projet_ia/processed` montrant l'arborescence des 3 tables.
+> - Dashboard Jupyter final : pas encore capturable, dépend du ticket
+>   "Dashboard : minimum 6 visualisations" (pas encore fait).
+
+---
+
+**TICKET — Relecture croisée finale** — [#102](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/102)
+Label : `qualité`
+Chaque membre relit la section rédigée par un autre. Vérification de
+la matrice de vérification en fin de trame docx du prof.
+Critère d'acceptation : toutes les sections relues par une personne
+différente de l'auteur, corrections appliquées.
+
+---
+
+**TICKET — Export final et vérification livrables** — [#104](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/104)
+Label : `livraison`
+Vérifier : rapport PDF complet, notebook(s), scripts SQL/PySpark
+versionnés, captures HDFS/Hive, schéma des 3 tables, dashboard,
+conclusions — tout présent avant le 21/09.
+Critère d'acceptation : checklist des livrables finaux (section 6 du
+sujet PDF) cochée intégralement.
+
+---
+
+## Décisions techniques et bugs corrigés (log condensé)
+
+Détail complet dans `CLAUDE.md` et `JOURNAL.md`. Résumé pour contexte
+rapide :
+1. Ports Docker : `0.0.0.0` → `127.0.0.1` (scan sécurité).
+2. `GRANT_SUDO` retiré (scan sécurité).
+3. `metier_id` : `monotonically_increasing_id()` → hash déterministe
+   (instabilité découverte en testant réellement).
+4. Table Hive RAW : `skip.header.line.count` ignoré par `spark.sql` →
+   lecture directe `spark.read.csv(header=True)` sur HDFS.
+5. Rapport : `rapport/rapport_esiea.tex` (monolithe, dérive d'un pivot
+   précédent) → restructuré en `report/main.tex` + fichiers séparés,
+   conforme à ce que `CLAUDE.md` décrivait déjà.
+6. GitHub Issues : 87 issues préexistantes (toutes `CLOSED`, datant du
+   09-16/09/2026, documentant l'ancienne architecture k3d/Zeppelin déjà
+   abandonnée avant le début de ce suivi) supprimées après confirmation
+   explicite, pour repartir d'un état propre aligné sur les tickets de
+   ce fichier. Les 11 tickets ci-dessous recréés en #94-#104.
+
+## Règle de maintenance de ce fichier
+
+Ce fichier fait partie de la **Definition of Done** définie dans
+`CLAUDE.md` : aucune étape n'est terminée tant que la section "État
+actuel" n'est pas mise à jour et que le ticket correspondant n'est pas
+déplacé de "reste à faire" vers "fait". Ne pas laisser ce document
+dériver du repo réel — il doit être aussi fiable que `CLAUDE.md`.

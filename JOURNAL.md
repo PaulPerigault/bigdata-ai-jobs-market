@@ -52,3 +52,22 @@ Poppins versionnées dans report/fonts/ pour ne pas dépendre de l'install
 système). Chapitres non encore concernés (01,02,09-15) laissés en placeholder,
 normal tant que leur étape n'est pas atteinte.
 Auteur : task automation
+
+## 2026-09-16 16:15 — STATUS.md corrigé + issues GitHub recréées
+Commande : gh issue delete/create/edit (voir historique de la session)
+Résultat : corrections d'exactitude dans STATUS.md (pre-commit = ruff
+seul, pas black ; GRANT_SUDO retiré du conteneur jupyter uniquement,
+pas "conteneurs Hadoop" ; 9548 competences = chiffre exact, pas une
+approximation ; label "sql" retiré du ticket 1, hors liste des 7 labels
+approuvés). Ajout d'une 5e condition à la Definition of Done (CLAUDE.md)
+: STATUS.md doit être mis à jour à chaque étape. Note ajoutée au ticket
+"Captures d'écran" listant précisément les 4 captures manquantes
+(report/figures/ vide, confirmé). 87 issues GitHub préexistantes
+(CLOSED, ancienne architecture k3d/Zeppelin) supprimées après
+confirmation utilisateur, labels pipeline/analytics/dashboard/rapport/
+figures/qualité/livraison créés, 11 tickets de STATUS.md recréés en
+issues #94-#104 (une erreur d'indexation de tableau bash a d'abord
+décalé titres/labels vs corps de plusieurs issues — détectée et
+corrigée avant validation finale). STATUS.md mis à jour avec les liens
+vers chaque issue.
+Auteur : task automation

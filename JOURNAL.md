@@ -84,3 +84,22 @@ comprise) - chiffré et documenté au chapitre 08. Rapport recompilé (2
 passes xelatex, 0 erreur, 22 -> 24 pages). Issue #103 fermée, ticket
 correspondant dans STATUS.md déplacé vers "fait".
 Auteur : task automation
+
+## 2026-09-16 16:35 — KPI obligatoires Jour 3 (issue #94)
+Commande : beeline -f sql/hive/02_kpis.sql
+Résultat : 10 KPI calculés pour de vrai sur le dataset réel : total 1500
+offres/25 métiers, salaire moyen 194892$/médian 179421$, métier le mieux
+rémunéré AI Solutions Architect (251577$), le plus demandé LLM Engineer
+(75 offres), compétence la plus demandée Python (942 offres), pays le
+mieux rémunéré USA (226190$), salaire par expérience (Lead 240055$ ->
+Entry 150039$), Hybrid dominant (45.7%), écart LLM/GenAI documenté
+(+8.6% de salaire mais premium_pct plus bas, sans affirmation causale),
+pic d'activité fevrier 2026 (306 offres, ~5x le volume mensuel 2025 -
+signale comme constat descriptif, pas une preuve de tendance). Chapitre
+09 du rapport rédigé avec ces résultats réels. Rapport recompilé (2
+passes xelatex, 0 erreur, 24 -> 26 pages, vérifié visuellement). Bug SQL
+corrigé en route : Hive 2.3.2 ne supporte pas les sous-requêtes
+scalaires en SELECT ni les CROSS JOIN (désactivés par sécurité) -> KPI1
+réécrit en UNION ALL avec discriminant. Issue #94 fermée, ticket déplacé
+vers "fait" dans STATUS.md.
+Auteur : task automation

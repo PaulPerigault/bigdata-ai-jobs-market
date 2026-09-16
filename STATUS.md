@@ -62,22 +62,34 @@
       expérience) : résultats identiques, Hive-on-MR 33,0s vs Spark SQL
       8,8s — chiffré et documenté (chapitre 08).
 
+### KPI obligatoires Jour 3 (Étape 3) ✅
+- [x] **[#94](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/94)**
+      Les 10 KPI obligatoires calculés via `sql/hive/02_kpis.sql` et
+      documentés au chapitre 09 : total 1500 offres/25 métiers, salaire
+      moyen 194 892$/médian 179 421$, métier le mieux rémunéré AI
+      Solutions Architect (251 577$), le plus demandé LLM Engineer (75
+      offres), compétence la plus demandée Python (942 offres), pays le
+      mieux rémunéré USA (226 190$), Hybrid dominant (45,7%), écart
+      LLM/GenAI documenté sans sur-interprétation causale, pic d'activité
+      février 2026 (306 offres, ~5x le volume mensuel 2025 — signalé
+      comme constat descriptif, repris au chapitre 13 limites).
+
 ### Rapport LaTeX ✅ (partiel)
 - [x] Restructuré en `report/main.tex` + `report/preamble/` +
       `report/chapters/*.tex` (15 chapitres), polices Roboto/Poppins
       versionnées (pas de dépendance système).
-- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 24 pages.
+- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 26 pages.
 - [x] Chapitres rédigés avec résultats réels : **03** (architecture +
       3 corrections sécurité), **04** (ingestion, bug 1501 lignes),
       **05** (DDL Hive + bug header), **06** (nulls/doublons), **07**
       (fix metier_id + chiffres tables), **08** (jointures
       offres↔metiers/competences, GROUP BY+HAVING, comparaison
-      Hive/Spark SQL — Étapes 2 et 3).
+      Hive/Spark SQL), **09** (10 KPI obligatoires Jour 3, chiffres
+      réels) — Étapes 2 et 3.
 - [ ] Chapitres encore en placeholder : **01** (introduction), **02**
-      (présentation dataset), **09** à **15** (KPI Jour 3, 4 analyses
-      au choix, dashboard, synthèse, recommandations, limites,
-      conclusion, annexes) — restent liés aux tickets
-      [#94](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/94),
+      (présentation dataset), **10** à **15** (4 analyses au choix,
+      dashboard, synthèse, recommandations, limites, conclusion,
+      annexes) — restent liés aux tickets
       [#95](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/95),
       [#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96),
       [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97),
@@ -103,19 +115,19 @@ rapport correspondant mis à jour (DoD). Voir chapitre 08 et
 
 ---
 
-**TICKET — KPI obligatoires Jour 3 (10 KPI)** — [#94](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/94)
+**TICKET — KPI obligatoires Jour 3 (10 KPI)** — ✅ FAIT — [#94](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/94) (fermée)
 Label : `analytics`
-- Total offres/métiers en KPI de synthèse affiché.
-- Salaire médian (`percentile_approx`), pas seulement moyenne.
-- Top métiers les mieux rémunérés (classement dédié).
-- Top métiers les plus demandés, top compétences.
-- Salaire moyen par pays.
-- Salaire par niveau d'expérience.
-- Répartition télétravail/présentiel (`remote_work`).
-- Analyse LLM/GenAI (`is_llm_role`).
-- Évolution 2025-2026 par période (`posting_year`/`posting_month`).
+- [x] Total offres/métiers en KPI de synthèse affiché.
+- [x] Salaire médian (`percentile_approx`), pas seulement moyenne.
+- [x] Top métiers les mieux rémunérés (classement dédié).
+- [x] Top métiers les plus demandés, top compétences.
+- [x] Salaire moyen par pays.
+- [x] Salaire par niveau d'expérience.
+- [x] Répartition télétravail/présentiel (`remote_work`).
+- [x] Analyse LLM/GenAI (`is_llm_role`).
+- [x] Évolution 2025-2026 par période (`posting_year`/`posting_month`).
 Critère d'acceptation : les 10 KPI calculés et documentés, chapitre
-rapport à jour.
+rapport à jour. Voir chapitre 09 et `sql/hive/02_kpis.sql`.
 
 ---
 

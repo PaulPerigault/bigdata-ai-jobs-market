@@ -1,3 +1,153 @@
 \chapter{Analyse des métiers, salaires et compétences}
-% KPI Jour 3 (salaire médian, top métiers/compétences, télétravail,
-% analyse LLM/GenAI, évolution 2025-2026) — Étape 3.
+% KPI Jour 3 obligatoires (10) — issue #94. Requêtes dans
+% sql/hive/02_kpis.sql, exécutées via Beeline le 16/09/2026.
+% Les 4 analyses au choix (issue #95) et le dashboard (issue #96)
+% restent à faire — voir STATUS.md.
+
+\section{KPI obligatoires (10)}
+
+\begin{center}
+\small
+\begin{tabular}{clr}
+\toprule
+KPI & Indicateur & Résultat \\
+\midrule
+1 & Total offres / métiers & 1500 offres / 25 métiers \\
+2 & Salaire moyen / médian & 194\,892\$ / 179\,421\$ \\
+3 & Métier le mieux rémunéré & AI Solutions Architect (251\,577\$) \\
+4 & Métier le plus demandé & LLM Engineer (75 offres) \\
+5 & Compétence la plus demandée & Python (942 offres) \\
+6 & Pays le mieux rémunéré & USA (226\,190\$) \\
+7 & Salaire par expérience (max) & Lead 10+ yrs (240\,055\$) \\
+8 & Mode de travail dominant & Hybrid (45,7\,\%) \\
+9 & Écart LLM/GenAI vs autres & +8,6\,\% de salaire, -2,4 pt de premium \\
+10 & Pic d'activité & Février 2026 (306 offres) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{KPI 3-4 : métiers les mieux rémunérés vs les plus demandés}
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Top 5 mieux rémunérés & Salaire moyen (\$) \\
+\midrule
+AI Solutions Architect & 251\,577 \\
+Senior ML Engineer & 247\,953 \\
+LLM Engineer & 240\,960 \\
+AI Agent Developer & 225\,649 \\
+Multimodal AI Engineer & 221\,791 \\
+\bottomrule
+\end{tabular}
+\quad
+\begin{tabular}{lr}
+\toprule
+Top 5 plus demandés & Offres \\
+\midrule
+LLM Engineer & 75 \\
+Robotics Engineer (AI) & 74 \\
+Prompt Engineer & 71 \\
+Generative AI Engineer & 71 \\
+AI Product Manager & 70 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{constat}[Interprétation]
+\textbf{LLM Engineer} est le seul métier présent dans les deux top 5
+(rémunération \emph{et} volume) — un signal de tension du marché
+particulièrement fort sur ce profil. \textbf{AI Solutions Architect}
+rémunère le mieux mais ne figure pas dans le top 4 des métiers les plus
+demandés (volume plus faible), cohérent avec un poste senior/rare plutôt
+que massifié.
+\end{constat}
+
+\subsection{KPI 7 : salaire par niveau d'expérience}
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Expérience & Salaire moyen (\$) \\
+\midrule
+Lead (10+ yrs) & 240\,055 \\
+Senior (6-9 yrs) & 214\,280 \\
+Mid (3-5 yrs) & 175\,984 \\
+Entry (0-2 yrs) & 150\,039 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Progression quasi linéaire : chaque palier d'expérience ajoute
+30\,000\,--\,40\,000\$ de salaire moyen, sans effet de seuil marqué.
+
+\subsection{KPI 8 : répartition télétravail / présentiel}
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Mode de travail & Offres & \% \\
+\midrule
+Hybrid & 686 & 45,7 \\
+Fully Remote & 445 & 29,7 \\
+On-site & 369 & 24,6 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Le mode \textbf{hybride} domine largement (45,7\,\%) sur ce marché de
+l'IA, devant le full-remote (29,7\,\%) — le présentiel intégral reste
+minoritaire (24,6\,\%) mais loin d'être marginal.
+
+\subsection{KPI 9 : analyse LLM/GenAI}
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+\texttt{is\_llm\_role} & Offres & Salaire moyen (\$) & Premium IA moyen (\%) \\
+\midrule
+Non (0) & 1173 & 191\,309 & 11,39 \\
+Oui (1) & 327 & 207\,746 & 8,96 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{constat}[Interprétation — à ne pas sur-interpréter]
+Les rôles LLM/GenAI (\texttt{is\_llm\_role=1}) sont mieux rémunérés en
+moyenne (+16\,437\$, soit +8,6\,\%) que le reste du marché IA — mais leur
+\texttt{ai\_salary\_premium\_pct} moyen est \emph{plus bas}
+(8,96\,\% contre 11,39\,\%). Ce n'est pas contradictoire : le premium
+mesure un écart relatif à un référentiel qui n'est pas détaillé dans le
+dataset, alors que le salaire absolu compare directement deux
+populations de métiers différents. Le dataset ne permet pas de trancher
+si les rôles LLM/GenAI sont \og mieux payés parce que rares \fg{} ou
+\og mieux payés par nature du poste \fg{} — une affirmation causale
+irait au-delà de ce que ces chiffres montrent.
+\end{constat}
+
+\subsection{KPI 10 : évolution 2025-2026}
+
+\begin{center}
+\small
+\begin{tabular}{llrr}
+\toprule
+Année & Mois & Offres & Salaire moyen (\$) \\
+\midrule
+2025 & 1--12 & 41 à 68 / mois & 179\,695 à 207\,732 \\
+2026 & 1 & 271 & 194\,288 \\
+2026 & 2 & 306 & 199\,846 \\
+2026 & 3 & 299 & 194\,024 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{constat}[Constat, sans sur-interprétation]
+Le volume d'offres par mois est environ \textbf{5 fois plus élevé} sur
+les 3 premiers mois de 2026 (271 à 306/mois) que sur l'ensemble de 2025
+(41 à 68/mois). Le dataset ne documente pas la méthode de collecte
+sous-jacente : cette rupture peut refléter une réelle accélération du
+marché de l'emploi IA sur cette période, ou un artefact de construction
+du jeu de données (échantillonnage non uniforme dans le temps). À
+traiter comme un constat descriptif, pas comme une preuve de tendance
+de marché — repris au chapitre~13 (limites de l'étude).
+\end{constat}

@@ -341,6 +341,20 @@ rapide :
    GitHub. Corrigé : notebook reformaté, règle « toujours `--all-files`
    avant de commit/push » ajoutée à `CLAUDE.md`. Documenté au
    chapitre 03 du rapport comme exemple de recul critique.
+8. **CI cassée une deuxième fois après le commit `2170739` (#95)** :
+   `sqlfluff-lint` a échoué sur GitHub Actions
+   (`sql/hive/03_analyses_choix.sql`, lignes trop longues + indentation)
+   alors qu'un `pre-commit run --all-files` local avait rapporté "tout
+   passe" juste avant de commit. Cause exacte non identifiée avec
+   certitude (fichier probablement pas encore sauvegardé au moment du
+   run local, ou lecture erronée de la sortie) — pas un problème
+   d'environnement CI vs local puisqu'un nouveau `pre-commit run` local
+   a immédiatement reproduit l'échec de GitHub. Corrigé (commit
+   `2347b81`) : requête de corrélation ré-enveloppée avec des alias plus
+   courts et une indentation à 4 espaces cohérente ; requête pays/
+   compétences reformatée pour `LT09`/`AL01`. Vérifié avec
+   `gh run watch` sur le run réel (pas seulement le pre-commit local) —
+   `lint` et `test` verts sur `2347b81`.
 
 ## Règle de maintenance de ce fichier
 

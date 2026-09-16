@@ -213,3 +213,19 @@ final). DoD appliquee par sous-etape tout du long (requete + capture +
 chapitre + STATUS.md avant de passer a l'analyse suivante), pas en
 rattrapage.
 Auteur : task automation
+
+## 2026-09-17 00:59 — Correction CI cassée après le push #95 (commit 2170739)
+Commande : gh run list --branch main → sqlfluff-lint FAIL sur
+sql/hive/03_analyses_choix.sql (LT05 lignes trop longues). Correction
+manuelle (alias raccourcis, indentation 4 espaces cohérente pour
+l'analyse 3 ; reformatage LT09/AL01 pour l'analyse 4), puis
+pre-commit run --all-files (tout passe) et gh run watch sur le run réel
+GitHub Actions déclenché par le nouveau push.
+Resultat : commit 2347b81 poussé, run CI 35160138049 vert confirmé en
+direct (job lint 14s, job test 1m4s) — pas seulement un pre-commit
+local, la divergence local/CI du commit précédent imposait de vérifier
+le run réel avant de considérer le sujet clos. STATUS.md section
+"Décisions techniques" mise à jour (entrée 8) avec le détail de
+l'incident. Chapitre 09 §9.3.3 (code listing de la requête de
+corrélation) resynchronisé avec la requête SQL réelle corrigée.
+Auteur : task automation

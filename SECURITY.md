@@ -48,6 +48,11 @@ les réflexes DevSecOps de base plutôt que de les ignorer parce que
   local. Aucune authentification renforcée n'est mise en place (hors
   périmètre pour un projet pédagogique local), mais aucun service ne
   doit être bindé sur `0.0.0.0` avec un port exposé publiquement.
+- Tous les ports publiés dans `compose.yaml`/`compose.override.yaml`
+  sont explicitement bindés sur `127.0.0.1` (ex. `"127.0.0.1:8888:8888"`),
+  jamais en `"8888:8888"` nu — ce raccourci Docker bind sur `0.0.0.0`
+  par défaut, ce qui exposerait le service sur le réseau local (Wi-Fi
+  partagé, etc.), pas seulement sur la machine du développeur.
 
 ## Signalement
 

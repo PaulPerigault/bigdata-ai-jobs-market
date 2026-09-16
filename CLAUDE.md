@@ -9,7 +9,8 @@ ponctuelle semble aller plus vite en le contournant.
 Projet pédagogique ESIEA (module Fondamentaux du Big Data, sujet proposé
 par M. Touati Zouhaier) : construire une chaîne Big Data complète pour
 analyser le marché de l'emploi en IA 2025-2026 à partir du dataset
-`ai_jobs_market_2025_2026.csv` (1500 lignes, 26 colonnes).
+`ai_jobs_market_2025_2026.csv` (1500 lignes, 25 colonnes — vérifié sur
+le fichier réel).
 
 - Équipe de 5 personnes, travail en parallèle sur le même dépôt.
 - Deadline : 21/09/2026.
@@ -138,6 +139,44 @@ Auteur : <nom ou "task automation">
 
 Ne pas réécrire l'historique de ce fichier ; toujours ajouter en fin de
 fichier (append), jamais réorganiser ou supprimer des entrées passées.
+
+## Pipeline ETL (Étape 2) — validé réellement (`task ingest` + `task etl`)
+
+- `scripts/01_ingest_hdfs.sh` dépose `data/raw/ai_jobs_market_2025_2026.csv`
+  dans `/projet_ia/raw` (HDFS) et vérifie ls/du/wc -l (1500 lignes de
+  données + 1 en-tête).
+- `sql/hive/00_create_raw_table.sql` crée `projet_ia.ai_jobs_raw`
+  (EXTERNAL, TEXTFILE, colonnes typées — le CSV n'a aucune virgule/quote
+  interne, un SerDe délimité simple suffit).
+- **`skip.header.line.count` n'est PAS honoré quand Spark lit une table
+  Hive TEXTFILE via `spark.sql("SELECT * FROM ...")`** (vérifié : la
+  ligne d'en-tête remonte comme une ligne de données, 1501 au lieu de
+  1500). `src/etl_pipeline.py` lit donc le CSV RAW directement depuis
+  HDFS via `spark.read.csv(header=True, schema=...)` — toujours conforme
+  à la règle « jamais lire le CSV en local, toujours HDFS → Hive *ou*
+  Spark lisant HDFS » (la parenthèse autorise explicitement ce chemin).
+  La table Hive RAW reste le point d'entrée pour les requêtes Hive SQL
+  (barème), pas pour ce script de transformation.
+- `src/etl/` : `schema.py` (StructType RAW), `cleaning.py` (dédoublonnage
+  + filtre salaire + comptages NULL avant/après, chiffrés), `tables.py`
+  (construction `offres`/`metiers`/`competences` — **`metier_id` en
+  `sha2(job_title, 256)` tronqué à 16 caractères**, jamais
+  `monotonically_increasing_id()`), `hive_io.py` (écrit le Parquet sur
+  HDFS puis dérive le DDL `CREATE EXTERNAL TABLE` depuis le schéma Spark).
+- `src/etl_pipeline.py` (point d'entrée de `task etl`, exécuté via
+  `spark-submit` dans le conteneur `jupyter`) écrit
+  `/projet_ia/processed/{offres,metiers,competences}` et crée les 3
+  tables Hive externes correspondantes dans la base `processed`.
+- Chiffres de référence sur le dataset réel : 1500 lignes RAW, 0 doublon
+  `job_id`, 1 ligne avec salaire ≤ 0 filtrée sur les runs où elle
+  existe, 25 métiers distincts, 1500 offres, ~9548 liaisons
+  job_id↔compétence. Jointure `processed.offres` ↔ `processed.metiers`
+  vérifiée via Beeline (ex. LLM Engineer : 75 offres, salaire moyen
+  ~240 960 $).
+- Tests dans `tests/unit/` (`test_cleaning.py`, `test_tables.py`,
+  `test_row_counts.py`) : Spark local (`local[2]`, pas de Hive), aucune
+  dépendance à la stack Compose — c'est ce que `task test` et le job CI
+  `test` exécutent.
 
 ## Ce que Claude Code ne doit PAS faire
 

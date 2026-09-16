@@ -129,7 +129,7 @@ services:
       hive-metastore-postgresql:
         condition: service_healthy
     ports:
-      - "9083:9083"
+      - "127.0.0.1:9083:9083"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9083"]
       interval: 10s
@@ -157,8 +157,8 @@ services:
       hive-metastore:
         condition: service_healthy
     ports:
-      - "10000:10000"
-      - "10002:10002"
+      - "127.0.0.1:10000:10000"
+      - "127.0.0.1:10002:10002"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "10000"]
       interval: 10s
@@ -185,7 +185,7 @@ services:
       hive-server:
         condition: service_healthy
     ports:
-      - "8888:8888"
+      - "127.0.0.1:8888:8888"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8888/api"]
       interval: 10s

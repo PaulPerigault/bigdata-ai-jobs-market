@@ -7,15 +7,13 @@ services:
   namenode:
     # Hadoop 2.7.4 : port web réel du namenode (voir compose.yaml).
     ports:
-      - "50070:50070"
+      - "127.0.0.1:50070:50070"
 
   datanode:
     # Hadoop 2.7.4 : port web réel du datanode.
     ports:
-      - "50075:50075"
+      - "127.0.0.1:50075:50075"
 
   jupyter:
     volumes:
       - ./src:/home/jovyan/work
-    environment:
-      GRANT_SUDO: "yes"

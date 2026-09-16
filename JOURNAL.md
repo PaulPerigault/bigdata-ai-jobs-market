@@ -17,3 +17,20 @@ Corrections apportées en cours de route : ports web namenode/datanode
 scripts/hive-metastore-entrypoint.sh pour initialiser le schéma Hive,
 JAVA_TOOL_OPTIONS=-Xint pour contourner un blocage JIT sous QEMU.
 Auteur : task automation
+
+## 2026-09-16 15:35 — task ingest + task etl (validation réelle Étape 2)
+Commande : bash scripts/01_ingest_hdfs.sh && spark-submit src/etl_pipeline.py
+Résultat : CSV déposé dans /projet_ia/raw (1500 lignes de données vérifiées
+ls/du/wc -l). Table projet_ia.ai_jobs_raw (EXTERNAL, TEXTFILE) créée et
+interrogée via Beeline (COUNT=1500, AVG salaire=194892$). Pipeline ETL
+exécuté pour de vrai : 0 doublon job_id, 0 salaire <=0 sur ce run, 25
+métiers (processed.metiers), 1500 offres (processed.offres), 9548 liaisons
+job_id<->compétence (processed.competences), toutes écrites en Parquet sur
+HDFS /projet_ia/processed/ et exposées comme tables Hive externes.
+Jointure offres<->metiers vérifiée via Beeline (top métier par volume :
+LLM Engineer, 75 offres, salaire moyen 240960$).
+Bug corrigé en cours de route : spark.sql lisant une table Hive TEXTFILE
+n'honore pas skip.header.line.count (ligne d'en-tête comptée comme donnée,
+1501 au lieu de 1500) -> etl_pipeline.py lit désormais le CSV RAW
+directement depuis HDFS via spark.read.csv(header=True), cf. CLAUDE.md.
+Auteur : task automation

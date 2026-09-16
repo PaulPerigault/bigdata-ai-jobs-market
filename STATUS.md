@@ -362,6 +362,57 @@ sujet PDF) cochée intégralement.
 
 ---
 
+**TICKET — Rapport : chapitre 01 (Introduction)** — [#110](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/110)
+Label : `rapport`
+Contexte du marché de l'emploi IA, problématique, objectifs
+pédagogiques/techniques, intérêt de la chaîne HDFS→Hive→Spark→Jupyter.
+Critère d'acceptation : chapitre rédigé, cohérent avec ce qui a été
+réellement construit (pas le plan initial), PDF recompile sans erreur.
+
+---
+
+**TICKET — Rapport : chapitre 02 (Présentation du dataset)** — [#111](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/111)
+Label : `rapport`
+Source du dataset, volumétrie (1500 lignes, 26 colonnes), variables
+principales, premières observations de qualité (avant nettoyage).
+Critère d'acceptation : chapitre rédigé avec les vrais chiffres, pas
+d'estimation.
+
+---
+
+**TICKET — Captures GitHub manuelles** — [#115](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/115)
+Label : `rapport` `figures`
+À faire à la main (pas via Claude Code) : Project board (vue
+Backlog/Todo/In Progress/In Review/Done), liste des issues fermées, un
+run CI vert — les 3 captures volontairement laissées manuelles depuis
+#101 (authentification GitHub, voir note ci-dessus).
+Critère d'acceptation : 3 captures dans `report/figures/` (convention
+`etapeX_outil_contenu.png`), intégrées au chapitre 03.
+
+---
+
+**TICKET — Bonus si le temps le permet** — [#116](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/116)
+Label : `bonus`
+Non noté explicitement mais valorisant pour le recul critique :
+comparaison à une source externe publique, export CSV/JSON des KPI
+dans `output/`, schéma de séquence pour la soutenance orale.
+Critère d'acceptation : optionnel, à ne traiter qu'une fois tout le
+reste fermé.
+
+---
+
+> **Note du 17/09/2026** : trois tickets initialement proposés pour ce
+> lot (chapitres 11-13, relecture croisée, vérification finale des
+> livrables) faisaient doublon avec des tickets déjà existants et
+> ouverts (#99, #102, #104 respectivement, créés le 16/09/2026).
+> Créés par erreur en #112/#113/#114, fermés immédiatement en
+> "not planned" avec renvoi vers le ticket original — l'automation du
+> Project board les affiche en "Done" comme tout ticket fermé, mais il
+> ne s'agit pas de travail réellement terminé : le vrai suivi reste sur
+> #99/#102/#104, toujours ouverts.
+
+---
+
 ## Décisions techniques et bugs corrigés (log condensé)
 
 Détail complet dans `CLAUDE.md` et `JOURNAL.md`. Résumé pour contexte

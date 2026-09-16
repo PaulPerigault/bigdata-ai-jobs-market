@@ -331,3 +331,21 @@ supprimé, #98 retiré de cette liste car fermée). #95 et #96 (8
 sous-étapes chacune, DoD appliquée en continu) et #98 (dépendant des
 deux) tous fermés et vérifiés Done.
 Auteur : task automation
+
+## 2026-09-17 02:05 — Création des issues restantes pour l'équipe
+Commande : gh issue create (7 appels individuels), gh label create bonus,
+vérification gh issue view après chaque création, gh api graphql sur le
+Status du Project board.
+Resultat : 7 issues créées (#110-#116) à partir du découpage fourni par
+l'utilisateur. Erreur détectée immédiatement après création : 3 d'entre
+elles (#112 chapitres 11-13, #113 relecture croisée, #114 vérification
+livrables) faisaient doublon avec des tickets déjà ouverts (#99, #102,
+#104, créés le 16/09/2026 et toujours actifs - non vérifiés avant
+création, erreur corrigée sans attendre). Fermées immédiatement en
+"not planned" avec renvoi vers le ticket original. 4 issues légitimes
+conservées : #110 (chapitre 01), #111 (chapitre 02), #115 (captures
+GitHub manuelles), #116 (bonus, nouveau label créé). Toutes confirmées
+"Backlog" sur le Project board (comportement attendu pour du travail non
+démarré). STATUS.md mis à jour avec les 4 nouveaux tickets et une note
+explicite sur l'erreur de doublon pour que le suivi reste fiable.
+Auteur : task automation

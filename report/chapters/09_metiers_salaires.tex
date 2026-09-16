@@ -171,3 +171,160 @@ métiers rémunérés/demandés, top compétences).}
 \caption{KPI 6 à 10 (salaire par pays/expérience, télétravail,
 LLM/GenAI, évolution 2025-2026).}
 \end{figure}
+
+\section{4 analyses au choix}
+% Issue #95. Une sous-section par analyse, ajoutée au fur et à mesure
+% de son exécution réelle (DoD appliquée par sous-étape).
+
+\subsection{Analyse 1 : prime salariale IA par métier}
+
+\textbf{Question} : quels métiers bénéficient de la plus forte prime
+salariale liée à l'IA (\texttt{ai\_salary\_premium\_pct}), et comment
+cela se compare à leur salaire absolu ?
+
+\begin{verbatim}
+SELECT m.job_title, ROUND(AVG(o.ai_salary_premium_pct), 2) AS premium_moyen_pct,
+       ROUND(AVG(o.annual_salary_usd), 0) AS salaire_moyen
+FROM processed.offres AS o
+INNER JOIN processed.metiers AS m ON o.metier_id = m.metier_id
+GROUP BY m.job_title
+ORDER BY premium_moyen_pct DESC
+LIMIT 5;
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_analyse1_prime_ia.png}
+\caption{Top 5 métiers par prime salariale IA moyenne — capture
+régénérée par \texttt{task screenshots-cli}.}
+\end{figure}
+
+\begin{constat}[Interprétation]
+\textbf{Multimodal AI Engineer} arrive en tête avec un premium moyen de
+13,6\,\%, suivi de près par Robotics Engineer (AI, 13,55\,\%) et AI
+Compliance Manager (13,45\,\%) — un métier pourtant absent des tops
+volume/rémunération absolue des chapitres précédents. Le premium le
+plus élevé ne coïncide pas nécessairement avec le salaire absolu le
+plus élevé (AI Compliance Manager : 155\,939\$, contre 251\,577\$ pour
+AI Solutions Architect qui n'apparaît pas dans ce top 5) — le premium
+mesure une prime relative, pas un niveau de rémunération.
+\end{constat}
+
+\subsection{Analyse 2 : LLM/GenAI vs autres métiers (comparaison enrichie)}
+
+\textbf{Question} : au-delà de la moyenne simple du KPI~9, comment les
+rôles LLM/GenAI se comparent-ils au reste du marché sur la médiane et
+la demande ?
+
+\begin{verbatim}
+SELECT is_llm_role, COUNT(*) AS nb_offres,
+       ROUND(AVG(annual_salary_usd), 0) AS salaire_moyen,
+       ROUND(PERCENTILE_APPROX(annual_salary_usd, 0.5), 0) AS salaire_median,
+       ROUND(AVG(demand_score), 1) AS demand_score_moyen
+FROM projet_ia.ai_jobs_raw
+GROUP BY is_llm_role;
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_analyse2_llm_vs_autres.png}
+\caption{LLM/GenAI vs autres métiers — salaire moyen, médian et
+\texttt{demand\_score} — capture régénérée par
+\texttt{task screenshots-cli}.}
+\end{figure}
+
+\begin{constat}[Interprétation]
+Les rôles LLM/GenAI (327 offres, 21,8\,\% du dataset) devancent le
+reste du marché sur les trois indicateurs : salaire moyen (+8,6\,\%,
+207\,746\$ contre 191\,309\$), salaire \textbf{médian} (+6,3\,\%,
+190\,500\$ contre 179\,125\$ — l'écart de médiane est plus resserré que
+l'écart de moyenne, signe que quelques offres très bien payées tirent
+la moyenne LLM vers le haut sans que la tendance centrale soit
+totalement différente), et \texttt{demand\_score} moyen (92,9 contre
+86,0 sur 100) — cohérent avec un segment de marché en tension.
+\end{constat}
+
+\subsection{Analyse 3 : expérience-salaire et matrice de corrélation}
+
+\textbf{Question} : au-delà de la moyenne par tranche d'expérience du
+KPI~7, quelle est la force réelle de la relation entre expérience et
+salaire — et comment se comparent-elles à d'autres relations du
+dataset ? Analyse descriptive (coefficients de corrélation de Pearson
+via \texttt{CORR()}), aucun modèle entraîné.
+
+\begin{verbatim}
+SELECT ROUND(CORR(annual_salary_usd, years_of_experience), 3) AS corr_salaire_experience,
+       ROUND(CORR(annual_salary_usd, demand_score), 3) AS corr_salaire_demande,
+       ROUND(CORR(annual_salary_usd, ai_salary_premium_pct), 3) AS corr_salaire_premium,
+       ROUND(CORR(years_of_experience, demand_score), 3) AS corr_experience_demande
+FROM projet_ia.ai_jobs_raw;
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_analyse3_correlation.png}
+\caption{Corrélations de Pearson entre salaire, expérience, demande et
+premium IA — capture régénérée par \texttt{task screenshots-cli}.}
+\end{figure}
+
+\begin{constat}[Interprétation — résultat contre-intuitif, à ne pas sur-interpréter]
+La corrélation \texttt{salaire}$\leftrightarrow$\texttt{expérience}
+(années continues) est \textbf{quasi nulle} (0,079) — un résultat qui
+semble contredire le KPI~7 (chapitre~9.1), où le salaire moyen progresse
+clairement de 150\,039\$ (Entry) à 240\,055\$ (Lead). Ce n'est pas une
+contradiction : le KPI~7 agrège par \emph{tranche catégorielle}
+(\texttt{experience\_level}), qui peut capturer un effet de seuil non
+linéaire (un saut de rémunération à l'entrée dans une tranche), alors
+que la corrélation de Pearson mesure une relation \emph{linéaire} sur
+la variable continue \texttt{years\_of\_experience} — une forte
+variance intra-tranche peut aussi diluer la corrélation globale. Le
+salaire est plus corrélé au \texttt{demand\_score} (0,292, la relation
+la plus forte du tableau, bien que toujours modeste) qu'à l'expérience
+ou au premium IA (quasi nuls, -0,02 et -0,096) : sur ce dataset, la
+tension du marché pour un profil semble un signal aussi ou plus
+pertinent que son ancienneté brute. Ces coefficients restent faibles
+dans l'absolu (aucun ne dépasse 0,3) : le dataset ne permet pas
+d'affirmer une relation forte entre ces variables, linéaire ou non.
+\end{constat}
+
+\subsection{Analyse 4 : pays et compétences}
+
+\textbf{Question} : la compétence la plus demandée diffère-t-elle
+d'un pays à l'autre ?
+
+\begin{verbatim}
+SELECT country, competence AS top_competence, nb_offres
+FROM (
+    SELECT country, competence, nb_offres,
+           ROW_NUMBER() OVER (PARTITION BY country ORDER BY nb_offres DESC) AS rnk
+    FROM (
+        SELECT o.country, c.competence, COUNT(DISTINCT o.job_id) AS nb_offres
+        FROM processed.offres AS o
+        INNER JOIN processed.competences AS c ON o.job_id = c.job_id
+        GROUP BY o.country, c.competence
+    ) t
+) r
+WHERE rnk = 1
+ORDER BY nb_offres DESC
+LIMIT 5;
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_analyse4_pays_competences.png}
+\caption{Compétence n°1 par pays (top 5 paires pays/compétence par
+volume) — capture régénérée par \texttt{task screenshots-cli}.}
+\end{figure}
+
+\begin{constat}[Interprétation]
+\textbf{Python est la compétence n°1 dans les 5 premiers pays du
+classement} (USA, Chine, Allemagne, Canada, UK), sans exception —
+l'écart de volume entre pays (334 offres pour les USA contre 52-58
+pour les autres) reflète surtout le poids des USA dans le dataset
+(chapitre~6) plutôt qu'une préférence de compétence différente. Ce
+résultat renforce le constat du chapitre~8 (jointure
+offres$\leftrightarrow$competences) : Python n'est pas seulement la
+compétence la plus demandée globalement, elle domine de façon
+\emph{uniforme} d'un pays à l'autre — le dataset ne fait apparaître
+aucune spécialisation nationale marquée sur la compétence phare.
+\end{constat}

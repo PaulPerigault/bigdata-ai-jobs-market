@@ -104,6 +104,18 @@ chacune renvoie vers le commit exact qui la clôt :
       février 2026 (306 offres, ~5x le volume mensuel 2025 — signalé
       comme constat descriptif, repris au chapitre 13 limites).
 
+### 4 analyses au choix (Étape 3) ✅
+- [x] **[#95](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/95)**
+      4 analyses réalisées et documentées au chapitre 09 §9.3
+      (`sql/hive/03_analyses_choix.sql`), DoD appliquée par sous-étape :
+      (1) prime salariale IA — Multimodal AI Engineer en tête (13,6%,
+      221 791$) ; (2) LLM/GenAI vs autres métiers enrichie — LLM devance
+      sur salaire moyen/médian et demand_score ; (3) matrice de
+      corrélation salaire/expérience/demande/premium — résultat
+      contre-intuitif documenté (corr salaire/expérience quasi nulle à
+      0,079 malgré la progression par tranche du KPI 7) ; (4) pays et
+      compétences — Python n°1 dans les 5 premiers pays sans exception.
+
 ### Rapport LaTeX ✅ (partiel)
 - [x] Restructuré en `report/main.tex` + `report/preamble/` +
       `report/chapters/*.tex` (15 chapitres), polices Roboto/Poppins
@@ -162,13 +174,42 @@ rapport à jour. Voir chapitre 09 et `sql/hive/02_kpis.sql`.
 
 ---
 
-**TICKET — 4 analyses au choix (minimum)** — [#95](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/95)
+**TICKET — 4 analyses au choix (minimum)** — ✅ FAIT (4/4) — [#95](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/95) (fermée)
 Label : `analytics`
-Choisir parmi : prime salariale IA, comparaison LLM vs autres métiers,
-relation expérience-salaire, pays et compétences, secteur et salaire,
-taille d'entreprise et salaire, métiers en forte croissance.
+Choix retenu (4) : prime salariale IA, LLM vs autres métiers,
+expérience-salaire (+ matrice de corrélation), pays et compétences.
 Critère d'acceptation : 4 analyses réalisées avec interprétation,
-intégrées au rapport.
+intégrées au rapport. DoD appliquée par sous-étape (pas en rattrapage) :
+- [x] **Analyse 1 : prime salariale IA par métier** — requête exécutée
+      réellement (`sql/hive/03_analyses_choix.sql`), capture
+      `etape3_analyse1_prime_ia.png`, chapitre 09 §9.3.1 rédigé. Top :
+      Multimodal AI Engineer (premium 13,6\%, salaire 221\,791\$) —
+      le premium le plus élevé ne coïncide pas avec le salaire le plus
+      élevé (AI Compliance Manager, 3e du classement, salaire pourtant
+      modeste à 155\,939\$).
+- [x] **Analyse 2 : LLM vs autres métiers (enrichie vs KPI 9)** —
+      requête exécutée réellement, capture
+      `etape3_analyse2_llm_vs_autres.png`, chapitre 09 §9.3.2 rédigé.
+      LLM/GenAI devance sur les 3 indicateurs : salaire moyen +8,6\%
+      (207\,746\$ vs 191\,309\$), salaire médian +6,3\% (190\,500\$ vs
+      179\,125\$ — écart plus resserré qu'en moyenne), demand\_score
+      92,9 vs 86,0.
+- [x] **Analyse 3 : expérience-salaire + matrice de corrélation** —
+      requête exécutée réellement (`CORR()`, Pearson, aucun modèle
+      entraîné), capture `etape3_analyse3_correlation.png`, chapitre 09
+      §9.3.3 rédigé. Résultat contre-intuitif documenté avec précaution :
+      corr(salaire, expérience continue) quasi nulle (0,079) malgré la
+      progression claire par tranche catégorielle au KPI 7 — corr(salaire,
+      demand\_score) la plus forte du tableau (0,292) mais reste modeste.
+- [x] **Analyse 4 : pays et compétences** — requête exécutée réellement
+      (fonction fenêtre `ROW_NUMBER()`), capture
+      `etape3_analyse4_pays_competences.png`, chapitre 09 §9.3.4 rédigé.
+      Python est la compétence n°1 dans les 5 premiers pays sans
+      exception (USA, Chine, Allemagne, Canada, UK) — domination
+      uniforme, aucune spécialisation nationale marquée.
+
+Les 4 analyses sont rédigées dans le chapitre 09 (§9.3), avec requête +
+capture + interprétation chacune. Voir `sql/hive/03_analyses_choix.sql`.
 
 ---
 

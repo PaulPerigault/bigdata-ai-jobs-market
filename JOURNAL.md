@@ -155,3 +155,61 @@ non automatisees (cf. CLAUDE.md) - restent a prendre a la main. Rapport
 recompile et inspecte visuellement (2 passes xelatex, 0 erreur, 27 -> 33
 pages). Issue #101 fermee, ticket deplace vers "fait" dans STATUS.md.
 Auteur : task automation
+
+## 2026-09-17 00:30 — Analyse 1/4 au choix : prime salariale IA (issue #95)
+Commande : beeline -e "<top 5 metiers par prime IA moyenne>" ; task screenshots-cli (freeze manuel)
+Resultat : requete executee reellement sur processed.offres JOIN
+processed.metiers. Top 5 : Multimodal AI Engineer (premium 13.6%,
+salaire 221791$), Robotics Engineer AI (13.55%), AI Compliance Manager
+(13.45%, salaire 155939$ - le 3e plus fort premium n'est pas dans le
+top salaires absolus), MLOps Engineer (13.23%), Generative AI Engineer
+(13.22%). Capture etape3_analyse1_prime_ia.png generee et integree au
+chapitre 09 (section 9.3, nouvelle, "4 analyses au choix"). 1/4 analyses
+faites, DoD appliquee immediatement (pas en rattrapage) : requete +
+capture + chapitre + STATUS.md a jour avant de passer a l'analyse
+suivante.
+Auteur : task automation
+
+## 2026-09-17 00:35 — Analyse 2/4 au choix : LLM vs autres métiers (issue #95)
+Commande : beeline -e "<LLM/GenAI vs autres métiers, comparaison enrichie>"
+Resultat : requete executee reellement sur projet_ia.ai_jobs_raw
+(comparaison enrichie vs KPI 9 : ajout mediane + demand_score, pas
+seulement la moyenne). LLM/GenAI (327 offres) devance sur les 3
+indicateurs : salaire moyen 207746$ vs 191309$ (+8.6%), salaire median
+190500$ vs 179125$ (+6.3%, ecart plus resserre qu'en moyenne),
+demand_score moyen 92.9 vs 86.0. Capture
+etape3_analyse2_llm_vs_autres.png generee et integree au chapitre 09
+section 9.3.2. 2/4 analyses faites, DoD appliquee immediatement.
+Auteur : task automation
+
+## 2026-09-17 00:40 — Analyse 3/4 au choix : correlation salaire/experience (issue #95)
+Commande : beeline -e "<matrice de correlation salaire/experience/demande/premium>"
+Resultat : requete CORR() executee reellement sur projet_ia.ai_jobs_raw
+(Pearson, descriptif, aucun modele entraine - touche BI suggeree par
+l'utilisateur). Resultat contre-intuitif et documente avec precaution :
+corr(salaire, years_of_experience continu) quasi nulle (0.079), alors
+que le KPI 7 montre une progression claire par tranche categorielle
+(experience_level) - explique par un possible effet de seuil non
+lineaire + variance intra-tranche, pas une contradiction. corr(salaire,
+demand_score)=0.292 la plus forte du tableau mais reste modeste ;
+corr(salaire, premium)=-0.02 et corr(experience, demand_score)=-0.096
+quasi nulles. Capture etape3_analyse3_correlation.png generee et
+integree au chapitre 09 section 9.3.3. 3/4 analyses faites, DoD
+appliquee immediatement.
+Auteur : task automation
+
+## 2026-09-17 00:45 — Analyse 4/4 au choix : pays et competences (issue #95)
+Commande : beeline -e "<competence n°1 par pays, top 5 paires par volume>"
+Resultat : requete avec fonction fenetre ROW_NUMBER() executee reellement
+sur processed.offres JOIN processed.competences. Python est la
+competence n°1 dans les 5 premiers pays sans exception (USA 334 offres,
+Chine 58, Allemagne 54, Canada 54, UK 52) - domination uniforme, aucune
+specialisation nationale marquee sur la competence phare. Capture
+etape3_analyse4_pays_competences.png generee et integree au chapitre 09
+section 9.3.4. 4/4 analyses faites - issue #95 fermee, ticket deplace
+vers "fait" dans STATUS.md. Rapport recompile et inspecte visuellement
+a chaque sous-etape (2 passes xelatex, 0 erreur, 33 -> 36 pages au
+final). DoD appliquee par sous-etape tout du long (requete + capture +
+chapitre + STATUS.md avant de passer a l'analyse suivante), pas en
+rattrapage.
+Auteur : task automation

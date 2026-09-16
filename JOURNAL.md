@@ -320,3 +320,14 @@ correspondre. PDF final : 41 pages, 0 erreur, chapitre 10 vérifié page
 par page dans le bon ordre. 6 figures dashboard toutes <100KB (bien
 sous la limite pre-commit 1MB).
 Auteur : task automation
+
+## 2026-09-17 01:53 — Clôture #96/#98, vérification Project board
+Commande : gh issue close 96, gh issue close 98, puis gh api graphql
+sur le champ Status des issues #95/#96/#98.
+Resultat : les 3 issues confirmées "Done" sur le Project board via
+l'automation project-status-sync.yml, sans intervention manuelle.
+STATUS.md nettoyé (doublon #97 dans la liste des chapitres placeholder
+supprimé, #98 retiré de cette liste car fermée). #95 et #96 (8
+sous-étapes chacune, DoD appliquée en continu) et #98 (dépendant des
+deux) tous fermés et vérifiés Done.
+Auteur : task automation

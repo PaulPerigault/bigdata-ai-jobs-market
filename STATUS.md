@@ -146,8 +146,6 @@ chacune renvoie vers le commit exact qui la clôt :
       recommandations, limites, conclusion, annexes) — restent liés aux
       tickets
       [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97),
-      [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97),
-      [#98](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/98),
       [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99).
 
 ## Ce qu'il reste à faire — prêt à découper en tickets
@@ -225,7 +223,7 @@ capture + interprétation chacune. Voir `sql/hive/03_analyses_choix.sql`.
 
 ---
 
-**TICKET — Dashboard : minimum 6 visualisations** — ✅ FAIT (6/6) — [#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96)
+**TICKET — Dashboard : minimum 6 visualisations** — ✅ FAIT (6/6) — [#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96) (fermée)
 Label : `analytics` `dashboard`
 Chaque visualisation : titre, requête source identifiable,
 interprétation chiffrée affichée sous le graphique (pas juste le

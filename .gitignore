@@ -52,8 +52,13 @@ kubeconfig*.yaml
 # Secrets
 .env
 .env.*
+!.env.example
 *.secrets.yaml
 secrets/
+
+# Dataset brut (déposé localement par chaque membre, jamais committé —
+# voir CLAUDE.md / SECURITY.md)
+data/raw/
 
 # graphify (graphify-out/ est fait pour etre committe - voir son README)
 graphify-out/cost.json
@@ -78,3 +83,5 @@ report/*.pdf
 # Materiel proprietaire du sujet - garde en local si besoin, jamais committe
 docs/sujet/*.pdf
 docs/sujet/*.docx
+documentation/*.pdf
+documentation/*.docx

@@ -1,60 +1,91 @@
 version: "3"
 
+vars:
+  JOURNAL: JOURNAL.md
+
 tasks:
   setup:
-    desc: Installe les dépendances dev, les hooks pre-commit et la baseline secrets
+    desc: Installe pre-commit et ses hooks
     cmds:
-      - pip install -r requirements-dev.txt
+      - pip install pre-commit
       - pre-commit install --install-hooks
       - pre-commit install --hook-type commit-msg
-      - task: secrets-baseline
-
-  secrets-baseline:
-    internal: true
-    status:
-      - test -f .secrets.baseline
-    cmds:
-      - detect-secrets scan > .secrets.baseline
 
   lint:
     desc: Rejoue tous les checks pre-commit
     cmds:
       - pre-commit run --all-files
 
+  up:
+    desc: Démarre la stack (HDFS, Hive, Jupyter/PySpark) via Docker Compose
+    cmds:
+      - test -f .env || cp .env.example .env
+      - docker compose up -d
+      - task: log
+        vars:
+          TASK_NAME: up
+          CMD: "docker compose up -d"
+          RESULT: "stack démarrée (namenode, datanode, hive-metastore, hive-server, jupyter)"
+
+  down:
+    desc: Arrête la stack (les volumes nommés sont conservés)
+    cmds:
+      - docker compose down
+      - task: log
+        vars:
+          TASK_NAME: down
+          CMD: "docker compose down"
+          RESULT: "stack arrêtée"
+
+  ingest:
+    desc: Dépose le CSV local dans HDFS /projet_ia/raw et vérifie le dépôt
+    cmds:
+      - bash scripts/01_ingest_hdfs.sh
+      - task: log
+        vars:
+          TASK_NAME: ingest
+          CMD: "bash scripts/01_ingest_hdfs.sh"
+          RESULT: "voir sortie ls/du/wc -l ci-dessus"
+
+  etl:
+    desc: Lance le pipeline Spark de nettoyage/transformation (RAW -> processed)
+    cmds:
+      - docker compose exec jupyter python /home/jovyan/work/etl_pipeline.py
+      - task: log
+        vars:
+          TASK_NAME: etl
+          CMD: "docker compose exec jupyter python /home/jovyan/work/etl_pipeline.py"
+          RESULT: "tables offres/metiers/competences (re)générées dans HDFS /projet_ia/processed"
+
   test:
-    desc: Lance les tests unitaires PySpark
+    desc: Lance les tests unitaires (comptages, schémas)
     cmds:
-      - pip install -r requirements-test.txt
-      - pytest tests/unit/ -v
+      - pip install -e ".[test]"
+      - pytest tests/ -v
+      - task: log
+        vars:
+          TASK_NAME: test
+          CMD: "pytest tests/ -v"
+          RESULT: "voir sortie pytest ci-dessus"
 
-  test:data:
-    desc: Lance les tests de qualité de données (nécessite le cluster up)
+  hive-shell:
+    desc: Ouvre un shell Beeline connecté à HiveServer2
     cmds:
-      - pytest tests/data_quality/ -v
+      - docker compose exec hive-server beeline -u jdbc:hive2://localhost:10000
 
-  report:build:
-    desc: Compile le rapport LaTeX en PDF via Docker (aucun outil à installer sur l'hôte)
+  jupyter:
+    desc: Affiche l'URL d'accès à Jupyter (token .env)
     cmds:
-      - task: report:build-image
-      - docker run --rm -v "$(pwd)/report:/workspace" bigdata-report-builder rapport.tex --outdir .
+      - 'echo "http://localhost:8888/?token=$(grep JUPYTER_TOKEN .env | cut -d= -f2)"'
 
-  report:build-image:
+  log:
     internal: true
-    desc: Build l'image Docker du compilateur LaTeX (tectonic pinné, checksum vérifié)
     cmds:
-      - docker build -t bigdata-report-builder infra/docker/report-builder
-
-  format:
-    desc: Formate le code Python
-    cmds:
-      - ruff format spark-jobs/scripts voila-app
-
-  k3d:up:
-    desc: Démarre le cluster k3d local
-    cmds:
-      - k3d cluster create bigdata --config infra/k3d/config.yaml
-
-  k3d:down:
-    desc: Détruit le cluster k3d local
-    cmds:
-      - k3d cluster delete bigdata
+      - |
+        {
+          echo ""
+          echo "## $(date '+%Y-%m-%d %H:%M') — task {{.TASK_NAME}}"
+          echo "Commande : {{.CMD}}"
+          echo "Résultat : {{.RESULT}}"
+          echo "Auteur : task automation"
+        } >> {{.JOURNAL}}

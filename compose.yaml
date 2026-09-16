@@ -1,0 +1,209 @@
+name: bigdata-ai-jobs-market
+
+x-hadoop-image: &hadoop-image
+  env_file:
+    - env/hadoop-hive.env
+
+# JAVA_TOOL_OPTIONS: -Xint répété dans l'environment de chaque service JVM
+# ci-dessous (pas dans cet anchor) : un `environment:` propre à un service
+# remplace entièrement celui d'un anchor fusionné via <<: (pas de deep merge
+# YAML), donc le mettre ici serait silencieusement perdu partout où le
+# service définit sa propre clé `environment`.
+# Images amd64 exécutées sous émulation QEMU (Apple Silicon) : le JIT HotSpot
+# y déclenche des blocages CPU-pinné de plusieurs minutes au premier
+# lancement (namenode -format, schematool...). -Xint (mode interprété)
+# contourne le bug, au prix d'un démarrage plus lent mais fiable.
+
+x-hive-image: &hive-image
+  image: bde2020/hive:2.3.2-postgresql-metastore
+  env_file:
+    - env/hadoop-hive.env
+
+# Les 5 variables ci-dessous (HIVE_SITE_CONF_javax_jdo_option_* + JAVA_TOOL_OPTIONS)
+# sont répétées dans l'environment de hive-metastore ET hive-server (pas dans
+# cet anchor) pour la même raison que x-hadoop-image plus haut : chaque service
+# définit aussi SERVICE_PRECONDITION dans son propre `environment:`, qui
+# remplacerait entièrement celui de l'anchor sans deep merge YAML.
+
+services:
+  namenode:
+    <<: *hadoop-image
+    image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
+    hostname: namenode
+    environment:
+      CLUSTER_NAME: projet_ia
+      JAVA_TOOL_OPTIONS: -Xint
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    healthcheck:
+      # Hadoop 2.7.4 (pas 3.x) : le port web du namenode est 50070, pas 9870.
+      test: ["CMD", "curl", "-f", "http://localhost:50070/dfshealth.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1500m
+    networks: [bigdata]
+
+  datanode:
+    <<: *hadoop-image
+    image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
+    hostname: datanode
+    environment:
+      # namenode:8020 (RPC), pas 9870 (inexistant en Hadoop 2.7.4).
+      SERVICE_PRECONDITION: "namenode:8020"
+      JAVA_TOOL_OPTIONS: -Xint
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    depends_on:
+      namenode:
+        condition: service_healthy
+    healthcheck:
+      # Hadoop 2.7.4 : le port web du datanode est 50075, pas 9864.
+      test: ["CMD", "curl", "-f", "http://localhost:50075/"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1500m
+    networks: [bigdata]
+
+  hive-metastore-postgresql:
+    # Postgres officiel (arm64 natif) plutôt que bde2020/hive-metastore-postgresql :
+    # ce dernier embarque un ancien entrypoint Go qui crashe (fatal error:
+    # newosproc) sous émulation amd64->arm64 (colima/QEMU sur Apple Silicon).
+    # Le schéma metastore est créé par Hive lui-même au premier démarrage.
+    image: postgres:13.18
+    hostname: hive-metastore-postgresql
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-metastore}
+      POSTGRES_USER: ${POSTGRES_USER:-hive}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hive}
+    volumes:
+      - hive_metastore_postgresql:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-hive}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512m
+    networks: [bigdata]
+
+  hive-metastore:
+    <<: *hive-image
+    hostname: hive-metastore
+    # postgres:13 (officiel) part d'une base "metastore" vide : contrairement à
+    # bde2020/hive-metastore-postgresql, le schéma Hive n'est pas pré-chargé —
+    # scripts/hive-metastore-entrypoint.sh lance schematool -initSchema puis
+    # hive --service metastore. Un seul token dans `command` (voir le script :
+    # l'entrypoint.sh de l'image fait un `exec $@` non quoté qui casse toute
+    # commande contenant des espaces).
+    volumes:
+      - ./scripts/hive-metastore-entrypoint.sh:/hive-metastore-entrypoint.sh:ro
+    command: ["/hive-metastore-entrypoint.sh"]
+    environment:
+      SERVICE_PRECONDITION: "hive-metastore-postgresql:5432"
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-postgresql/${POSTGRES_DB:-metastore}
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: ${POSTGRES_USER:-hive}
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: ${POSTGRES_PASSWORD:-hive}
+      JAVA_TOOL_OPTIONS: -Xint
+    depends_on:
+      namenode:
+        condition: service_healthy
+      datanode:
+        condition: service_healthy
+      hive-metastore-postgresql:
+        condition: service_healthy
+    ports:
+      - "9083:9083"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9083"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1500m
+    networks: [bigdata]
+
+  hive-server:
+    <<: *hive-image
+    hostname: hive-server
+    environment:
+      SERVICE_PRECONDITION: "hive-metastore:9083"
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-postgresql/${POSTGRES_DB:-metastore}
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: ${POSTGRES_USER:-hive}
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: ${POSTGRES_PASSWORD:-hive}
+      JAVA_TOOL_OPTIONS: -Xint
+    depends_on:
+      hive-metastore:
+        condition: service_healthy
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "10000"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1500m
+    networks: [bigdata]
+
+  jupyter:
+    image: jupyter/pyspark-notebook:spark-3.5.0
+    hostname: jupyter
+    environment:
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-bigdata}
+      CORE_CONF_fs_defaultFS: hdfs://namenode:8020
+      HIVE_METASTORE_URI: thrift://hive-metastore:9083
+    depends_on:
+      namenode:
+        condition: service_healthy
+      hive-server:
+        condition: service_healthy
+    ports:
+      - "8888:8888"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/api"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4g
+    networks: [bigdata]
+
+networks:
+  bigdata:
+    driver: bridge
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:
+  hive_metastore_postgresql:

@@ -7,35 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  branch-name-check:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: deepakputhraya/action-branch-name@master
-        with:
-          regex: '^(feat|fix|infra|docs|security|chore)\/[a-z0-9-]+$'
-          ignore: main
-
-  pr-title-check:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - uses: amannn/action-semantic-pull-request@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          types: |
-            feat
-            fix
-            infra
-            docs
-            security
-            chore
-            test
-
-  pre-commit:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,37 +28,5 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - run: pip install -r requirements-test.txt
-      - run: pytest tests/unit/ -v
-
-  scan-images:
-    runs-on: ubuntu-latest
-    # se déclenche seulement s'il existe des Dockerfiles à scanner
-    steps:
-      - uses: actions/checkout@v4
-      - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          exit-code: 1
-
-  manifest-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Vérifier la présence de manifests à lint
-        id: check
-        run: |
-          if [ -d infra/manifests ] && find infra/manifests -name '*.yml' -o -name '*.yaml' 2>/dev/null | grep -q .; then
-            echo "has_manifests=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_manifests=false" >> "$GITHUB_OUTPUT"
-            echo "infra/manifests/ n'existe pas encore ou est vide — rien à lint (normal avant J2-J3)."
-          fi
-      - name: kubeconform
-        if: steps.check.outputs.has_manifests == 'true'
-        uses: docker://ghcr.io/yannh/kubeconform:latest
-        with:
-          args: -summary -output json infra/manifests/
+      - run: pip install -e ".[test]"
+      - run: pytest tests/ -v

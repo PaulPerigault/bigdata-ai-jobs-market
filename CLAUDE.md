@@ -1,247 +1,248 @@
-# Projet Big Data — Marché de l'emploi en IA 2025-2026
+# CLAUDE.md
 
-## Objectif double
+Ce fichier cadre toute intervention de Claude Code sur ce dépôt. Le lire
+intégralement avant toute action, et le respecter même si une demande
+ponctuelle semble aller plus vite en le contournant.
 
-Ce projet a deux finalités qui coexistent et ne doivent jamais être sacrifiées
-l'une pour l'autre :
+## Contexte du projet
 
-1. **Projet académique noté** (ESIEA, sujet de M. Touati Zouhaier) — barème /20,
-   deadline **lundi 21 septembre 2026, 23:59**.
-2. **Démonstrateur DevSecOps/Cloud personnel** — infra k3d, best practices,
-   interface web, à but de portfolio/apprentissage.
+Projet pédagogique ESIEA (module Fondamentaux du Big Data, sujet proposé
+par M. Touati Zouhaier) : construire une chaîne Big Data complète pour
+analyser le marché de l'emploi en IA 2025-2026 à partir du dataset
+`ai_jobs_market_2025_2026.csv` (1500 lignes, 26 colonnes).
 
-Quand un choix technique doit trancher entre "plus simple pour la note" et
-"plus proche des best practices pro", privilégier la solution pragmatique qui
-satisfait les deux, jamais sacrifier le premier point pour le second.
+- Équipe de 5 personnes, travail en parallèle sur le même dépôt.
+- Deadline : 21/09/2026.
+- Rapport final en LaTeX aux couleurs ESIEA (`report/rapport_esiea.tex`),
+  produit en parallèle du code — ne jamais le considérer comme secondaire.
+- Un `JOURNAL.md` à la racine trace l'exécution (voir plus bas) : toute
+  tâche significative doit y ajouter une entrée.
 
-## Contraintes académiques non négociables
+**Objectif de fond** : un projet qui a l'air et se comporte comme un
+projet d'ingénieur (reproductible, versionné, testé), pas comme un TP
+cliqué à la main. Mais rester proportionné à 5 jours et 5 personnes —
+ne pas ajouter de complexité qui ne sert pas le rendu.
 
-Le rapport final doit suivre la trame imposée (15 sections, voir
-`docs/trame-rapport.md` si présent) et les livrables suivants sont **requis
-pour la note**, quelle que soit l'infra choisie :
-
-- Arborescence HDFS : `/projet_ia/raw`, `/processed/{offres,metiers,competences}`,
-  `/output`
-- Table Hive externe RAW (`CREATE EXTERNAL TABLE`, TEXTFILE, header skip)
-- Chargement + nettoyage du DataFrame Spark (NULL, doublons, types) avec règles
-  de nettoyage documentées et justifiées
-- 3 tables construites : **offres** (grain = 1 ligne/offre), **metiers**
-  (référentiel, `metier_id` stable), **competences** (1 ligne par
-  offre×compétence, via `split()` + `explode()` sur `required_skills`)
-- Requêtes obligatoires Jour 1 (5 requêtes), Jour 2 (requêtes 6 à 13, incluant
-  2 jointures + 1 GROUP BY/HAVING), Jour 3 (KPI 14 à 23)
-- Au moins 4 analyses supplémentaires au choix (Jour 3)
-- **Dashboard Zeppelin et/ou Data Analytics Studio** : minimum 6
-  visualisations, chacune avec titre, requête identifiable, interprétation
-  chiffrée — **non négociable, explicitement demandé par le sujet, ne pas
-  remplacer par Jupyter/Voilà**
-- Rapport final structuré suivant la trame officielle (15 sections exactes,
-  voir `docs/sujet-synthese.md` et `report/rapport.tex` qui l'implémente
-  déjà) — volume conseillé **12 à 18 pages hors annexes** (trame docx,
-  fait foi sur le chiffre du PDF sujet qui indiquait 10-15)
-
-Distinguer systématiquement, dans toute analyse : ce que montre le dataset, ce
-qui relève de l'interprétation, et ce que le dataset ne permet pas d'affirmer.
-
-## Stack technique arrêté
-
-| Couche | Choix | Non-goals explicites |
-|---|---|---|
-| Cluster | k3d (Docker), local, jetable | Pas de VPS, pas d'infra permanente |
-| Stockage | HDFS (NameNode/DataNode StatefulSet + PVC) | — |
-| Métastore | Hive Metastore + HiveServer2 (Postgres backend) | — |
-| Traitement | Spark on k8s (Spark Operator), **PySpark** | Pas de Scala |
-| Dev interactif | Jupyter (kernel PySpark connecté au cluster) pour l'exploration | — |
-| Prod pipeline | Scripts PySpark versionnés (repo Git) — version finale propre à partir de l'exploration Jupyter | — |
-| Dashboard académique | Zeppelin (+ DAS si le temps le permet) | Obligatoire, ne pas retirer |
-| Interface perso | Notebook Jupyter → **Voilà** → app web conteneurisée, derrière ingress k3s | Pas de Go, pas de Streamlit/Dash (tranché) |
-| Sécu | NetworkPolicies namespace `bigdata`, secrets via Sealed Secrets/SOPS, scan Trivy en CI, RBAC minimal | Pas de Vault, pas d'ArgoCD, pas de stack sécu complet — pragmatique assumé |
-| CI | GitHub Actions : `pre-commit` rejoué, tests unitaires, scan manifests, scan images | — |
-| Tests | Voir `docs/TESTING.md` — unitaires (obligatoire, CI), qualité données (manuel), pas d'intégration cluster en CI | — |
-| Rapport | **LaTeX**, multi-fichiers (`report/rapport.tex` = squelette +
-`\input`, contenu réel dans `report/sections/`), compilé avec `tectonic`
-(`task report:build`) | Pas de Word/docx, pas un seul fichier monolithique
-(conflits de merge à 5) |
-
-## Ingénierie logicielle — non négociable
-
-Ces principes s'appliquent à tout le code produit sur ce projet (infra ET
-PySpark ET scripts), pas seulement au périmètre où ils ont été énoncés :
-
-- **Infra 100% as code** : aucune commande mutative ad-hoc sans fichier
-  versionné derrière (manifest k8s, script `infra/scripts/*.sh`, config
-  `infra/k3d/`). Un `kubectl apply -f` sur un fichier du repo est acceptable,
-  un `kubectl create`/`kubectl exec` mutatif "à la main" sans script versionné
-  ne l'est pas.
-- **Builds via conteneur, pas d'outil installé en dur sur l'hôte** : si un
-  outil de build (compilateur LaTeX, futur linter, etc.) peut tourner dans
-  un conteneur, il doit — voir `infra/docker/report-builder/` comme
-  référence. Objectif : n'importe qui clone le repo et lance `task <cible>`
-  sans rien installer sur sa machine.
-- **Tests en parallèle du code, jamais après-coup** : toute fonction de
-  transformation PySpark notable (nettoyage, construction de table,
-  `split`/`explode`, KPI) a son test unitaire écrit **dans la même PR**
-  qui l'introduit (voir `docs/TESTING.md` niveau 1). Une PR qui ajoute de
-  la logique de transformation sans test associé est incomplète.
-- **Séparation stricte du code, principes SOLID** : responsabilité unique
-  par fichier/module, pas de script monolithique qui mélange lecture,
-  nettoyage, transformation et écriture. Pour PySpark, découpage en
-  modules distincts (io, cleaning, transform par table, KPI) — voir
-  `spark-jobs/scripts/README.md` pour la convention de découpage attendue.
-  Nommage explicite, pas de magie implicite. Un fichier/dossier
-  supplémentaire pour isoler une responsabilité est préférable à un
-  fichier qui grossit.
-- **Titres de PR** : doivent utiliser un des types acceptés par
-  `pr-title-check` (`feat|fix|infra|docs|security|chore|test`), y compris
-  pour les issues labellisées `academic:` dans `docs/issues-seed.yml` —
-  leur titre GitHub garde le préfixe `academic:` (label sémantique pour le
-  barème), mais le titre de la **PR** qui la ferme doit utiliser un type
-  valide (souvent `feat` ou `infra` selon la nature du travail).
-
-## Équipe (5 personnes)
-
-Répartition par rôle/label plutôt que nominative pour l'instant (pseudos
-GitHub à assigner plus tard) — voir `docs/team-roles.md` pour le détail
-complet des responsabilités de chaque rôle :
-
-- `team:infra` — k3d, HDFS, Hive, Spark Operator, sécurité, CI infra
-- `team:data-eng` — nettoyage Spark, construction des 3 tables, scripts
-  PySpark, tests unitaires
-- `team:analytics` — requêtes Hive/Spark SQL, KPI, dashboard Zeppelin, Voilà
-- `team:insights` — analyses au choix, LLM/GenAI, synthèse, recommandations
-- `team:docs-qa` — rédaction des sections du rapport, captures d'écran,
-  tests de qualité de données, matrice de vérification finale
-
-## Workflow issue → branche → PR
-
-Chaque tâche = une issue (granularité fine, voir `docs/issues-seed.yml`).
-Pour chaque issue : brancher via `gh issue develop <numéro> --checkout`
-(lie automatiquement la branche à l'issue côté GitHub), nommer la branche
-selon `docs/CONTRIBUTING.md`, ouvrir une PR qui `Closes #<numéro>`. Pas de
-push direct sur `main` — protection de branche à activer (PR obligatoire +
-checks CI verts) dès le repo GitHub en place.
-
-## Idées et notes en cours de route
-
-Si une idée/point à creuser surgit pendant le travail sur une issue et
-qu'elle ne rentre pas dans le rapport tout de suite : créer un fichier dans
-`docs/notes/` (convention : `docs/notes/<slug>.md`) plutôt que la perdre ou
-la caser de force ailleurs. Ces notes sont la matière brute qui alimente
-ensuite `report/sections/`, elles ne remplacent pas le rapport.
-
-## Autonomie sur les skills
-
-Claude Code est autonome sur le choix et l'usage des skills/outils
-disponibles (graphify inclus) — pas besoin de demander confirmation avant
-d'utiliser un skill pertinent. La confirmation explicite de Paul reste
-requise uniquement pour les actions qui modifient l'état du cluster k3d
-(règle d'or ci-dessous), pas pour l'usage d'un skill.
-
-## Captures d'écran (annexes du rapport)
-
-Le cluster k3d est jetable — les captures doivent être prises **au fur et à
-mesure de chaque jour**, pas reconstituées à la fin. Convention :
-`docs/screenshots/J<N>-<slug>.png` (ex. `J2-hdfs-ls.png`,
-`J6-zeppelin-dashboard.png`). Inclut aussi des captures GitHub (Project
-board, issues, CI verte, scan Trivy) pour la partie DevSecOps du portfolio.
-
-## Structure de repo (proposition)
+## Architecture retenue (ne pas dévier sans validation)
 
 ```
-.
-├── CLAUDE.md
-├── docs/
-│   ├── trame-rapport.md
-│   ├── dataset-schema.md
-│   └── architecture.md
-├── infra/
-│   ├── k3d/              # config cluster
-│   ├── manifests/        # HDFS, Hive, Spark Operator, Zeppelin, ingress
-│   └── security/         # NetworkPolicies, secrets templates
-├── spark-jobs/
-│   ├── notebooks/        # exploration Jupyter
-│   └── scripts/          # PySpark versionné (version finale)
-├── voila-app/
-│   └── dashboard.ipynb
-└── report/
-    ├── rapport.tex        # squelette + \input, compilé via `task report:build`
-    └── sections/          # une section = un fichier .tex (voir docs/sujet-synthese.md)
+CSV (data/raw/) → HDFS /projet_ia/raw
+                 → Spark : contrôle, nettoyage, transformation
+                 → HDFS /projet_ia/processed/{offres,metiers,competences}
+                 → Hive (tables externes RAW + processed)
+                 → Jupyter/PySpark (exploration, requêtes Hive SQL/Spark SQL, dashboard)
 ```
 
-## Planning (12 jours restants au 09/09/2026)
+- **Jupyter/PySpark remplace Zeppelin** — choix validé avec le professeur.
+  Ne jamais réintroduire Zeppelin/DAS dans la stack.
+- **HDFS et Hive restent obligatoires**, même si l'analyse finale se fait
+  dans Jupyter. Ne jamais lire le CSV directement depuis le système de
+  fichiers local dans le notebook final : toujours passer par HDFS → Hive
+  (ou Spark lisant HDFS), sinon les points HDFS/Hive du barème sont perdus.
+- Stack orchestrée via **Docker Compose modulaire** :
+  `compose.yaml` (services de base) + `compose.override.yaml` (overrides
+  dev local). Jamais un seul fichier monolithique.
+- **Taskfile.yml** (go-task) est le seul point d'entrée documenté :
+  `task up`, `task down`, `task ingest`, `task etl`, `task test`,
+  `task hive-shell`, `task jupyter`. Ne pas demander aux membres de
+  l'équipe de retenir des commandes `docker compose exec ...` à la main.
 
-| Jour | Notation | Infra / Web |
-|---|---|---|
-| J1 | — | Repo Git, scaffolding k3d, structure du projet |
-| J2 | HDFS raw/processed/output + table Hive RAW | Déploiement HDFS + Hive Metastore sur k3d |
-| J3 | Spark : chargement, nettoyage, contrôle qualité | Spark Operator déployé ; exploration Jupyter démarrée |
-| J4-J5 | 3 tables offres/metiers/competences + requêtes Jour 2 | Scripts PySpark finaux versionnés à partir de l'exploration Jupyter |
-| J6 | Démarrage Zeppelin | Zeppelin déployé (Spark+Hive) ; notebook Voilà démarré |
-| J7 | KPI Jour 3 obligatoires (14-23) | Voilà branché aux résultats Hive, ingress k3s |
-| J8 | 4 analyses au choix, dashboard 6+ visualisations | Finalisation Voilà |
-| J9 | — | Durcissement sécu (NetworkPolicies, secrets, scan CI) |
-| J10 | Rédaction rapport sections 9-14 | README technique du repo |
-| J11 | Polish rapport, annexes | Polish Voilà, captures |
-| J12 | Relecture vs matrice de vérification | Buffer |
-| J13 (dépôt) | Soumission | — |
+### Règles Docker Compose
+- Images **toujours pinnées** par tag précis (jamais `:latest`).
+- `healthcheck` sur chaque service ; les dépendances utilisent
+  `depends_on: condition: service_healthy`, pas un simple `depends_on` nu.
+- `deploy.resources.limits` raisonnables (l'équipe tourne sur des laptops,
+  pas des serveurs).
+- Secrets et config variables dans `.env` (gitignored) ; `.env.example`
+  versionné avec des valeurs factices.
 
-## Dataset — `ai_jobs_market_2025_2026.csv`
+## Modèle de données cible
 
-1500 lignes, 25 colonnes. Colonnes principales :
+Table `offres` : une ligne par offre. Colonnes clés : `job_id`,
+`metier_id` (FK), `experience_level`, `years_of_experience`,
+`annual_salary_usd`, `salary_min_usd`, `salary_max_usd`, `city`,
+`country`, `remote_work`, `company_size`, `industry`,
+`ai_salary_premium_pct`, `demand_score`, `posting_year`, `posting_month`.
 
-`job_id, job_title, job_category, experience_level, years_of_experience,
-education_required, annual_salary_usd, salary_min_usd, salary_max_usd, city,
-country, remote_work, company_size, industry, required_skills,
-ai_salary_premium_pct, demand_score, demand_growth_yoy_pct, benefits_score_10,
-posting_year, posting_month, is_senior, is_remote_friendly, is_llm_role,
-salary_tier`
+Table `metiers` : une ligne par `job_title` distinct.
+**`metier_id` doit être stable et déterministe** — ne jamais utiliser
+`monotonically_increasing_id()` (non stable entre exécutions/partitions).
+Utiliser un hash déterministe, ex. `sha2(job_title, 256)` tronqué, ou un
+`row_number()` sur un tri stable (`ORDER BY job_title`).
 
-- `required_skills` : liste de compétences séparées par `|` → source pour
-  `split()`/`explode()` de la table `competences`
-- `posting_year`/`posting_month` : permet l'analyse d'évolution 2025→2026
-- `is_llm_role` : flag dédié pour l'analyse métiers LLM/GenAI demandée par le
-  sujet
-- 25 métiers distincts, 14 pays distincts (annoncés dans la description du
-  jeu de données)
+Table `competences` : `job_id` + une ligne par compétence, obtenue via
+`split(required_skills, '\\|')` puis `explode()`.
 
-## Conventions
+Nettoyage à documenter et **chiffrer** (pas juste appliqué en silence) :
+- Comptage des NULLs par colonne importante, avant/après nettoyage.
+- Comptage des doublons sur `job_id` avant/après `dropDuplicates`.
+- Toute règle de filtrage (ex. salaires ≤ 0) doit logger le nombre de
+  lignes affectées.
 
-- Code (Python, YAML, noms de variables, commits) : anglais
-- Rapport, documentation projet, commentaires métier : français
-- Pas de credentials en clair dans les manifests, même en local/jetable
+## Livrables obligatoires (à ne jamais oublier en cours de route)
 
-## Outillage déjà en place (ne pas recréer)
+Le barème est sur 20 points, réparti HDFS (2) / Hive RAW+processed (3) /
+Spark nettoyage (4) / modèle 3 tables (3) / Hive SQL+Spark SQL (3) /
+visualisations (3) / analyse et rapport (2). Concrètement :
 
-- `.pre-commit-config.yaml`, `.editorconfig`, `.gitattributes`, `.gitignore`
-  (distinction fine JetBrains — voir historique)
-- `Taskfile.yml` (`task setup|lint|test|test:data|format|report:build|k3d:up|k3d:down`)
-- `.github/workflows/ci.yml` (branch-name-check, pr-title-check, pre-commit,
-  test, scan-images, manifest-lint)
-- `.github/ISSUE_TEMPLATE/` (academic-deliverable, infra-task, bug),
-  `PULL_REQUEST_TEMPLATE.md`
-- `docs/CONTRIBUTING.md` (conventions branches/commits/labels)
-- `docs/TESTING.md` (politique de tests, 3 niveaux)
-- `docs/sujet-synthese.md` (synthèse complète du PDF sujet — ne jamais
-  rouvrir le PDF original, tout est ici)
-- `report/rapport.tex` (structure exacte de la trame docx officielle, déjà
-  implémentée avec tous les tableaux à remplir — ne pas réordonner/modifier
-  la structure des sections) + `report/sections/*.tex` (16 fichiers, un par
-  section, `\input`és depuis rapport.tex)
-- `docs/team-roles.md` (les 5 rôles et leurs responsabilités)
-- `docs/notes/` (convention pour capturer les idées en cours de route)
-- `docs/issues-seed.yml` (issues à créer, granularité fine, prêtes à scripter)
-- `docs/project-board.md` (spec du GitHub Project)
-- `docs/prompts/` (prompts Claude Code séquencés : 01-github-setup,
-  02-report-check, 03-j1-infra-bootstrap)
-- `docs/sujet/` (originaux PDF/docx volontairement non committés — voir son
-  README)
-- `data/ai_jobs_market_2025_2026.csv` (dataset, committé — petit fichier,
-  public, nécessaire à la reproductibilité)
-- `LICENSE` (MIT), `SECURITY.md`, `README.md`
-- `graphify` installé (knowledge graph du repo, se met à jour tout seul via
-  hook post-commit)
+- Requêtes obligatoires Jour 1 : nombre d'offres, métiers distincts, pays
+  distincts, salaire moyen/min/max, répartition par expérience.
+- Requêtes obligatoires Jour 2 (8) : top 10 métiers par offres, salaire
+  moyen par métier, top 10 compétences, salaire moyen par expérience,
+  offres par pays/secteur, **jointure offres↔metiers** (requête dédiée,
+  pas seulement utilisée en interne), **jointure offres↔competences**
+  (idem), une requête GROUP BY + HAVING.
+- KPI obligatoires Jour 3 (10) : total offres/métiers, salaire moyen ET
+  médian (`percentile_approx`), top métiers les mieux rémunérés, top
+  métiers les plus demandés, top compétences, salaire moyen par pays,
+  salaire par expérience, répartition télétravail/présentiel
+  (`remote_work`), analyse LLM/GenAI (`is_llm_role`), évolution
+  2025-2026 par période (`posting_year`/`posting_month`).
+- **Au moins 4 analyses au choix** en plus des KPI obligatoires.
+- **Au moins 6 visualisations** dans le dashboard, chacune avec titre,
+  requête source identifiable, interprétation chiffrée affichée.
+- Comparer, quand pertinent, une requête Hive SQL et son équivalent
+  Spark SQL (section 8 du rapport).
+- Rapport final : 6-10 constats, 3 recommandations argumentées, une
+  section limites de l'étude distincte de la synthèse.
 
-## Règle d'or
+## Conventions de dépôt
 
-Ne rien exécuter/déployer sans validation explicite de Paul au préalable pour
-chaque étape structurante du planning.
+- Commits **Conventional Commits** (`feat:`, `fix:`, `chore:`, `docs:`,
+  `test:`). Historique lisible = preuve de démarche pour le rapport.
+- `pre-commit` obligatoire avant push : `ruff`/`black` (Python),
+  `sqlfluff` (SQL), `gitleaks` (scan de secrets). Ne jamais committer
+  avec `--no-verify` sauf urgence explicitement assumée par l'auteur.
+- Transformations Spark versionnées en **scripts `.py` dans `src/`**, pas
+  seulement écrites à la volée dans le notebook. Le notebook final
+  importe/appelle ces scripts ou reproduit leurs étapes de façon
+  traçable — il ne doit pas être le seul endroit où vit la logique.
+- Tests dans `tests/` (pytest) : au minimum des sanity checks de comptage
+  de lignes après chaque étape ETL (`test_row_counts.py`), et une
+  validation de schéma sur les 3 tables cibles.
+- `data/raw/` et `.env` dans `.gitignore` dès le premier commit — ne
+  jamais committer le CSV brut ni des secrets.
+
+## JOURNAL.md
+
+Chaque recette Taskfile qui exécute une étape significative
+(ingestion, ETL, création de tables Hive, run de tests) doit ajouter une
+entrée à `JOURNAL.md` à la racine, au format :
+
+```
+## AAAA-MM-JJ HH:MM — task <nom>
+Commande : <commande exécutée>
+Résultat : <ce qui a été vérifié, ex. nombre de lignes>
+Auteur : <nom ou "task automation">
+```
+
+Ne pas réécrire l'historique de ce fichier ; toujours ajouter en fin de
+fichier (append), jamais réorganiser ou supprimer des entrées passées.
+
+## Ce que Claude Code ne doit PAS faire
+
+- Ne pas réintroduire Zeppelin/DAS.
+- Ne pas lire le CSV directement en local dans le pipeline final (HDFS
+  obligatoire).
+- Ne pas utiliser `:latest` sur une image Docker.
+- Ne pas committer `data/raw/*.csv`, `.env`, ou tout fichier listé dans
+  `.gitignore`.
+- Ne pas fusionner/simplifier `compose.yaml` en un seul fichier monolithique.
+- Ne pas modifier `report/rapport_esiea.tex` en dehors de son contenu
+  (structure des couleurs/polices définie dans le préambule à respecter).
+- Ne pas supprimer d'entrées existantes dans `JOURNAL.md`.
+
+## Stack technique de référence
+
+Docker Compose (HDFS namenode/datanode, Hive metastore + server, Spark,
+Jupyter/PySpark) · Taskfile (go-task) · Python (PySpark, pytest, ruff) ·
+Hive SQL / Spark SQL · LaTeX (XeLaTeX, rapport aux couleurs ESIEA) ·
+pre-commit + gitleaks.
+
+### Images pinnées (socle infra, Étape 1) — validé réellement avec `task up`
+
+Combo `bde2020` volontairement figé sur Hadoop 2.7.4 (pas 3.2.1) car
+c'est la version pour laquelle l'image `bde2020/hive:2.3.2-postgresql-metastore`
+est construite et testée — mélanger avec un namenode/datanode 3.2.1
+aurait cassé la compatibilité RPC HDFS côté Hive sans bénéfice.
+
+- `bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8`,
+  `bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8`. **Ports web réels en
+  Hadoop 2.7.4 : 50070 (namenode) et 50075 (datanode), pas 9870/9864**
+  (défauts Hadoop 3.x) — healthchecks et `compose.override.yaml` alignés
+  sur 50070/50075. `SERVICE_PRECONDITION` du datanode pointe sur
+  `namenode:8020` (RPC), le port 9870 n'existe pas sur cette image.
+- `bde2020/hive:2.3.2-postgresql-metastore` pour `hive-metastore`
+  (service metastore Thrift, port 9083) **et** `hive-server`
+  (HiveServer2, ports 10000 JDBC / 10002 web), même image, commande
+  différente.
+- **Backend Postgres du metastore : `postgres:13.18` (officiel), pas
+  `bde2020/hive-metastore-postgresql:2.3.0`** — ce dernier embarque un
+  entrypoint Go ancien qui crashe (`fatal error: newosproc`) sous
+  émulation amd64→arm64 (Apple Silicon via colima/QEMU). Contrepartie :
+  l'image officielle part d'une base `metastore` vide (pas de schéma
+  Hive pré-chargé) — `hive-metastore` monte
+  `scripts/hive-metastore-entrypoint.sh` et l'utilise comme `command`
+  pour lancer `schematool -dbType postgres -initSchema` puis
+  `hive --service metastore`. Ce script doit rester un **seul token**
+  dans `command:` : l'`entrypoint.sh` de l'image `bde2020/hive` fait un
+  `exec $@` non quoté qui découpe (et casse) toute commande contenant
+  des espaces — ne jamais remettre un `sh -c "... ; ..."` inline ici.
+  Identifiants Postgres attendus : `hive`/`hive`/`metastore`
+  (voir `.env.example`), cohérents avec les
+  `HIVE_SITE_CONF_javax_jdo_option_*` répétés dans l'`environment:` de
+  `hive-metastore` **et** `hive-server` (ces deux services définissent
+  aussi `SERVICE_PRECONDITION` dans leur propre `environment:`, ce qui
+  écrase entièrement celui d'un anchor YAML fusionné via `<<:` — pas de
+  deep merge en YAML — d'où la duplication au lieu d'un anchor commun).
+- `JAVA_TOOL_OPTIONS=-Xint` sur tous les services JVM (namenode,
+  datanode, hive-metastore, hive-server) — sous émulation QEMU
+  (amd64 sur Apple Silicon), le JIT HotSpot provoque des blocages
+  CPU-pinné de plusieurs minutes au premier lancement (`hdfs namenode
+  -format`, `schematool`). Le mode interprété évite le bug, démarrage
+  plus lent mais fiable. À retirer seulement si toute l'équipe tourne
+  sur du x86_64 natif.
+- `jupyter/pyspark-notebook:spark-3.5.0` pour le service `jupyter`
+  (PySpark local, connecté à HDFS via `fs.defaultFS=hdfs://namenode:8020`
+  et à Hive via `thrift://hive-metastore:9083`) — multi-arch, tourne
+  nativement sur Apple Silicon, aucun souci d'émulation constaté.
+- Config Hadoop/Hive non secrète versionnée dans `env/hadoop-hive.env`
+  (traduite en XML par les entrypoints bde2020) ; identifiants Postgres
+  et token Jupyter dans `.env` (voir `.env.example`).
+- Réseau Compose unique : `bigdata`. Volumes nommés :
+  `hadoop_namenode`, `hadoop_datanode`, `hive_metastore_postgresql`.
+- `compose.override.yaml` ne porte que du confort de dev (ports web
+  HDFS exposés sur 50070/50075, montage `./src` dans le conteneur
+  Jupyter) — jamais requis pour que la stack tourne.
+- Tags `.pre-commit-config.yaml` : `gitleaks` remplace `detect-secrets`
+  (plus de `.secrets.baseline` à maintenir) ; `sqlfluff` ajouté avec
+  dialecte `hive` (`.sqlfluff` à la racine) pour le SQL à venir en
+  Étape 3.
+
+### Tests locaux (`task test` / CI) — Java et Python requis
+
+`pyspark==3.5.0` (voir `pyproject.toml`, extra `test`) ne démarre pas sous
+un JDK ≥ 21 en local (`UnsupportedOperationException: getSubject is not
+supported`, API retirée) ni sous Python ≥ 3.13 (crash du sérialiseur
+cloudpickle) — utiliser **Java 17 ou 21 max** (`brew install
+openjdk@21`, `export JAVA_HOME=/opt/homebrew/opt/openjdk@21`) et
+**Python 3.12** pour l'environnement virtuel local. Le CI GitHub Actions
+utilise déjà `actions/setup-java` (Java 17) et `actions/setup-python`
+(3.12) — aucun changement nécessaire côté workflow, seulement côté poste
+de dev local si `java -version` par défaut est plus récent.
+
+### Docker sur Mac Apple Silicon (M-series) — colima, pas forcément Docker Desktop
+
+Les images `bde2020/*` sont **amd64 uniquement** (pas d'image arm64) :
+sur Apple Silicon elles tournent sous émulation QEMU, plus lentes qu'en
+natif mais fonctionnelles une fois `JAVA_TOOL_OPTIONS=-Xint` en place
+(voir ci-dessus). `docker compose up` a été validé pour de vrai sur ce
+poste via **colima** (`brew install colima docker-compose`, puis
+`colima start --cpu 4 --memory 8 --disk 60`) plutôt que Docker Desktop
+(cask présent mais cassé sur cette machine — `Docker.app` absent malgré
+l'installation Homebrew). Si `docker compose` n'est pas reconnu après
+installation de `docker-compose` en formule brew, ajouter
+`"cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]` à
+`~/.docker/config.json`. Chaque membre de l'équipe doit disposer d'un
+runtime Docker fonctionnel (Docker Desktop **ou** colima) — peu importe
+lequel, seul `docker compose` doit répondre.

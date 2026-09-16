@@ -1,0 +1,21 @@
+# Overrides de dev local uniquement (chargé automatiquement par
+# `docker compose up` en complément de compose.yaml). Rien ici ne doit
+# être nécessaire pour que la stack tourne en CI/headless — seulement du
+# confort d'édition et de débogage pour l'équipe.
+
+services:
+  namenode:
+    # Hadoop 2.7.4 : port web réel du namenode (voir compose.yaml).
+    ports:
+      - "50070:50070"
+
+  datanode:
+    # Hadoop 2.7.4 : port web réel du datanode.
+    ports:
+      - "50075:50075"
+
+  jupyter:
+    volumes:
+      - ./src:/home/jovyan/work
+    environment:
+      GRANT_SUDO: "yes"

@@ -1,0 +1,203 @@
+% !TeX program = xelatex
+% Compilation : xelatex rapport_esiea.tex (2 passes pour le sommaire/numérotation)
+% Nécessite XeLaTeX ou LuaLaTeX (fontspec) — pdflatex ne fonctionnera pas.
+%
+% Polices requises (à placer dans un dossier fonts/ à côté de ce fichier,
+% téléchargeables gratuitement sur fonts.google.com — licence Apache) :
+%   fonts/Poppins-Bold.ttf, Poppins-SemiBold.ttf, Poppins-Regular.ttf
+%   fonts/Roboto-Regular.ttf, Roboto-Bold.ttf, Roboto-Italic.ttf
+% Si les polices ne sont pas installées système, décommentez la ligne
+% \setmainfont{Roboto}[Path=fonts/,...] plus bas avec le chemin explicite.
+
+\documentclass[11pt,a4paper]{report}
+
+% ---------- Encodage / langue ----------
+\usepackage{fontspec}
+\usepackage[french]{babel}
+\usepackage{microtype}
+
+% ---------- Couleurs charte ESIEA ----------
+\usepackage[table]{xcolor}
+\definecolor{esieablue}{HTML}{36A9E1}      % Bleu clair — couleur principale
+\definecolor{esienavy}{HTML}{151D34}       % Bleu marine — couleur secondaire foncée
+\definecolor{esieaorange}{HTML}{F59E00}    % Orange — accent (barres, encarts)
+\definecolor{esieaoffwhite}{HTML}{FDF8F1}  % Blanc cassé — fonds clairs
+\definecolor{esieagray}{HTML}{4A4A4A}      % Gris texte courant (dérivé, lisibilité)
+
+% ---------- Polices (Poppins = titres, Roboto = corps) ----------
+% Si Poppins/Roboto sont installées au niveau système, ces deux lignes suffisent :
+\setmainfont{Roboto}
+\newfontfamily\titlefont{Poppins}[BoldFont={Poppins SemiBold}]
+% Sinon, remplacez par (chemins relatifs au fichier .tex) :
+% \setmainfont{Roboto-Regular.ttf}[Path=fonts/,BoldFont=Roboto-Bold.ttf,ItalicFont=Roboto-Italic.ttf]
+% \newfontfamily\titlefont{Poppins-SemiBold.ttf}[Path=fonts/,BoldFont=Poppins-Bold.ttf]
+
+% ---------- Mise en page ----------
+\usepackage[margin=2.5cm,top=3cm]{geometry}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{caption}
+
+% ---------- Titres de section façon charte (barre orange sous le titre) ----------
+\titleformat{\chapter}[display]
+  {\titlefont\Huge\bfseries\color{esienavy}}
+  {\filright\normalfont\normalsize\color{esieablue}\MakeUppercase{Rapport Big Data — IA 2025-2026}}
+  {6pt}
+  {\titlerule[2pt]\color{esieaorange}\vspace{4pt}\thechapter.\ }
+[\vspace{2pt}{\color{esieaorange}\titlerule[3pt]}]
+
+\titleformat{\section}
+  {\titlefont\Large\bfseries\color{esieablue}}{\thesection}{10pt}{}
+\titlespacing{\section}{0pt}{18pt}{8pt}
+
+\titleformat{\subsection}
+  {\titlefont\large\bfseries\color{esienavy}}{\thesubsection}{8pt}{}
+
+% ---------- En-têtes / pieds de page ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[L]{\small\color{esienavy}\textbf{esiea} \,|\, Projet Big Data IA}
+\fancyhead[R]{\small\color{esieablue}\leftmark}
+\fancyfoot[C]{\small\color{esieagray}\thepage}
+
+% ---------- Encadré "constat / interprétation" réutilisable ----------
+\newtcolorbox{constat}[1][]{
+  colback=esieaoffwhite, colframe=esieablue, boxrule=0.8pt,
+  arc=2pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\titlefont\bfseries\color{white}, coltitle=white,
+  colbacktitle=esieablue, title={#1}, breakable
+}
+\newtcolorbox{recommandation}[1][]{
+  colback=white, colframe=esieaorange, boxrule=1pt,
+  arc=2pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\titlefont\bfseries\color{esienavy}, title={#1}, breakable
+}
+
+\hypersetup{
+  colorlinks=true, linkcolor=esieablue, citecolor=esieablue,
+  urlcolor=esieablue, pdftitle={Marché de l'emploi en IA 2025-2026},
+  pdfauthor={Équipe projet — ESIEA}
+}
+
+\title{\titlefont\Huge\bfseries\color{esienavy}Marché de l'emploi en IA\\[4pt]\Large 2025--2026}
+\author{}
+\date{}
+
+% =========================================================
+\begin{document}
+
+% ---------- Page de garde façon charte (fond marine, titre blanc, barre orange) ----------
+\begin{titlepage}
+\newgeometry{margin=0cm}
+\begin{tikzpicture}[remember picture, overlay]
+  \fill[esienavy] (current page.south west) rectangle (current page.north east);
+\end{tikzpicture}
+\vspace*{3cm}
+\begin{center}
+  {\titlefont\color{white}\Large esiea}\\[2.5cm]
+  {\titlefont\color{white}\Huge\bfseries Projet Big Data\\[6pt] Marché de l'emploi en IA}\\[10pt]
+  {\titlefont\color{white}\huge 2025 -- 2026}\\[18pt]
+  {\color{esieaorange}\rule{6cm}{3pt}}\\[18pt]
+  {\color{white}\large HDFS $\cdot$ Hive $\cdot$ Spark $\cdot$ Jupyter/PySpark}\\[40pt]
+  {\color{white}\normalsize Sujet proposé par M.~Touati Zouhaier}\\[4pt]
+  {\color{white}\normalsize Équipe : \emph{[Prénom NOM $\times$5]}}\\[4pt]
+  {\color{white}\normalsize ESIEA — Spécialisation DevSecOps \& Cloud Computing}\\[4pt]
+  {\color{white}\normalsize Septembre 2026}
+\end{center}
+\end{titlepage}
+\restoregeometry
+
+\tableofcontents
+\clearpage
+
+% ---------- Nécessite \usepackage{tikz} pour la page de garde ----------
+
+\chapter{Introduction}
+\section{Contexte}
+% Présenter le contexte du marché de l'emploi en IA.
+
+\section{Problématique}
+% Formuler la problématique du projet.
+
+\section{Objectifs}
+% Objectifs techniques et analytiques.
+
+\section{Intérêt de la chaîne HDFS $\to$ Hive $\to$ Spark $\to$ Jupyter/PySpark}
+% Expliquer brièvement l'intérêt de l'architecture retenue.
+
+\chapter{Présentation du dataset}
+% Source, nombre de lignes/colonnes, période couverte, variables principales,
+% premières observations sur la qualité des données.
+
+\chapter{Architecture Big Data retenue}
+\section{Schéma d'architecture}
+% \includegraphics[width=\linewidth]{figures/architecture.png}
+
+\section{Rôle de chaque composant}
+% HDFS, Hive, Spark, Jupyter/PySpark (remplace Zeppelin — cf. note ci-dessous).
+
+\begin{constat}[Choix technique validé]
+Choix validé avec M.~Touati~: Jupyter/PySpark remplace Zeppelin comme
+interface d'analyse et de dashboard. HDFS et Hive restent le socle de
+stockage et de requêtage, conformément au sujet.
+\end{constat}
+
+\section{Organisation raw / processed / output}
+
+\chapter{Ingestion des données dans HDFS}
+% Arborescence HDFS, commandes mkdir/put/ls/du, vérification du nombre de lignes.
+
+\chapter{Création et contrôle de la table Hive RAW}
+% Schéma retenu, CREATE EXTERNAL TABLE, DESCRIBE, SELECT LIMIT, COUNT(*).
+
+\chapter{Qualité et préparation des données avec Spark}
+% Chargement, printSchema(), contrôle NULL/doublons/types, règles de nettoyage justifiées.
+
+\chapter{Construction des tables offres, metiers et competences}
+% Grain de chaque table, clés job\_id/metier\_id, split()/explode(), schéma relationnel.
+
+\chapter{Analyses Hive SQL et Spark SQL}
+% Pour chaque analyse : question -> tables -> requête -> résultat -> interprétation.
+
+\chapter{Analyse des métiers, salaires et compétences}
+
+\chapter{Dashboard Jupyter/PySpark}
+% Minimum 6 visualisations, titre + question + interprétation chiffrée sous chaque graphique.
+
+\chapter{Synthèse des résultats}
+\begin{constat}[Constat 1]
+% Relier chaque constat à un indicateur ou une requête précise.
+\end{constat}
+
+\chapter{Recommandations}
+\begin{recommandation}[Recommandation 1]
+% Résultat observé -> interprétation -> recommandation.
+\end{recommandation}
+
+\chapter{Limites de l'étude}
+% Représentativité, volume du dataset, limites techniques/méthodologiques.
+% Rappeler que le dataset ne mesure pas l'impact causal de l'IA sur l'emploi global.
+
+\chapter{Conclusion}
+
+\appendix
+\chapter{Annexes}
+\section{Commandes HDFS}
+\section{Scripts PySpark}
+\section{CREATE TABLE Hive}
+\section{Requêtes Hive SQL / Spark SQL}
+\section{Journal d'exécution}
+% Voir JOURNAL.md du dépôt — synthèse à intégrer ici avant le rendu final.
+
+\end{document}

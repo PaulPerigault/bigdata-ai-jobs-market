@@ -1,3 +1,0 @@
-pytest==8.3.3
-pyspark==3.5.3
-chispa==0.10.1

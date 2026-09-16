@@ -1,30 +1,66 @@
-# Politique de sécurité
+# Politique de sécurité du projet
 
-Ce projet est un démonstrateur pédagogique et personnel (pipeline Big Data +
-infra k3d), pas un service en production. Pas de bug bounty, mais les
-remontées sont prises au sérieux.
+Dépôt pédagogique (ESIEA — Fondamentaux du Big Data). Ce document reste
+volontairement proportionné à un projet étudiant de 5 jours, mais applique
+les réflexes DevSecOps de base plutôt que de les ignorer parce que
+"c'est juste un TP".
 
-## Signaler une vulnérabilité
+## Périmètre
 
-Ne pas ouvrir d'issue publique pour une vulnérabilité (secret exposé, faille
-dans un manifest, dépendance vulnérable critique). Utiliser plutôt l'onglet
-**Security → Report a vulnerability** du repo (GitHub Security Advisories),
-qui permet une divulgation privée.
+- Le dataset (`ai_jobs_market_2025_2026.csv`) est un jeu de données
+  public (Kaggle), sans donnée personnelle identifiante. Aucune
+  classification particulière n'est requise, mais il n'est **jamais**
+  committé dans le dépôt (voir `.gitignore`) — il est déposé localement
+  dans `data/raw/` par chaque membre et référencé par le pipeline HDFS.
+- Le périmètre couvre : le code source (`src/`), les scripts
+  d'infrastructure (`compose.yaml`, `Taskfile.yml`), les notebooks, et
+  le rapport LaTeX.
 
-À inclure si possible :
-- Composant concerné (`hdfs`, `hive`, `spark`, `zeppelin`, `voila`, `k3d`, `ci`)
-- Étapes de reproduction
-- Impact estimé
+## Secrets et configuration
 
-## Ce qui est déjà couvert automatiquement
+- Aucun secret, mot de passe, token ou clé d'API ne doit être committé.
+- Toute configuration sensible (identifiants Hive/HDFS de dev, ports
+  personnalisés) passe par `.env`, listé dans `.gitignore`.
+  `.env.example` est versionné avec des valeurs factices documentant les
+  variables attendues.
+- `pre-commit` inclut `gitleaks` pour scanner chaque commit avant push.
+  Un secret détecté bloque le commit — ne pas contourner avec
+  `--no-verify` sans en avertir l'équipe.
+- Si un secret est accidentellement committé : le considérer compromis,
+  le régénérer/changer immédiatement (pas seulement le supprimer du
+  dernier commit — il reste dans l'historique Git tant qu'il n'est pas
+  purgé avec `git filter-repo` ou équivalent).
 
-- Scan de secrets avant commit (`detect-secrets`) et en CI
-- Scan de vulnérabilités filesystem/dépendances (`Trivy`) en CI
-- Validation des manifests Kubernetes (`kubeconform`) en CI
-- Pas de credentials en clair dans les manifests (secrets via Sealed
-  Secrets/SOPS)
+## Conteneurs et dépendances
 
-## Portée
+- Images Docker **toujours pinnées** par tag de version précis, jamais
+  `:latest` — reproductibilité et surface d'attaque connue.
+- Pas de service exposé au-delà de `localhost` / du réseau Docker
+  interne : ce projet tourne en local pour un rendu académique, pas en
+  production, donc aucun port n'a besoin d'être ouvert sur Internet.
+- Dépendances Python figées via `pyproject.toml` (versions explicites,
+  pas de plage ouverte non bornée sur les packages critiques comme
+  `pyspark`).
 
-Le cluster k3d est local et jetable — aucune donnée sensible n'y est
-attendue au-delà du dataset public *AI Jobs Market 2025-2026*.
+## Accès et périmètre réseau
+
+- HDFS, Hive et Jupyter tournent uniquement sur le réseau Docker Compose
+  local. Aucune authentification renforcée n'est mise en place (hors
+  périmètre pour un projet pédagogique local), mais aucun service ne
+  doit être bindé sur `0.0.0.0` avec un port exposé publiquement.
+
+## Signalement
+
+Projet académique sans processus de disclosure formel. Si un membre de
+l'équipe repère un problème de sécurité dans le dépôt (secret exposé,
+dépendance vulnérable signalée par un outil, mauvaise configuration) :
+ouvrir une issue GitHub taguée `security` ou prévenir directement
+l'équipe sur le canal du projet — pas de canal public externe nécessaire
+vu le périmètre.
+
+## Ce qui est explicitement hors périmètre
+
+- Durcissement en environnement de production (ce projet n'est jamais
+  déployé au-delà du poste de travail local des membres de l'équipe).
+- Authentification multi-utilisateurs sur HDFS/Hive.
+- Chiffrement au repos des données (dataset public, non sensible).

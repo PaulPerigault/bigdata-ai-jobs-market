@@ -45,6 +45,27 @@ Le \texttt{COUNT(*)} vaut bien \textbf{1500} via Hive/Beeline — la
 propriété \texttt{skip.header.line.count} fonctionne correctement pour
 le moteur d'exécution Hive natif (Hive-on-MR).
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape2_hive_raw_describe.png}
+\caption{\texttt{DESCRIBE projet\_ia.ai\_jobs\_raw} via Beeline —
+25 colonnes typées, schéma réel de la table externe.}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape2_processed_tables_describe.png}
+\caption{\texttt{DESCRIBE} des 3 tables \texttt{processed} (offres,
+metiers, competences) — schéma réel après le pipeline ETL (chapitre~7).}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape2_hdfs_namenode_explorer.png}
+\caption{Interface web HDFS NameNode — arborescence
+\texttt{/projet\_ia} (\texttt{raw}, \texttt{processed}, \texttt{output}).}
+\end{figure}
+
 \begin{constat}[Bug découvert : \texttt{skip.header.line.count} ignoré par Spark]
 En revanche, lire la même table depuis \textbf{Spark} via
 \texttt{spark.sql("SELECT * FROM projet\_ia.ai\_jobs\_raw")} ne

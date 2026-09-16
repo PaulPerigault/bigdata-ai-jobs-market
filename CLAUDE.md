@@ -255,6 +255,47 @@ la Definition of Done dès l'Étape 2) :
   documenté dans l'Étape 5 du plan initial (image texlive pinnée) reste
   à faire ; ne pas le considérer comme déjà en place.
 
+## Captures d'écran (`report/figures/`) — automatisées, pas prises à la main
+
+Convention de nommage : `etapeX_outil_contenu.png`. Deux recettes
+Taskfile régénèrent les captures reproductibles à la demande (utile si
+les chiffres/l'UI changent avant le rendu) :
+
+- **`task screenshots-cli`** (`scripts/screenshots_cli.sh`) : captures
+  terminal/requêtes via **freeze** (`charmbracelet/freeze`, binaire Go
+  unique — `brew install charmbracelet/tap/freeze`, ou télécharger le
+  binaire `Darwin_arm64` depuis les releases GitHub si le brew tap
+  échoue sur des Command Line Tools obsolètes, cf. incident du
+  16/09/2026). Piège découvert en le mettant en place :
+  **`freeze -x "<commande>"` a un timeout court (~2-3s) et échoue
+  (`signal: killed` / `no command output`) sur toute commande plus
+  longue** — largement dépassé par Hive-on-MR. Le script capture donc
+  la sortie de chaque commande dans un fichier texte lui-même
+  (exécution complète, pas de limite de temps), puis demande à `freeze`
+  de rendre ce fichier déjà écrit (rendu instantané, aucun souci de
+  timeout). Ne jamais revenir à `freeze -x` directement sur une requête
+  Hive/Spark.
+- **`task screenshots-web`** (`scripts/screenshots_web.py`) : captures
+  d'interfaces web non authentifiées via **Playwright** (Python,
+  `pyproject.toml` extra `screenshots`, navigateur Chromium headless
+  installé par la recette). HDFS NameNode (port réel **50070**, pas
+  9870 — Hadoop 2.7.4, voir plus haut) et le notebook Jupyter (chemin
+  `work/<fichier>.ipynb`, préfixe obligatoire : le volume monté par
+  `compose.override.yaml` apparaît sous `work/` dans l'arborescence
+  Jupyter, pas à la racine).
+- **Captures GitHub authentifiées (Project board, Issues, run CI
+  vert) : volontairement NON automatisées.** Playwright peut
+  screenshoter des pages authentifiées via un `storage_state` (cookies
+  de session), mais automatiser proprement cette authentification
+  (login interactif unique pour générer le `storage_state`, gestion de
+  son renouvellement) demandait plus de temps que ces 3-4 captures ne
+  le justifiaient à quelques jours du rendu — et le risque d'un token
+  bricolé en dur dans un script était jugé pire que la capture
+  manuelle. **`playwright/.auth/` est dans `.gitignore` par précaution
+  dès maintenant**, mais rien n'y a été créé : ces captures restent
+  prises à la main par l'équipe (voir le ticket associé pour la liste
+  exacte).
+
 ## Ce que Claude Code ne doit PAS faire
 
 - Ne pas réintroduire Zeppelin/DAS.

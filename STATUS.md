@@ -79,8 +79,18 @@ chacune renvoie vers le commit exact qui la clôt :
 - [x] Requête `GROUP BY` + `HAVING` : 12 pays avec >50 offres et salaire
       moyen >150 000$, USA en tête (515 offres, 226 190$).
 - [x] Comparaison Hive SQL vs Spark SQL (même requête, salaire moyen par
-      expérience) : résultats identiques, Hive-on-MR 33,0s vs Spark SQL
-      8,8s — chiffré et documenté (chapitre 08).
+      expérience) : résultats identiques, Spark SQL 3-4x plus rapide
+      (chiffres exacts variables d'un run à l'autre sous émulation QEMU
+      — 57s/15s et 33,0s/8,8s mesurés sur deux runs distincts) —
+      chiffré et documenté (chapitre 08).
+
+### Captures d'écran automatisées (Étape 3) ✅
+- [x] **[#101](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/101)**
+      `task screenshots-cli` (freeze) et `task screenshots-web`
+      (Playwright) régénèrent à la demande les 9 captures de
+      `report/figures/` intégrées aux chapitres 03/05/08/09. Captures
+      GitHub authentifiées volontairement laissées manuelles (voir note
+      du ticket ci-dessous et CLAUDE.md).
 
 ### KPI obligatoires Jour 3 (Étape 3) ✅
 - [x] **[#94](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/94)**
@@ -213,32 +223,32 @@ dans les chapitres concernés (actuellement en commentaire placeholder).
 
 ---
 
-**TICKET — Captures d'écran pour annexes** — [#101](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/101)
+**TICKET — Captures d'écran pour annexes** — ✅ FAIT (automatisé) — [#101](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/101) (fermée)
 Label : `rapport` `figures`
-Convention de nommage : `etapeX_outil_contenu.png`
-(ex. `etape2_beeline_join.png`, `etape1_task_up_healthy.png`).
-À capturer : `task up` healthy, DESCRIBE des tables Hive, requêtes
-Beeline clés, dashboard Jupyter final.
+Convention de nommage : `etapeX_outil_contenu.png`.
 Critère d'acceptation : captures dans `report/figures/`, intégrées aux
-annexes du rapport.
+chapitres concernés du rapport.
 
-> **Vérifié le 2026-09-16** : `report/figures/` est actuellement **vide**
-> (aucun fichier). Toutes les captures mentionnées comme faites dans le
-> repo (JOURNAL.md, chapitres 04/05/08 du rapport) n'ont en réalité
-> **jamais été prises** — elles n'existent que sous forme de sorties
-> texte (logs beeline, `docker ps`), pas d'images. Manquent
-> précisément :
-> - `etape1_task_up_healthy.png` — `docker ps` montrant les 6 services
->   `healthy` (chapitre 03/annexes).
-> - `etape2_hive_raw_describe.png` — `DESCRIBE FORMATTED
->   projet_ia.ai_jobs_raw` via Beeline (chapitre 05).
-> - `etape2_beeline_join_llm_engineer.png` — la requête de jointure
->   `offres`↔`metiers` et son résultat (top métiers, LLM Engineer en
->   tête) citée au chapitre 08.
-> - `etape2_hdfs_processed_tree.png` — `hdfs dfs -ls -R
->   /projet_ia/processed` montrant l'arborescence des 3 tables.
-> - Dashboard Jupyter final : pas encore capturable, dépend du ticket
->   "Dashboard : minimum 6 visualisations" (pas encore fait).
+> **Fait le 16/09/2026, automatisé plutôt que pris à la main** (demande
+> explicite : reproductible si la stack change avant le rendu) :
+> - `task screenshots-cli` (`scripts/screenshots_cli.sh`, freeze) :
+>   `etape1_task_up_healthy.png`, `etape2_hive_raw_describe.png`,
+>   `etape2_processed_tables_describe.png`,
+>   `etape3_join_offres_competences.png`, `etape3_group_by_having.png`,
+>   `etape3_hive_vs_spark_sql.png`, `etape3_kpis_1.png`/`_2.png`.
+> - `task screenshots-web` (`scripts/screenshots_web.py`, Playwright) :
+>   `etape2_hdfs_namenode_explorer.png`, `etape2_jupyter_notebook.png`.
+> - Captures GitHub authentifiées (Project board, Issues, run CI vert) :
+>   **volontairement non automatisées** — authentification Playwright
+>   propre jugée disproportionnée pour 3-4 captures à ce stade du
+>   projet, risque d'un secret bricodé en dur jugé pire que la capture
+>   manuelle. `playwright/.auth/` ajouté à `.gitignore` par précaution.
+>   **Restent à prendre à la main** : capture du Project board
+>   (colonnes Backlog/Todo/In Progress/In Review/Done), de la liste des
+>   issues, et d'un run CI vert sur GitHub Actions.
+> - Toutes les captures régénérables à la demande via les deux recettes
+>   Taskfile ci-dessus (utile si les chiffres/l'UI changent avant le
+>   rendu) — voir CLAUDE.md section captures.
 
 ---
 

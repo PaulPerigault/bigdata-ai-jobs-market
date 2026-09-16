@@ -31,6 +31,7 @@ out/
 __pycache__/
 *.py[cod]
 .venv/
+.venv-*/
 venv/
 .ruff_cache/
 *.egg-info/
@@ -55,6 +56,10 @@ kubeconfig*.yaml
 !.env.example
 *.secrets.yaml
 secrets/
+
+# Playwright : storage_state (cookies de session GitHub authentifiée) -
+# jamais committe, meme accidentellement. Voir CLAUDE.md section captures.
+playwright/.auth/
 
 # Dataset brut (déposé localement par chaque membre, jamais committé —
 # voir CLAUDE.md / SECURITY.md)

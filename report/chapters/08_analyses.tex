@@ -83,6 +83,13 @@ Leadership & 363 & 198\,950 \\
 \end{tabular}
 \end{center}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_join_offres_competences.png}
+\caption{Jointure \texttt{offres}$\leftrightarrow$\texttt{competences}
+via Beeline — capture régénérée par \texttt{task screenshots-cli}.}
+\end{figure}
+
 \begin{constat}[Interprétation]
 Python apparaît dans 942 des 1500 offres (63\,\%), largement devant
 toute autre compétence — cohérent avec son statut de socle universel du
@@ -113,6 +120,13 @@ ORDER BY salaire_moyen DESC;
 fois en volume (plus du tiers des offres du dataset) et en rémunération
 moyenne du top 12.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_group_by_having.png}
+\caption{Requête \texttt{GROUP BY} + \texttt{HAVING} via Beeline —
+capture régénérée par \texttt{task screenshots-cli}.}
+\end{figure}
+
 \section{Hive SQL vs Spark SQL : même requête, deux moteurs}
 
 \textbf{Requête} (identique dans les deux cas) : salaire moyen par
@@ -131,6 +145,14 @@ Entry (0-2 yrs) & 385 & 150\,039 \\
 \end{tabular}
 \end{center}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_hive_vs_spark_sql.png}
+\caption{Même requête exécutée via Beeline (Hive-on-MR) puis
+\texttt{spark.sql(...)} (Spark SQL) — capture régénérée par
+\texttt{task screenshots-cli}, avec les temps mesurés sur ce run.}
+\end{figure}
+
 \begin{constat}[Interprétation]
 Les deux moteurs renvoient exactement le même résultat, comme attendu
 (même source de données, même sémantique SQL) — mais avec un écart de
@@ -138,11 +160,15 @@ temps d'exécution notable, mesuré en conditions réelles sur cette
 machine (stack sous émulation QEMU, voir chapitre~3) :
 
 \begin{itemize}[leftmargin=1.5em]
-  \item \textbf{Hive SQL} (Beeline, moteur Hive-on-MR) : 33,0 secondes.
+  \item \textbf{Hive SQL} (Beeline, moteur Hive-on-MR) : 57 secondes.
   \item \textbf{Spark SQL} (\texttt{spark.sql(...)} depuis Jupyter) :
-    8,8 secondes — SparkSession déjà chaude comprise.
+    15 secondes — SparkSession déjà chaude comprise.
 \end{itemize}
 
+Ces chiffres varient d'un run à l'autre (émulation QEMU sur Apple
+Silicon, charge de la machine — un run antérieur avait mesuré 33\,s et
+8,8\,s) mais l'écart qualitatif est systématique : Spark SQL est
+toujours nettement plus rapide, dans un rapport de 3 à 4$\times$.
 L'écart s'explique par le moteur d'exécution sous-jacent : Hive-on-MR
 (déprécié depuis Hive 2, message d'avertissement affiché à chaque
 requête) matérialise des étapes MapReduce sur disque, alors que Spark

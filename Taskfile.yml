@@ -78,6 +78,29 @@ tasks:
     cmds:
       - 'echo "http://localhost:8888/?token=$(grep JUPYTER_TOKEN .env | cut -d= -f2)"'
 
+  screenshots-cli:
+    desc: Régénère les captures terminal/requêtes de report/figures/ (freeze)
+    cmds:
+      - bash scripts/screenshots_cli.sh
+      - task: log
+        vars:
+          TASK_NAME: screenshots-cli
+          CMD: "bash scripts/screenshots_cli.sh"
+          RESULT: "captures terminal/requêtes régénérées dans report/figures/"
+
+  screenshots-web:
+    desc: Régénère les captures HDFS NameNode / Jupyter de report/figures/ (Playwright)
+    cmds:
+      - test -d .venv-screenshots || python3 -m venv .venv-screenshots
+      - .venv-screenshots/bin/pip install -q -e ".[screenshots]"
+      - .venv-screenshots/bin/playwright install chromium
+      - .venv-screenshots/bin/python scripts/screenshots_web.py
+      - task: log
+        vars:
+          TASK_NAME: screenshots-web
+          CMD: ".venv-screenshots/bin/python scripts/screenshots_web.py"
+          RESULT: "captures HDFS NameNode/Jupyter régénérées dans report/figures/"
+
   log:
     internal: true
     cmds:

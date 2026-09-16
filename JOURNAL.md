@@ -129,3 +129,29 @@ mention SQL "à venir" obsolète), STATUS.md (lien #99 manquant dans la liste
 des chapitres placeholder). Rapport recompilé et inspecté visuellement (2
 passes xelatex, 0 erreur, 26 -> 27 pages).
 Auteur : task automation
+
+## 2026-09-16 17:20 — captures d'écran automatisées (issue #101)
+Commande : task screenshots-cli ; task screenshots-web
+Résultat : 9 captures régénérées dans report/figures/ via freeze
+(charmbracelet/freeze, scripts/screenshots_cli.sh) et Playwright
+(scripts/screenshots_web.py) plutot que prises a la main. Piège freeze
+découvert : `freeze -x "<commande>"` a un timeout court (~2-3s) et échoue
+(signal: killed / no command output) sur toute commande plus longue,
+largement dépassé par Hive-on-MR -> le script capture la sortie dans un
+fichier texte lui-même puis demande a freeze de rendre ce fichier deja
+ecrit (rendu instantane, aucun souci de timeout). Image des 10 KPI
+(12872px de haut) coupee en 2 via imagemagick pour rester imprimable ;
+toutes les captures recompressees (-colors 64) pour repasser sous la
+limite de 1024 Ko de check-added-large-files (1.3-1.5 Mo -> ~100-350 Ko,
+qualite visuelle inchangee, verifie). Chapitres 03 (task up healthy +
+environnement Jupyter), 05 (DESCRIBE raw/processed + explorer HDFS), 08
+(jointure competences, GROUP BY+HAVING, comparaison Hive/Spark SQL avec
+chiffres reconcilies sur ce run : 57s/15s), 09 (10 KPI) mis a jour avec
+les figures. Bug de mise en page corrige en route : les 2 images KPI
+(tres hautes) debordaient sur le pied de page et perdaient leur legende
+en `width=`+`[h]` -> passees en `height=0.8\textheight`+`[p]`. Captures
+GitHub authentifiees (Project board, Issues, run CI vert) volontairement
+non automatisees (cf. CLAUDE.md) - restent a prendre a la main. Rapport
+recompile et inspecte visuellement (2 passes xelatex, 0 erreur, 27 -> 33
+pages). Issue #101 fermee, ticket deplace vers "fait" dans STATUS.md.
+Auteur : task automation

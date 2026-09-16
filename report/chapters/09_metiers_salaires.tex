@@ -151,3 +151,23 @@ du jeu de données (échantillonnage non uniforme dans le temps). À
 traiter comme un constat descriptif, pas comme une preuve de tendance
 de marché — repris au chapitre~13 (limites de l'étude).
 \end{constat}
+
+\section{Captures des 10 KPI (exécution réelle)}
+
+Sortie complète de \texttt{sql/hive/02\_kpis.sql} via Beeline, capture
+régénérée par \texttt{task screenshots-cli} — preuve d'exécution
+réelle correspondant aux chiffres ci-dessus.
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=0.8\textheight]{figures/etape3_kpis_1.png}
+\caption{KPI 1 à 5 (total offres/métiers, salaire moyen/médian, top
+métiers rémunérés/demandés, top compétences).}
+\end{figure}
+
+\begin{figure}[p]
+\centering
+\includegraphics[height=0.8\textheight]{figures/etape3_kpis_2.png}
+\caption{KPI 6 à 10 (salaire par pays/expérience, télétravail,
+LLM/GenAI, évolution 2025-2026).}
+\end{figure}

@@ -39,6 +39,24 @@ interface d'analyse et de dashboard. HDFS et Hive restent le socle de
 stockage et de requêtage, conformément au sujet.
 \end{constat}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape1_task_up_healthy.png}
+\caption{\texttt{docker compose ps} — les 6 services de la stack
+healthy (\texttt{task up}, capture régénérée par
+\texttt{task screenshots-cli}).}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\linewidth]{figures/etape2_jupyter_notebook.png}
+\caption{Environnement Jupyter/PySpark connecté à la stack, notebook du
+projet ouvert (capture régénérée par \texttt{task screenshots-web}).
+Le dashboard final (6+ visualisations, issue \#96) n'existe pas encore
+à ce stade — cette capture montre l'environnement, pas le livrable
+final du chapitre~10.}
+\end{figure}
+
 \section{Organisation raw / processed / output}
 
 \begin{itemize}[leftmargin=1.5em]

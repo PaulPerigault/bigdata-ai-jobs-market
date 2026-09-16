@@ -52,20 +52,36 @@
 - [x] Jointure offres↔métiers vérifiée via Beeline (ex. LLM Engineer :
       75 offres, salaire moyen ~240 960$).
 
+### Requêtes Hive SQL / Spark SQL (Étape 3, partiel) ✅
+- [x] **[#103](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/103)**
+      Jointure offres↔competences dédiée (`sql/hive/01_analyses.sql`) :
+      top compétence = Python (942 offres, 63% du dataset).
+- [x] Requête `GROUP BY` + `HAVING` : 12 pays avec >50 offres et salaire
+      moyen >150 000$, USA en tête (515 offres, 226 190$).
+- [x] Comparaison Hive SQL vs Spark SQL (même requête, salaire moyen par
+      expérience) : résultats identiques, Hive-on-MR 33,0s vs Spark SQL
+      8,8s — chiffré et documenté (chapitre 08).
+
 ### Rapport LaTeX ✅ (partiel)
 - [x] Restructuré en `report/main.tex` + `report/preamble/` +
       `report/chapters/*.tex` (15 chapitres), polices Roboto/Poppins
       versionnées (pas de dépendance système).
-- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 22 pages.
+- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 24 pages.
 - [x] Chapitres rédigés avec résultats réels : **03** (architecture +
       3 corrections sécurité), **04** (ingestion, bug 1501 lignes),
       **05** (DDL Hive + bug header), **06** (nulls/doublons), **07**
-      (fix metier_id + chiffres tables), **08** (jointure LLM Engineer
-      commentée).
+      (fix metier_id + chiffres tables), **08** (jointures
+      offres↔metiers/competences, GROUP BY+HAVING, comparaison
+      Hive/Spark SQL — Étapes 2 et 3).
 - [ ] Chapitres encore en placeholder : **01** (introduction), **02**
-      (présentation dataset), **09** à **15** (analyses restantes,
-      dashboard, synthèse, recommandations, limites, conclusion,
-      annexes).
+      (présentation dataset), **09** à **15** (KPI Jour 3, 4 analyses
+      au choix, dashboard, synthèse, recommandations, limites,
+      conclusion, annexes) — restent liés aux tickets
+      [#94](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/94),
+      [#95](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/95),
+      [#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96),
+      [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97),
+      [#98](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/98).
 
 ## Ce qu'il reste à faire — prêt à découper en tickets
 
@@ -74,15 +90,16 @@ titre, ce qu'il couvre, critères d'acceptation. Copiable tel quel.
 
 ---
 
-**TICKET — Requêtes Hive SQL/Spark SQL manquantes (Jour 2)** — [#103](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/103)
+**TICKET — Requêtes Hive SQL/Spark SQL manquantes (Jour 2)** — ✅ FAIT — [#103](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/103) (fermée)
 Label : `pipeline`
-- Jointure offres↔competences comme requête dédiée (pas seulement
+- [x] Jointure offres↔competences comme requête dédiée (pas seulement
   utilisée en interne pour construire la table).
-- Une requête `GROUP BY` + `HAVING`.
-- Comparaison explicite d'une requête en Hive SQL vs son équivalent
+- [x] Une requête `GROUP BY` + `HAVING`.
+- [x] Comparaison explicite d'une requête en Hive SQL vs son équivalent
   Spark SQL (pour la section 8 du rapport).
 Critère d'acceptation : requêtes exécutées, résultats capturés, chapitre
-rapport correspondant mis à jour (DoD).
+rapport correspondant mis à jour (DoD). Voir chapitre 08 et
+`sql/hive/01_analyses.sql`.
 
 ---
 

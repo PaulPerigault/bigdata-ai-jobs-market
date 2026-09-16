@@ -71,3 +71,16 @@ décalé titres/labels vs corps de plusieurs issues — détectée et
 corrigée avant validation finale). STATUS.md mis à jour avec les liens
 vers chaque issue.
 Auteur : task automation
+
+## 2026-09-16 16:20 — Requêtes Hive SQL/Spark SQL manquantes (issue #103)
+Commande : beeline -f sql/hive/01_analyses.sql ; spark-submit (comparaison)
+Résultat : jointure offres<->competences dédiée exécutée pour de vrai
+(top compétence Python, 942/1500 offres soit 63%). Requête GROUP BY +
+HAVING exécutée (12 pays avec >50 offres et salaire moyen >150000$, USA
+en tête à 226190$). Comparaison Hive SQL vs Spark SQL sur la même
+requête (salaire moyen par expérience) : résultats identiques sur les 2
+moteurs, Hive-on-MR 33.0s vs Spark SQL 8.8s (SparkSession chaude
+comprise) - chiffré et documenté au chapitre 08. Rapport recompilé (2
+passes xelatex, 0 erreur, 22 -> 24 pages). Issue #103 fermée, ticket
+correspondant dans STATUS.md déplacé vers "fait".
+Auteur : task automation

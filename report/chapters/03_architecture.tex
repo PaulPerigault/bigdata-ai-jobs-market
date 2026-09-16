@@ -1,0 +1,107 @@
+\chapter{Architecture Big Data retenue}
+
+\section{Schéma d'architecture}
+% \includegraphics[width=\linewidth]{figures/architecture.png}
+
+\begin{center}
+\small
+CSV (\texttt{data/raw/}) $\to$ HDFS \texttt{/projet\_ia/raw}
+$\to$ Spark (nettoyage, transformation)
+$\to$ HDFS \texttt{/projet\_ia/processed}
+$\to$ Hive (tables externes)
+$\to$ Jupyter/PySpark
+\end{center}
+
+\section{Rôle de chaque composant}
+
+La stack est orchestrée via Docker Compose (\texttt{compose.yaml} +
+\texttt{compose.override.yaml}), pilotée par un unique point d'entrée
+documenté, le \texttt{Taskfile.yml} (\texttt{task up}, \texttt{task
+ingest}, \texttt{task etl}, \dots).
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{HDFS} (\texttt{bde2020/hadoop-namenode} /
+    \texttt{hadoop-datanode}, tag \texttt{2.0.0-hadoop2.7.4-java8}) :
+    stockage distribué des zones \texttt{raw} et \texttt{processed}.
+  \item \textbf{Hive} (\texttt{bde2020/hive:2.3.2-postgresql-metastore})
+    : metastore Thrift + HiveServer2, tables externes RAW et
+    processed, requêtage SQL.
+  \item \textbf{Spark} : moteur de nettoyage/transformation, exécuté en
+    mode local depuis le conteneur \texttt{jupyter}
+    (\texttt{jupyter/pyspark-notebook:spark-3.5.0}).
+  \item \textbf{Jupyter/PySpark} : exploration interactive, requêtes
+    Hive SQL/Spark SQL, dashboard.
+\end{itemize}
+
+\begin{constat}[Choix technique validé]
+Choix validé avec M.~Touati~: Jupyter/PySpark remplace Zeppelin comme
+interface d'analyse et de dashboard. HDFS et Hive restent le socle de
+stockage et de requêtage, conformément au sujet.
+\end{constat}
+
+\section{Organisation raw / processed / output}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \texttt{/projet\_ia/raw} : CSV brut déposé par ingestion (chapitre~4).
+  \item \texttt{/projet\_ia/processed/\{offres,metiers,competences\}} :
+    tables Parquet issues du pipeline ETL (chapitre~7).
+  \item \texttt{/projet\_ia/output} : réservé aux exports du dashboard
+    et analyses finales.
+\end{itemize}
+
+\section{Adaptation à l'émulation amd64 sur Apple Silicon}
+
+Les images \texttt{bde2020/*} n'existent qu'en \texttt{amd64} ; sur les
+postes Apple Silicon de l'équipe, elles tournent sous émulation QEMU
+via \textbf{colima} (Docker Desktop s'étant révélé installé mais cassé
+sur un des postes de développement — \texttt{Docker.app} absent malgré
+l'installation Homebrew). Deux effets concrets de cette émulation ont
+été rencontrés et corrigés :
+
+\begin{itemize}[leftmargin=1.5em]
+  \item démarrage JVM figé plusieurs minutes en CPU à 100\,\% (format
+    du namenode, initialisation du schéma Hive) — contourné en forçant
+    le mode interprété (\texttt{JAVA\_TOOL\_OPTIONS=-Xint}) plutôt que
+    le JIT HotSpot, qui présente un bug de traduction sous QEMU ;
+  \item l'image \texttt{bde2020/hive-metastore-postgresql:2.3.0}
+    (ancien entrypoint Go) plante au démarrage
+    (\texttt{fatal error: newosproc}) sous cette même émulation —
+    remplacée par l'image officielle \texttt{postgres:13.18} (native
+    arm64), avec un script dédié
+    (\texttt{scripts/hive-metastore-entrypoint.sh}) pour initialiser le
+    schéma Hive (\texttt{schematool -initSchema}) que l'image
+    officielle ne pré-charge pas.
+\end{itemize}
+
+\section{Recul critique : corrections de sécurité}
+
+Un scan de sécurité automatique exécuté après le premier push a
+identifié trois problèmes réels sur la configuration Docker Compose
+initiale, corrigés avant de poursuivre :
+
+\begin{enumerate}[leftmargin=1.5em]
+  \item \textbf{Exposition réseau non intentionnelle} : les ports
+    publiés (\texttt{"8888:8888"}, \texttt{"9083:9083"}, etc.) étaient
+    bindés par défaut sur \texttt{0.0.0.0}, donc accessibles depuis tout
+    le réseau local (Wi-Fi partagé) et pas seulement depuis la machine
+    du développeur — contraire à la règle explicite de
+    \texttt{SECURITY.md}. Corrigé en préfixant chaque port publié par
+    \texttt{127.0.0.1:} (ex. \texttt{"127.0.0.1:8888:8888"}).
+  \item \textbf{Élévation de privilèges superflue} : la variable
+    \texttt{GRANT\_SUDO=yes} avait été ajoutée au conteneur
+    \texttt{jupyter} sans besoin réel (aucune commande du pipeline ne
+    nécessite \texttt{sudo} à l'intérieur du conteneur) — retirée.
+  \item \textbf{Identifiants par défaut} : les identifiants Postgres
+    (\texttt{hive}/\texttt{hive}) et le token Jupyter par défaut
+    (\texttt{bigdata}) restent volontairement des valeurs par défaut
+    documentées dans \texttt{.env.example} — acceptable dans le
+    périmètre explicitement défini par \texttt{SECURITY.md} (stack
+    strictement locale, non exposée), d'autant plus maintenant que les
+    ports ne sont plus accessibles au-delà de \texttt{localhost}.
+\end{enumerate}
+
+Cet épisode illustre concrètement l'intérêt d'outiller la revue de
+sécurité même sur un projet pédagogique local : les deux premiers
+points étaient de vraies failles de configuration, pas des faux
+positifs, corrigées avant qu'elles ne deviennent une habitude reproduite
+sur d'autres services de la stack.

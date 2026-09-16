@@ -1,0 +1,43 @@
+\chapter{Ingestion des données dans HDFS}
+
+\section{Arborescence HDFS réelle}
+
+\begin{verbatim}
+/projet_ia
+├── raw/
+│   └── ai_jobs_market_2025_2026.csv
+├── processed/
+│   ├── offres/
+│   ├── metiers/
+│   └── competences/
+└── output/
+\end{verbatim}
+
+\section{Commandes utilisées}
+
+L'ingestion est scriptée dans \texttt{scripts/01\_ingest\_hdfs.sh}
+(recette \texttt{task ingest}), pas exécutée à la main~:
+
+\begin{verbatim}
+docker compose exec -T namenode hdfs dfs -mkdir -p /projet_ia/raw
+docker compose exec -T namenode hdfs dfs -mkdir -p /projet_ia/processed /projet_ia/output
+docker compose cp data/raw/ai_jobs_market_2025_2026.csv namenode:/tmp/...
+docker compose exec -T namenode hdfs dfs -put -f /tmp/... /projet_ia/raw/...
+docker compose exec -T namenode hdfs dfs -ls /projet_ia/raw
+docker compose exec -T namenode hdfs dfs -du -h /projet_ia/raw
+\end{verbatim}
+
+\section{Vérification réelle}
+
+Exécuté pour de vrai le 16/09/2026 (voir \texttt{JOURNAL.md}) :
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \texttt{hdfs dfs -ls} : \texttt{/projet\_ia/raw/ai\_jobs\_market\_2025\_2026.csv},
+    taille \texttt{383\,900} octets.
+  \item \texttt{hdfs dfs -du -h} : \texttt{374.9 K}.
+  \item Comparaison du nombre de lignes local vs HDFS
+    (\texttt{wc -l} local vs \texttt{hdfs dfs -cat | wc -l}) :
+    \textbf{1501 lignes des deux côtés} (1500 lignes de données + 1
+    ligne d'en-tête) — dépôt intègre, aucune ligne perdue ou dupliquée
+    pendant le transfert.
+\end{itemize}

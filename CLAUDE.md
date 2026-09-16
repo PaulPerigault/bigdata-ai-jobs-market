@@ -14,8 +14,11 @@ le fichier réel).
 
 - Équipe de 5 personnes, travail en parallèle sur le même dépôt.
 - Deadline : 21/09/2026.
-- Rapport final en LaTeX aux couleurs ESIEA (`report/rapport_esiea.tex`),
-  produit en parallèle du code — ne jamais le considérer comme secondaire.
+- Rapport final en LaTeX aux couleurs ESIEA (`report/main.tex` + chapitres
+  dans `report/chapters/`, voir section « Rapport LaTeX modulaire » plus
+  bas), produit en parallèle du code — ne jamais le considérer comme
+  secondaire. **Voir « Definition of Done » ci-dessous : un chapitre
+  n'attend jamais la fin du projet pour être rédigé.**
 - Un `JOURNAL.md` à la racine trace l'exécution (voir plus bas) : toute
   tâche significative doit y ajouter une entrée.
 
@@ -23,6 +26,38 @@ le fichier réel).
 projet d'ingénieur (reproductible, versionné, testé), pas comme un TP
 cliqué à la main. Mais rester proportionné à 5 jours et 5 personnes —
 ne pas ajouter de complexité qui ne sert pas le rendu.
+
+## Definition of Done (s'applique à chaque étape, à partir de maintenant)
+
+Le rapport a pris du retard sur le code une première fois (Étapes 1 et
+2 rattrapées après coup) — cette section existe pour que ça ne se
+reproduise pas. Elle s'applique à **chaque** étape du plan (Étape 2, 3,
+4, 5...), sans qu'il soit besoin de le redemander à chaque fois : c'est
+la norme du projet. Une étape n'est considérée terminée que si les 4
+conditions suivantes sont remplies :
+
+1. **Le code/l'infra correspondant fonctionne et est testé
+   réellement** — pas seulement « ça devrait marcher » : commande
+   exécutée pour de vrai, sortie vérifiée (cf. les validations réelles
+   des Étapes 1 et 2 comme référence de rigueur attendue).
+2. **Le(s) chapitre(s) du rapport concernés
+   (`report/chapters/*.tex`) sont rédigés avec les résultats réels
+   obtenus à cette étape** — chiffres réels, requêtes réelles,
+   captures/sorties réelles. Jamais de placeholder ni de
+   « à compléter plus tard » sur un chapitre couvert par une étape
+   terminée.
+3. **Toute décision technique qui s'écarte du plan initial** (bug
+   corrigé, config changée, choix différent de ce qui était prévu) est
+   documentée **à la fois** dans `CLAUDE.md` (déjà la norme) **et**
+   dans le chapitre du rapport pertinent, avec la justification — le
+   rapport doit pouvoir raconter la même histoire que `CLAUDE.md`, pas
+   une version idéalisée qui passe sous silence les détours réels.
+4. **`JOURNAL.md` a une entrée pour l'étape** (append-only, comme déjà
+   spécifié plus bas).
+
+Si une étape touche plusieurs chapitres, **tous** doivent être à jour
+avant de passer à l'étape suivante — ne pas en oublier un parce qu'il
+semblait secondaire.
 
 ## Architecture retenue (ne pas dévier sans validation)
 
@@ -178,6 +213,35 @@ fichier (append), jamais réorganiser ou supprimer des entrées passées.
   dépendance à la stack Compose — c'est ce que `task test` et le job CI
   `test` exécutent.
 
+## Rapport LaTeX modulaire — structure réelle
+
+Le rapport vivait initialement dans un unique fichier
+`rapport/rapport_esiea.tex` (squelette 16 chapitres, tous en
+placeholder). Éclaté en amont de l'Étape 5 (nécessaire pour appliquer
+la Definition of Done dès l'Étape 2) :
+
+- `report/main.tex` : `\documentclass` + `\input` des 3 fichiers de
+  préambule puis des 15 chapitres, dans l'ordre.
+- `report/preamble/{colors,fonts,style}.tex` : couleurs charte ESIEA,
+  polices, mise en page/titleformat/tcolorbox — **ne pas modifier le
+  fond (couleurs/polices) sans validation**, voir plus haut.
+- `report/fonts/{Roboto,Poppins}-*.ttf` : polices versionnées (licence
+  Apache, Google Fonts) et chargées via `Path=fonts/` dans
+  `preamble/fonts.tex` — la compilation ne doit **pas** dépendre de
+  polices installées système sur la machine de chaque membre.
+- `report/chapters/NN_slug.tex` (`01_introduction.tex` …
+  `15_annexes.tex`) : un chapitre = un fichier, numérotation qui
+  correspond à l'ordre `\input` dans `main.tex`. Chapitres avec contenu
+  réel à ce jour : `03_architecture`, `04_ingestion_hdfs`,
+  `05_hive_raw`, `06_spark_quality`, `07_construction_tables`,
+  `08_analyses` (Étapes 1-2). Les autres restent en placeholder
+  jusqu'à l'étape qui les concerne — normal, pas un oubli.
+- Compilation vérifiée avec `xelatex -interaction=nonstopmode
+  -halt-on-error main.tex` (2 passes, depuis `report/`) — via
+  `mactex-no-gui` en local pour l'instant. Le conteneur `task report`
+  documenté dans l'Étape 5 du plan initial (image texlive pinnée) reste
+  à faire ; ne pas le considérer comme déjà en place.
+
 ## Ce que Claude Code ne doit PAS faire
 
 - Ne pas réintroduire Zeppelin/DAS.
@@ -187,9 +251,12 @@ fichier (append), jamais réorganiser ou supprimer des entrées passées.
 - Ne pas committer `data/raw/*.csv`, `.env`, ou tout fichier listé dans
   `.gitignore`.
 - Ne pas fusionner/simplifier `compose.yaml` en un seul fichier monolithique.
-- Ne pas modifier `report/rapport_esiea.tex` en dehors de son contenu
-  (structure des couleurs/polices définie dans le préambule à respecter).
+- Ne pas modifier la structure du préambule du rapport
+  (`report/preamble/{colors,fonts,style}.tex`) en dehors de son contenu
+  (couleurs/polices de la charte ESIEA à respecter).
 - Ne pas supprimer d'entrées existantes dans `JOURNAL.md`.
+- Ne pas avancer à l'étape suivante du plan sans avoir satisfait la
+  Definition of Done ci-dessous pour l'étape en cours.
 
 ## Stack technique de référence
 

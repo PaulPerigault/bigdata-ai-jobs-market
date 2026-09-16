@@ -1,0 +1,59 @@
+\chapter{Qualité et préparation des données avec Spark}
+
+\section{Chargement et schéma}
+
+\texttt{src/etl/schema.py} définit le \texttt{StructType} RAW (25
+colonnes typées). \texttt{src/etl\_pipeline.py} charge le CSV RAW
+depuis HDFS avec ce schéma explicite (voir chapitre~5 pour la raison de
+ce choix plutôt qu'une lecture via la table Hive).
+
+\section{Règles de nettoyage et comptages chiffrés}
+
+Implémentées dans \texttt{src/etl/cleaning.py}
+(\texttt{clean()}), avec impression systématique des comptages
+avant/après (fonction \texttt{print\_stats()}) — jamais appliquées
+silencieusement, conformément à \texttt{CLAUDE.md}~:
+
+\begin{enumerate}[leftmargin=1.5em]
+  \item \textbf{Doublons \texttt{job\_id}} : comptage des groupes
+    \texttt{job\_id} en plus d'une occurrence avant
+    \texttt{dropDuplicates(["job\_id"])}.
+  \item \textbf{Salaires invalides} : filtre
+    \texttt{annual\_salary\_usd > 0}, avec comptage des lignes
+    retirées.
+  \item \textbf{Valeurs manquantes} : \texttt{required\_skills} et
+    \texttt{job\_title} manquants remplacés par \texttt{"Unknown"}
+    (\texttt{na.fill}).
+  \item \textbf{NULLs par colonne importante} (\texttt{job\_id},
+    \texttt{job\_title}, \texttt{annual\_salary\_usd},
+    \texttt{experience\_level}, \texttt{country},
+    \texttt{required\_skills}) comptés avant et après nettoyage.
+\end{enumerate}
+
+\section{Résultats réels (run du 16/09/2026)}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Indicateur & Valeur \\
+\midrule
+Lignes RAW (après lecture HDFS avec en-tête correct) & 1500 \\
+Doublons \texttt{job\_id} détectés & 0 \\
+Lignes retirées (salaire $\leq 0$) & 0 \\
+Lignes finales après nettoyage & 1500 \\
+NULLs (toutes colonnes importantes, avant $\to$ après) & 0 $\to$ 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{constat}[Interprétation]
+Le dataset \emph{AI Jobs Market 2025-2026} se révèle déjà propre sur
+ces critères : aucun doublon \texttt{job\_id}, aucun salaire
+négatif/nul, aucune valeur manquante sur les colonnes clés. Les règles
+de nettoyage restent nécessaires et actives dans le pipeline (elles
+seront exercées automatiquement si une future mise à jour du dataset
+introduit des anomalies), et sont validées par les tests unitaires
+\texttt{tests/unit/test\_cleaning.py} sur des données synthétiques
+contenant volontairement doublons, salaires invalides et valeurs
+manquantes.
+\end{constat}

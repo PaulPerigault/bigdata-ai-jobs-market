@@ -1,0 +1,51 @@
+\chapter{Analyses Hive SQL et Spark SQL}
+% Pour chaque analyse : question -> tables -> requête -> résultat -> interprétation.
+% Section complétée au fil de l'Étape 3 (requêtes Jour 2/Jour 3) ; la
+% jointure offres<->metiers ci-dessous est déjà vérifiée réellement
+% (Étape 2) et documentée ici en avance sur le reste du chapitre.
+
+\section{Jointure offres $\leftrightarrow$ metiers (vérifiée via Beeline)}
+
+\textbf{Question} : quels sont les métiers avec le plus d'offres et
+leur salaire moyen associé ?
+
+\textbf{Requête} (Hive SQL, exécutée via Beeline sur
+\texttt{hive-server}) :
+
+\begin{verbatim}
+SELECT m.job_title, COUNT(*) AS n,
+       ROUND(AVG(o.annual_salary_usd),0) AS avg_sal
+FROM processed.offres o
+JOIN processed.metiers m ON o.metier_id = m.metier_id
+GROUP BY m.job_title
+ORDER BY n DESC
+LIMIT 5;
+\end{verbatim}
+
+\textbf{Résultat réel} :
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Métier & Offres & Salaire moyen (\$) \\
+\midrule
+LLM Engineer & 75 & 240\,960 \\
+Robotics Engineer (AI) & 74 & 170\,851 \\
+Prompt Engineer & 71 & 151\,451 \\
+Generative AI Engineer & 71 & 206\,761 \\
+AI Product Manager & 70 & 194\,571 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{constat}[Interprétation]
+La jointure \texttt{offres} $\leftrightarrow$ \texttt{metiers} via
+\texttt{metier\_id} fonctionne correctement de bout en bout (HDFS
+Parquet $\to$ tables Hive externes $\to$ requête SQL avec jointure et
+agrégation). \textbf{LLM Engineer} arrive en tête à la fois en volume
+(75 offres, le plus demandé du dataset) et en rémunération (240\,960\$
+en moyenne, largement au-dessus des autres métiers du top 5) — cohérent
+avec la prime salariale généralement associée aux compétences LLM/GenAI
+observée par ailleurs dans le dataset (\texttt{ai\_salary\_premium\_pct},
+\texttt{is\_llm\_role}), à creuser au chapitre~9.
+\end{constat}

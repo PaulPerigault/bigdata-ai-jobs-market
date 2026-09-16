@@ -34,3 +34,21 @@ n'honore pas skip.header.line.count (ligne d'en-tête comptée comme donnée,
 1501 au lieu de 1500) -> etl_pipeline.py lit désormais le CSV RAW
 directement depuis HDFS via spark.read.csv(header=True), cf. CLAUDE.md.
 Auteur : task automation
+
+## 2026-09-16 16:00 — rattrapage rapport (Definition of Done, Étapes 1-2)
+Commande : xelatex -interaction=nonstopmode -halt-on-error main.tex (x2, depuis report/)
+Résultat : ajout d'une section "Definition of Done" dans CLAUDE.md (s'applique
+à toutes les étapes suivantes). Éclatement de rapport/rapport_esiea.tex
+(monolithique, placeholders) en report/main.tex + report/preamble/*.tex +
+report/chapters/*.tex, avec rédaction réelle des chapitres concernés par les
+Étapes 1-2 : 03_architecture (stack réelle + 3 corrections de sécurité issues
+du scan automatique), 04_ingestion_hdfs (arborescence + 1501 lignes vérifiées),
+05_hive_raw (DDL + bug skip.header.line.count ignoré par spark.sql, 1501 vs
+1500), 06_spark_quality (comptages NULL/doublons chiffrés), 07_construction_
+tables (fix metier_id + 1500 offres/25 metiers/9548 competences),
+08_analyses (jointure offres<->metiers, LLM Engineer commenté). Compilation
+vérifiée réellement (2 passes xelatex, 0 erreur, PDF 22 pages, polices Roboto/
+Poppins versionnées dans report/fonts/ pour ne pas dépendre de l'install
+système). Chapitres non encore concernés (01,02,09-15) laissés en placeholder,
+normal tant que leur étape n'est pas atteinte.
+Auteur : task automation

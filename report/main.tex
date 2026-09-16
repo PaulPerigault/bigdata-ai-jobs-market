@@ -1,0 +1,67 @@
+% !TeX program = xelatex
+% Compilation : xelatex main.tex (2 passes pour le sommaire/numérotation)
+% Nécessite XeLaTeX ou LuaLaTeX (fontspec) — pdflatex ne fonctionnera pas.
+% Via Docker/Taskfile : task report (voir CLAUDE.md, Étape 5).
+%
+% Polices requises (à placer dans report/fonts/ si non installées système,
+% téléchargeables gratuitement sur fonts.google.com — licence Apache) :
+%   fonts/Poppins-Bold.ttf, Poppins-SemiBold.ttf, Poppins-Regular.ttf
+%   fonts/Roboto-Regular.ttf, Roboto-Bold.ttf, Roboto-Italic.ttf
+% Voir report/preamble/fonts.tex si les polices ne sont pas installées système.
+
+\documentclass[11pt,a4paper]{report}
+
+\input{preamble/colors}
+\input{preamble/fonts}
+\input{preamble/style}
+
+\title{\titlefont\Huge\bfseries\color{esienavy}Marché de l'emploi en IA\\[4pt]\Large 2025--2026}
+\author{}
+\date{}
+
+% =========================================================
+\begin{document}
+
+% ---------- Page de garde façon charte (fond marine, titre blanc, barre orange) ----------
+\begin{titlepage}
+\newgeometry{margin=0cm}
+\begin{tikzpicture}[remember picture, overlay]
+  \fill[esienavy] (current page.south west) rectangle (current page.north east);
+\end{tikzpicture}
+\vspace*{3cm}
+\begin{center}
+  {\titlefont\color{white}\Large esiea}\\[2.5cm]
+  {\titlefont\color{white}\Huge\bfseries Projet Big Data\\[6pt] Marché de l'emploi en IA}\\[10pt]
+  {\titlefont\color{white}\huge 2025 -- 2026}\\[18pt]
+  {\color{esieaorange}\rule{6cm}{3pt}}\\[18pt]
+  {\color{white}\large HDFS $\cdot$ Hive $\cdot$ Spark $\cdot$ Jupyter/PySpark}\\[40pt]
+  {\color{white}\normalsize Sujet proposé par M.~Touati Zouhaier}\\[4pt]
+  {\color{white}\normalsize Équipe : \emph{[Prénom NOM $\times$5]}}\\[4pt]
+  {\color{white}\normalsize ESIEA — Spécialisation DevSecOps \& Cloud Computing}\\[4pt]
+  {\color{white}\normalsize Septembre 2026}
+\end{center}
+\end{titlepage}
+\restoregeometry
+
+\tableofcontents
+\clearpage
+
+\input{chapters/01_introduction}
+\input{chapters/02_dataset}
+\input{chapters/03_architecture}
+\input{chapters/04_ingestion_hdfs}
+\input{chapters/05_hive_raw}
+\input{chapters/06_spark_quality}
+\input{chapters/07_construction_tables}
+\input{chapters/08_analyses}
+\input{chapters/09_metiers_salaires}
+\input{chapters/10_dashboard}
+\input{chapters/11_synthese}
+\input{chapters/12_recommandations}
+\input{chapters/13_limites}
+\input{chapters/14_conclusion}
+
+\appendix
+\input{chapters/15_annexes}
+
+\end{document}

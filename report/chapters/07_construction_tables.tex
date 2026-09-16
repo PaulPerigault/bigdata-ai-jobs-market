@@ -1,0 +1,62 @@
+\chapter{Construction des tables offres, metiers et competences}
+
+\section{Modèle relationnel}
+
+Trois tables construites dans \texttt{src/etl/tables.py} à partir du
+DataFrame nettoyé (chapitre~6), écrites en Parquet sur HDFS
+(\texttt{/projet\_ia/processed/}) puis exposées comme tables Hive
+externes (\texttt{processed.offres}, \texttt{processed.metiers},
+\texttt{processed.competences}) via \texttt{src/etl/hive\_io.py}.
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{metiers} — référentiel : une ligne par
+    \texttt{job\_title} distinct (\texttt{job\_title},
+    \texttt{job\_category}, \texttt{metier\_id}).
+  \item \textbf{offres} — grain = une ligne par offre
+    (\texttt{job\_id}, \texttt{metier\_id}, salaires, localisation,
+    expérience, \dots), jointe au référentiel \texttt{metiers}.
+  \item \textbf{competences} — une ligne par couple
+    (\texttt{job\_id}, compétence), obtenue par
+    \texttt{split(required\_skills, "\textbackslash{}|")} puis
+    \texttt{explode()}.
+\end{itemize}
+
+\begin{constat}[Correction : \texttt{metier\_id} déterministe]
+La première version (issue du notebook d'exploration) générait
+\texttt{metier\_id} avec
+\texttt{monotonically\_increasing\_id()}. Cette fonction Spark
+\textbf{n'est pas stable} entre deux exécutions ni entre partitions
+(elle encode le numéro de partition dans les bits hauts de l'ID) : deux
+exécutions du pipeline sur le même dataset peuvent produire des
+\texttt{metier\_id} différents pour le même métier, ce qui casserait
+silencieusement toute jointure historique ou tout ré-exécution
+partielle du pipeline.
+
+Corrigé en \texttt{src/etl/tables.py} :
+\texttt{metier\_id = substring(sha2(job\_title, 256), 1, 16)} — un
+hash déterministe de \texttt{job\_title}, identique à chaque exécution
+et à travers les partitions. Vérifié par le test
+\texttt{tests/unit/test\_tables.py::test\_build\_metiers\_is\_deterministic\_and\_deduplicated}
+qui exécute \texttt{build\_metiers()} deux fois sur les mêmes données
+et compare les ID obtenus.
+\end{constat}
+
+\section{Chiffres réels (run du 16/09/2026)}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Table & Nombre de lignes \\
+\midrule
+\texttt{processed.offres} & 1500 \\
+\texttt{processed.metiers} & 25 (métiers distincts) \\
+\texttt{processed.competences} & 9548 (liaisons job\_id $\times$ compétence) \\
+\midrule
+Doublons \texttt{job\_id} (avant construction) & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Ces chiffres sont cohérents entre eux : 1500 offres pour 25 métiers
+distincts (60 offres en moyenne par métier), et 9548/1500 $\approx$
+6,4 compétences en moyenne par offre.

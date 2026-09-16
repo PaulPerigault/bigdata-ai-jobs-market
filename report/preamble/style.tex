@@ -1,0 +1,57 @@
+% ---------- Mise en page ----------
+\usepackage[margin=2.5cm,top=3cm]{geometry}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{caption}
+
+% ---------- Titres de section façon charte (barre orange sous le titre) ----------
+\titleformat{\chapter}[display]
+  {\titlefont\Huge\bfseries\color{esienavy}}
+  {\filright\normalfont\normalsize\color{esieablue}\MakeUppercase{Rapport Big Data — IA 2025-2026}}
+  {6pt}
+  {\titlerule[2pt]\color{esieaorange}\vspace{4pt}\thechapter.\ }
+[\vspace{2pt}{\color{esieaorange}\titlerule[3pt]}]
+
+\titleformat{\section}
+  {\titlefont\Large\bfseries\color{esieablue}}{\thesection}{10pt}{}
+\titlespacing{\section}{0pt}{18pt}{8pt}
+
+\titleformat{\subsection}
+  {\titlefont\large\bfseries\color{esienavy}}{\thesubsection}{8pt}{}
+
+% ---------- En-têtes / pieds de page ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.6pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[L]{\small\color{esienavy}\textbf{esiea} \,|\, Projet Big Data IA}
+\fancyhead[R]{\small\color{esieablue}\leftmark}
+\fancyfoot[C]{\small\color{esieagray}\thepage}
+
+% ---------- Encadré "constat / interprétation" réutilisable ----------
+\newtcolorbox{constat}[1][]{
+  colback=esieaoffwhite, colframe=esieablue, boxrule=0.8pt,
+  arc=2pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\titlefont\bfseries\color{white}, coltitle=white,
+  colbacktitle=esieablue, title={#1}, breakable
+}
+\newtcolorbox{recommandation}[1][]{
+  colback=white, colframe=esieaorange, boxrule=1pt,
+  arc=2pt, left=8pt, right=8pt, top=6pt, bottom=6pt,
+  fonttitle=\titlefont\bfseries\color{esienavy}, title={#1}, breakable
+}
+
+\hypersetup{
+  colorlinks=true, linkcolor=esieablue, citecolor=esieablue,
+  urlcolor=esieablue, pdftitle={Marché de l'emploi en IA 2025-2026},
+  pdfauthor={Équipe projet — ESIEA}
+}

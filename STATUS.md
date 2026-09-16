@@ -12,6 +12,10 @@
   · visualisations (3) · analyse et rapport (2)
 - **Deadline** : 21/09/2026
 - **Repo** : ~/PycharmProjects/bigdata-ai-jobs-market (branche main)
+- **GitHub Project** : [Big Data AI Jobs — Roadmap](https://github.com/users/PaulPerigault/projects/9)
+  (colonnes Backlog/Todo/In Progress/In Review/Done, existait déjà et
+  s'alimente automatiquement via le workflow `project-status-sync.yml`
+  — statuts alignés manuellement le 16/09/2026 sur les règles ci-dessous).
 
 ## État actuel — ce qui est FAIT et vérifié en conditions réelles
 
@@ -51,6 +55,22 @@
       documentés (chapitre 06 du rapport).
 - [x] Jointure offres↔métiers vérifiée via Beeline (ex. LLM Engineer :
       75 offres, salaire moyen ~240 960$).
+
+### Issues rétroactives (travail déjà fait, tracé après coup)
+Créées et fermées le 16/09/2026 pour que l'historique complet du projet
+soit visible dans les issues, pas seulement ce qu'il reste à faire —
+chacune renvoie vers le commit exact qui la clôt :
+- [x] [#105](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/105)
+      infra bootstrap Docker Compose — commit `80dd76a`.
+- [x] [#106](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/106)
+      pipeline de données RAW → processed — commit `1737b51`.
+- [x] [#107](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/107)
+      restructuration du rapport en fichiers séparés — commit `517fb9a`.
+- [x] [#108](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/108)
+      mise en place de la CI — commit `80dd76a` (même commit que #105).
+- [x] [#109](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/109)
+      corrections de sécurité (ports, GRANT_SUDO) — commit `1737b51`
+      (même commit que #106).
 
 ### Requêtes Hive SQL / Spark SQL (Étape 3, partiel) ✅
 - [x] **[#103](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/103)**
@@ -93,7 +113,8 @@
       [#95](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/95),
       [#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96),
       [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97),
-      [#98](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/98).
+      [#98](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/98),
+      [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99).
 
 ## Ce qu'il reste à faire — prêt à découper en tickets
 
@@ -258,6 +279,17 @@ rapide :
    abandonnée avant le début de ce suivi) supprimées après confirmation
    explicite, pour repartir d'un état propre aligné sur les tickets de
    ce fichier. Les 11 tickets ci-dessous recréés en #94-#104.
+7. **CI cassée depuis le premier commit, jamais vérifiée en conditions
+   réelles** (découvert lors de l'audit de cohérence du 16/09/2026) :
+   le job `lint` échouait sur tous les runs GitHub Actions depuis
+   `80dd76a` — `ruff` reformatait
+   `src/Analyse_Marche_Emploi_IA_PySpark.ipynb` à chaque run (fichier
+   jamais couvert par un `pre-commit run --all-files` local, seulement
+   des runs scopés aux fichiers touchés à chaque commit). "CI en
+   place" avait été déclaré sans jamais consulter le résultat réel sur
+   GitHub. Corrigé : notebook reformaté, règle « toujours `--all-files`
+   avant de commit/push » ajoutée à `CLAUDE.md`. Documenté au
+   chapitre 03 du rapport comme exemple de recul critique.
 
 ## Règle de maintenance de ce fichier
 

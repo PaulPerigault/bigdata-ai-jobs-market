@@ -103,3 +103,29 @@ scalaires en SELECT ni les CROSS JOIN (désactivés par sécurité) -> KPI1
 réécrit en UNION ALL avec discriminant. Issue #94 fermée, ticket déplacé
 vers "fait" dans STATUS.md.
 Auteur : task automation
+
+## 2026-09-16 16:50 — audit de cohérence complet + Project + issues rétroactives
+Commande : git log --oneline --all ; gh issue create/close ; gh project item-edit ;
+pre-commit run --all-files ; xelatex (2 passes)
+Résultat : 5 issues rétroactives créées et fermées pour le travail déjà fait et
+non encore représenté (#105 infra bootstrap, #106 pipeline de données, #107
+restructuration rapport, #108 mise en place CI, #109 corrections sécurité),
+chacune fermée avec un commentaire renvoyant vers le hash de commit exact
+(80dd76a et 1737b51). Labels infra/ci/security créés. Projet GitHub existant
+"Big Data AI Jobs — Roadmap" (#9, colonnes Backlog/Todo/In Progress/In
+Review/Done) identifié — statuts alignés manuellement : #94/#103/#105-109 ->
+Done, #95/#96/#97/#100/#101 -> Todo, #98/#99/#102/#104 -> Backlog (bloqués par
+dépendances). Audit de cohérence complet (STATUS.md, CLAUDE.md, JOURNAL.md,
+compilation+inspection visuelle du rapport, correspondance issues<->chapitres)
+: 8 incohérences trouvées et corrigées, la plus grave étant que le job CI
+"lint" échouait sur TOUS les runs GitHub Actions depuis le premier commit
+d'infra (80dd76a) sans que cela ait jamais été vérifié sur GitHub -> notebook
+src/Analyse_Marche_Emploi_IA_PySpark.ipynb jamais passé par `pre-commit run
+--all-files`, seulement des runs scopés par commit. Corrigé (notebook
+reformaté, règle --all-files ajoutée à CLAUDE.md, documenté au chapitre 03
+comme exemple de recul critique). Autres corrections : CLAUDE.md (ruff/black
+obsolète, ~9548->9548, liste des chapitres avec contenu réel incomplète,
+mention SQL "à venir" obsolète), STATUS.md (lien #99 manquant dans la liste
+des chapitres placeholder). Rapport recompilé et inspecté visuellement (2
+passes xelatex, 0 erreur, 26 -> 27 pages).
+Auteur : task automation

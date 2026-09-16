@@ -105,3 +105,32 @@ sécurité même sur un projet pédagogique local : les deux premiers
 points étaient de vraies failles de configuration, pas des faux
 positifs, corrigées avant qu'elles ne deviennent une habitude reproduite
 sur d'autres services de la stack.
+
+\section{Intégration continue}
+
+\texttt{.github/workflows/ci.yml} définit deux jobs déclenchés à chaque
+push/PR sur \texttt{main} :
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{lint} : \texttt{pre-commit run --all-files} (ruff,
+    sqlfluff, gitleaks).
+  \item \textbf{test} : \texttt{pytest tests/} avec Spark en local
+    (\texttt{local[2]}), sans dépendance à la stack Docker Compose —
+    Java 17 (\texttt{actions/setup-java}) et Python 3.12
+    (\texttt{actions/setup-python}).
+\end{itemize}
+
+\begin{constat}[Recul critique : CI jamais vérifiée en conditions réelles]
+Le job \texttt{lint} a échoué sur \textbf{tous} les runs GitHub Actions
+depuis le commit qui l'a introduit, jusqu'à un audit de cohérence mené
+le 16/09/2026 : \texttt{ruff} reformatait
+\texttt{src/Analyse\_Marche\_Emploi\_IA\_PySpark.ipynb} à chaque run
+(fichier jamais passé par \texttt{pre-commit run --all-files} en local
+— seulement des runs limités aux fichiers touchés à chaque commit), ce
+qui fait échouer le hook (« files were modified by this hook »). Le
+travail avait été déclaré « CI en place » sans jamais consulter le
+résultat réel sur GitHub — un manquement à la rigueur de vérification
+appliquée par ailleurs sur ce projet. Corrigé en reformatant le
+notebook et en ajoutant la règle « toujours \texttt{--all-files} avant
+de committer » à \texttt{CLAUDE.md}.
+\end{constat}

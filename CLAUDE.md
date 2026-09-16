@@ -152,9 +152,14 @@ visualisations (3) / analyse et rapport (2). Concrètement :
 
 - Commits **Conventional Commits** (`feat:`, `fix:`, `chore:`, `docs:`,
   `test:`). Historique lisible = preuve de démarche pour le rapport.
-- `pre-commit` obligatoire avant push : `ruff`/`black` (Python),
-  `sqlfluff` (SQL), `gitleaks` (scan de secrets). Ne jamais committer
-  avec `--no-verify` sauf urgence explicitement assumée par l'auteur.
+- `pre-commit` obligatoire avant push : `ruff` (lint + format, pas de
+  black), `sqlfluff` (SQL), `gitleaks` (scan de secrets). **Toujours
+  lancer `pre-commit run --all-files` avant de commit/push, pas
+  seulement sur les fichiers touchés** — un run scopé a laissé la CI
+  cassée sur `src/*.ipynb` pendant plusieurs commits sans que personne
+  ne le remarque (voir audit du 16/09/2026, `JOURNAL.md`). Ne jamais
+  committer avec `--no-verify` sauf urgence explicitement assumée par
+  l'auteur.
 - Transformations Spark versionnées en **scripts `.py` dans `src/`**, pas
   seulement écrites à la volée dans le notebook. Le notebook final
   importe/appelle ces scripts ou reproduit leurs étapes de façon
@@ -209,11 +214,12 @@ fichier (append), jamais réorganiser ou supprimer des entrées passées.
   `/projet_ia/processed/{offres,metiers,competences}` et crée les 3
   tables Hive externes correspondantes dans la base `processed`.
 - Chiffres de référence sur le dataset réel : 1500 lignes RAW, 0 doublon
-  `job_id`, 1 ligne avec salaire ≤ 0 filtrée sur les runs où elle
-  existe, 25 métiers distincts, 1500 offres, ~9548 liaisons
-  job_id↔compétence. Jointure `processed.offres` ↔ `processed.metiers`
-  vérifiée via Beeline (ex. LLM Engineer : 75 offres, salaire moyen
-  ~240 960 $).
+  `job_id`, 0 ligne avec salaire ≤ 0 (le dataset est propre sur ce
+  critère — le filtre reste actif et testé sur données synthétiques,
+  voir `tests/unit/test_cleaning.py`), 25 métiers distincts, 1500
+  offres, 9548 liaisons job_id↔compétence (chiffre exact). Jointure
+  `processed.offres` ↔ `processed.metiers` vérifiée via Beeline (ex.
+  LLM Engineer : 75 offres, salaire moyen 240 960 $).
 - Tests dans `tests/unit/` (`test_cleaning.py`, `test_tables.py`,
   `test_row_counts.py`) : Spark local (`local[2]`, pas de Hive), aucune
   dépendance à la stack Compose — c'est ce que `task test` et le job CI
@@ -240,8 +246,9 @@ la Definition of Done dès l'Étape 2) :
   correspond à l'ordre `\input` dans `main.tex`. Chapitres avec contenu
   réel à ce jour : `03_architecture`, `04_ingestion_hdfs`,
   `05_hive_raw`, `06_spark_quality`, `07_construction_tables`,
-  `08_analyses` (Étapes 1-2). Les autres restent en placeholder
-  jusqu'à l'étape qui les concerne — normal, pas un oubli.
+  `08_analyses`, `09_metiers_salaires` (Étapes 1-3, KPI Jour 3 inclus).
+  Les autres restent en placeholder jusqu'à l'étape qui les concerne
+  — normal, pas un oubli.
 - Compilation vérifiée avec `xelatex -interaction=nonstopmode
   -halt-on-error main.tex` (2 passes, depuis `report/`) — via
   `mactex-no-gui` en local pour l'instant. Le conteneur `task report`
@@ -328,8 +335,8 @@ aurait cassé la compatibilité RPC HDFS côté Hive sans bénéfice.
   Jupyter) — jamais requis pour que la stack tourne.
 - Tags `.pre-commit-config.yaml` : `gitleaks` remplace `detect-secrets`
   (plus de `.secrets.baseline` à maintenir) ; `sqlfluff` ajouté avec
-  dialecte `hive` (`.sqlfluff` à la racine) pour le SQL à venir en
-  Étape 3.
+  dialecte `hive` (`.sqlfluff` à la racine), utilisé depuis l'Étape 3 par
+  `sql/hive/01_analyses.sql` et `02_kpis.sql`.
 
 ### Tests locaux (`task test` / CI) — Java et Python requis
 

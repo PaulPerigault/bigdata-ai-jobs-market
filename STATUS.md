@@ -116,6 +116,18 @@ chacune renvoie vers le commit exact qui la clôt :
       0,079 malgré la progression par tranche du KPI 7) ; (4) pays et
       compétences — Python n°1 dans les 5 premiers pays sans exception.
 
+### Dashboard : 6 visualisations (Étape 4) ✅
+- [x] **[#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96)**
+      6 visualisations réalisées dans le notebook (section 8) et
+      documentées au chapitre 10, DoD appliquée par sous-étape : (1)
+      distribution des salaires — moyenne 194\,892\$, médiane
+      180\,000\$ ; (2) évolution mensuelle 2025-2026 — pic février 2026
+      (306 offres, ~5,6x la moyenne 2025) ; (3) répartition
+      télétravail/présentiel — Hybrid 45,7% ; (4) salaire moyen par
+      pays — USA en tête (226\,190\$), écart limité au top 10 ; (5) top
+      10 compétences — Python 62,8% ; (6) heatmap de corrélation —
+      cohérence croisée confirmée avec l'analyse SQL de #95.
+
 ### Rapport LaTeX ✅ (partiel)
 - [x] Restructuré en `report/main.tex` + `report/preamble/` +
       `report/chapters/*.tex` (15 chapitres), polices Roboto/Poppins
@@ -126,14 +138,14 @@ chacune renvoie vers le commit exact qui la clôt :
       **05** (DDL Hive + bug header), **06** (nulls/doublons), **07**
       (fix metier_id + chiffres tables), **08** (jointures
       offres↔metiers/competences, GROUP BY+HAVING, comparaison
-      Hive/Spark SQL), **09** (10 KPI obligatoires Jour 3, chiffres
-      réels) — Étapes 2 et 3.
+      Hive/Spark SQL), **09** (10 KPI obligatoires Jour 3 + 4 analyses
+      au choix, chiffres réels), **10** (dashboard, 6 visualisations,
+      chiffres réels) — Étapes 2, 3 et 4.
 - [ ] Chapitres encore en placeholder : **01** (introduction), **02**
-      (présentation dataset), **10** à **15** (4 analyses au choix,
-      dashboard, synthèse, recommandations, limites, conclusion,
-      annexes) — restent liés aux tickets
-      [#95](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/95),
-      [#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96),
+      (présentation dataset), **11** à **15** (synthèse,
+      recommandations, limites, conclusion, annexes) — restent liés aux
+      tickets
+      [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97),
       [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97),
       [#98](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/98),
       [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99).
@@ -213,13 +225,52 @@ capture + interprétation chacune. Voir `sql/hive/03_analyses_choix.sql`.
 
 ---
 
-**TICKET — Dashboard : minimum 6 visualisations** — [#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96)
+**TICKET — Dashboard : minimum 6 visualisations** — ✅ FAIT (6/6) — [#96](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/96)
 Label : `analytics` `dashboard`
 Chaque visualisation : titre, requête source identifiable,
 interprétation chiffrée affichée sous le graphique (pas juste le
 graphique seul).
 Critère d'acceptation : 6+ visualisations dans le notebook Jupyter,
-exportées en figures pour le rapport.
+exportées en figures pour le rapport. DoD appliquée par visualisation
+(pas en rattrapage) :
+- [x] **Viz 1 : distribution des salaires annuels** — histogramme +
+      KDE exécuté réellement dans le notebook (section 8.1, lecture
+      HDFS directe pour contourner le bug `skip.header.line.count`),
+      capture `etape4_dashboard_distribution_salaires.png`, chapitre 10
+      rédigé. Moyenne 194\,892\$, médiane 180\,000\$, écart-type
+      66\,507\$, 80% des salaires entre 120\,900\$ (p10) et
+      297\,100\$ (p90).
+- [x] **Viz 2 : évolution du volume d'offres par mois** — line chart
+      exécuté réellement (section 8.2), capture
+      `etape4_dashboard_evolution_mensuelle.png`, chapitre 10 rédigé.
+      Pic en 2026-02 (306 offres), moyenne mensuelle 2025 = 52,0 vs
+      2026 (jan-mars) = 292,0 — ~5,6x supérieur, constat descriptif
+      sans causalité affirmée (couverture 2026 partielle).
+- [x] **Viz 3 : répartition télétravail/présentiel** — bar chart
+      exécuté réellement (section 8.3), capture
+      `etape4_dashboard_remote_work.png`, chapitre 10 rédigé. Hybrid
+      45,7% (686), Fully Remote 29,7% (445), On-site 24,6% (369).
+- [x] **Viz 4 : salaire moyen par pays (top 10)** — barres horizontales
+      exécutées réellement (section 8.4), capture
+      `etape4_dashboard_salaire_pays.png`, chapitre 10 rédigé. USA en
+      tête (226\,190\$, 515 offres) ; écart limité au sein du top 10,
+      Canada (10e) à 180\,588\$ seulement 20,2% en dessous du leader.
+- [x] **Viz 5 : top 10 compétences les plus demandées** — barres
+      exécutées réellement (section 8.5, `spark.sql` sur
+      `processed.competences`), capture
+      `etape4_dashboard_top_competences.png`, chapitre 10 rédigé.
+      Python 942 (62,8%), loin devant SQL (452) et Cloud (429).
+- [x] **Viz 6 : heatmap de corrélation** — matrice exécutée réellement
+      (section 8.6, même 4 variables que l'analyse 3 de #95), capture
+      `etape4_dashboard_correlation_heatmap.png`, chapitre 10 rédigé.
+      Valeurs identiques à celles calculées en SQL (corr salaire/
+      demande 0,292 la plus forte, corr salaire/expérience 0,079 quasi
+      nulle) — cohérence croisée SQL/Spark confirmée.
+
+Les 6 visualisations sont rédigées dans le chapitre 10, chacune avec
+requête source, capture et interprétation chiffrée affichée dans le
+notebook lui-même. Voir section 8 du notebook
+`src/Analyse_Marche_Emploi_IA_PySpark.ipynb`.
 
 ---
 
@@ -232,12 +283,13 @@ Critère d'acceptation : chapitres rédigés, PDF recompile sans erreur.
 
 ---
 
-**TICKET — Rapport : chapitres 09-10 (analyses/KPI/dashboard)** — [#98](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/98)
+**TICKET — Rapport : chapitres 09-10 (analyses/KPI/dashboard)** — ✅ FAIT — [#98](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/98) (fermée)
 Label : `rapport`
-Dépend des tickets "KPI obligatoires", "4 analyses au choix",
-"Dashboard". Intégrer résultats réels une fois ces tickets faits.
+Dépendait des tickets "KPI obligatoires" (#94), "4 analyses au choix"
+(#95), "Dashboard" (#96) — les 3 sont fermées, chapitres 09 et 10
+rédigés avec les vrais chiffres.
 Critère d'acceptation : chapitres à jour avec les vrais chiffres, pas
-de placeholder.
+de placeholder. Voir chapitres 09 et 10.
 
 ---
 

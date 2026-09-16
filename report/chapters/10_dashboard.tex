@@ -1,3 +1,167 @@
 \chapter{Dashboard Jupyter/PySpark}
-% Minimum 6 visualisations, titre + question + interprétation chiffrée sous chaque graphique.
-% Étape 4.
+
+Minimum 6 visualisations (issue \#96), chacune produite dans le notebook
+\texttt{src/Analyse\_Marche\_Emploi\_IA\_PySpark.ipynb} (section 8) à
+partir de données lues via HDFS/Hive (jamais le CSV local, conformément
+à \texttt{CLAUDE.md}), avec titre, requête source identifiable en
+commentaire, et interprétation chiffrée imprimée sous le graphique dans
+le notebook lui-même. Chaque figure ci-dessous est exportée en PNG et
+régénérable via le notebook.
+
+\section{Distribution des salaires annuels}
+
+\textbf{Question} : au-delà de la moyenne/médiane déjà données au
+KPI~2, quelle est la forme de la distribution des salaires sur
+l'ensemble du marché ?
+
+\begin{verbatim}
+SELECT annual_salary_usd FROM projet_ia.ai_jobs_raw
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape4_dashboard_distribution_salaires.png}
+\caption{Distribution des salaires annuels (n=1500), histogramme +
+estimation de densité.}
+\end{figure}
+\FloatBarrier
+
+\textbf{Interprétation} : moyenne 194\,892\$, médiane 180\,000\$
+(écart-type 66\,507\$) — distribution étalée mais sans forte asymétrie
+(moyenne proche de la médiane, pas de longue traîne extrême visible).
+80\% des salaires se situent entre 120\,900\$ (p10) et 297\,100\$
+(p90), un écart de près de 2,5x entre les deux bornes qui traduit une
+forte hétérogénéité du marché IA selon métier/expérience/pays plutôt
+qu'un marché homogène autour de la moyenne.
+
+\section{Évolution du volume d'offres par mois (2025-2026)}
+
+\textbf{Question} : le pic de février 2026 déjà signalé au KPI~10
+(analyse LLM/GenAI) se confirme-t-il sur l'ensemble du dataset, et
+comment la dynamique 2025 se compare-t-elle à 2026 ?
+
+\begin{verbatim}
+SELECT posting_year, posting_month, COUNT(*)
+FROM projet_ia.ai_jobs_raw
+GROUP BY posting_year, posting_month
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape4_dashboard_evolution_mensuelle.png}
+\caption{Volume mensuel d'offres, janvier 2025 à mars 2026.}
+\end{figure}
+\FloatBarrier
+
+\textbf{Interprétation} : pic en février 2026 avec 306 offres. Moyenne
+mensuelle 2025 = 52,0 offres, moyenne mensuelle 2026 (janvier-mars) =
+292,0 offres, soit un volume environ 5,6x supérieur. Ce constat est
+purement descriptif — le dataset ne permet pas d'affirmer de causalité
+(couverture temporelle 2026 très partielle, 3 mois contre 12 pour 2025 ;
+possible biais de collecte plutôt qu'un signal de marché réel, discuté
+au chapitre 13 limites).
+
+\section{Répartition des offres par mode de travail}
+
+\textbf{Question} : au-delà du pourcentage Hybrid déjà cité au KPI~8,
+comment se répartissent les trois modes de travail entre eux ?
+
+\begin{verbatim}
+SELECT remote_work, COUNT(*) FROM projet_ia.ai_jobs_raw
+GROUP BY remote_work
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\linewidth]{figures/etape4_dashboard_remote_work.png}
+\caption{Répartition des 1500 offres par mode de travail.}
+\end{figure}
+\FloatBarrier
+
+\textbf{Interprétation} : Hybrid domine avec 686 offres (45,7\%),
+suivi de Fully Remote (445 offres, 29,7\%) et On-site (369 offres,
+24,6\%). Le télétravail intégral et le présentiel intégral se
+partagent à parts presque égales le solde restant, l'hybride restant
+la norme majoritaire sans toutefois constituer une écrasante majorité
+absolue.
+
+\section{Salaire moyen par pays (top 10)}
+
+\textbf{Question} : au-delà du seul pays le mieux rémunéré cité au
+KPI~6, comment le reste du top~10 se positionne-t-il — écart marqué ou
+marché mondial relativement homogène en haut de tableau ?
+
+\begin{verbatim}
+SELECT country, COUNT(*), AVG(annual_salary_usd)
+FROM projet_ia.ai_jobs_raw
+GROUP BY country HAVING COUNT(*) >= 20
+ORDER BY AVG(annual_salary_usd) DESC LIMIT 10
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape4_dashboard_salaire_pays.png}
+\caption{Salaire annuel moyen par pays, top 10 (pays avec au moins 20
+offres).}
+\end{figure}
+\FloatBarrier
+
+\textbf{Interprétation} : USA en tête avec 226\,190\$ (515 offres, de
+loin le plus gros volume du dataset). L'écart au sein du top~10 reste
+limité : le Canada, 10e du classement, reste à 180\,588\$, soit
+seulement 20,2\% en dessous du leader — un marché mondial des salaires
+IA relativement homogène en haut de tableau plutôt qu'une poignée de
+pays qui écrase tous les autres.
+
+\section{Top 10 compétences les plus demandées}
+
+\textbf{Question} : quelles compétences dominent réellement le marché,
+au-delà de la seule compétence n°1 déjà citée au KPI~5 ?
+
+\begin{verbatim}
+SELECT competence, COUNT(*) FROM processed.competences
+GROUP BY competence ORDER BY COUNT(*) DESC LIMIT 10
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape4_dashboard_top_competences.png}
+\caption{Top 10 des compétences les plus demandées (sur 9\,548
+liaisons job/compétence).}
+\end{figure}
+\FloatBarrier
+
+\textbf{Interprétation} : Python domine très largement avec 942 offres
+(62,8\% du dataset), loin devant SQL (452) et Cloud (429), 2e et 3e du
+classement. Cohérent avec l'analyse~4 du chapitre~9 (\#95) : Python
+n'est pas seulement dominant globalement mais n°1 dans les 5 premiers
+pays sans exception — une domination uniforme plutôt qu'un artefact de
+spécialisation régionale.
+
+\section{Matrice de corrélation — salaire, expérience, demande, premium IA}
+
+\textbf{Question} : visualiser en un coup d'œil la matrice de
+corrélation déjà calculée en SQL pour l'analyse 3 du chapitre~9
+(\#95), pour en faciliter la lecture comparative entre les 6 paires de
+variables.
+
+\begin{verbatim}
+-- Équivalent visuel de sql/hive/03_analyses_choix.sql, analyse 3
+-- (CORR() sur les 4 variables, Pearson, descriptif)
+\end{verbatim}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\linewidth]{figures/etape4_dashboard_correlation_heatmap.png}
+\caption{Matrice de corrélation de Pearson entre salaire, expérience,
+demande et premium IA.}
+\end{figure}
+\FloatBarrier
+
+\textbf{Interprétation} : corr(salaire, demande) = 0,292 est la plus
+forte du tableau mais reste modeste. corr(salaire, expérience) = 0,079
+est quasi nulle malgré la progression par tranche catégorielle observée
+au KPI~7 — un résultat contre-intuitif déjà discuté au chapitre~9
+§9.3.3, qu'il ne faut pas sur-interpréter comme une absence de relation
+(une corrélation linéaire faible entre une variable continue et le
+salaire n'exclut pas un effet de seuil par tranche catégorielle).

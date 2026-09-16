@@ -229,3 +229,94 @@ le run réel avant de considérer le sujet clos. STATUS.md section
 l'incident. Chapitre 09 §9.3.3 (code listing de la requête de
 corrélation) resynchronisé avec la requête SQL réelle corrigée.
 Auteur : task automation
+
+## 2026-09-17 01:15 — Dashboard viz 1/6 : distribution des salaires (issue #96)
+Commande : cellule notebook section 8.1 (spark.read.csv HDFS direct sur
+/projet_ia/raw/ai_jobs_market_2025_2026.csv, contournement du bug
+skip.header.line.count), exécutée réellement via nbconvert --execute
+dans le conteneur jupyter.
+Resultat : n=1500 confirmé (pas 1501). Moyenne 194892$, médiane
+180000$, écart-type 66507$, p10=120900$, p90=297100$. Histogramme +
+KDE affiché dans le notebook avec interprétation imprimée sous le
+graphique. Export etape4_dashboard_distribution_salaires.png (90KB,
+1500x825px) intégré au chapitre 10 (nouveau, remplace le placeholder).
+STATUS.md mis à jour (1/6 visualisations faites). DoD appliquée
+immédiatement avant de passer à la visualisation suivante.
+Auteur : task automation
+
+## 2026-09-17 01:22 — Dashboard viz 2/6 : évolution mensuelle (issue #96)
+Commande : cellule notebook section 8.2 (GROUP BY posting_year,
+posting_month sur df_raw_hdfs), exécutée réellement via nbconvert
+--execute.
+Resultat : pic confirmé en 2026-02 (306 offres). Moyenne mensuelle 2025
+= 52,0, moyenne mensuelle 2026 (jan-mars) = 292,0, soit ~5,6x. Line
+chart affiché dans le notebook avec interprétation imprimée (incluant
+la mise en garde sur la couverture 2026 partielle). Export
+etape4_dashboard_evolution_mensuelle.png (77KB) intégré au chapitre 10
+section "Évolution du volume d'offres". STATUS.md mis à jour (2/6).
+Auteur : task automation
+
+## 2026-09-17 01:28 — Dashboard viz 3/6 : répartition télétravail (issue #96)
+Commande : cellule notebook section 8.3 (GROUP BY remote_work sur
+df_raw_hdfs), exécutée réellement via nbconvert --execute.
+Resultat : Hybrid 686 offres (45,7%), Fully Remote 445 (29,7%),
+On-site 369 (24,6%) - cohérent avec le KPI 8 déjà documenté. Bar chart
+affiché dans le notebook avec interprétation imprimée. Export
+etape4_dashboard_remote_work.png (38KB) intégré au chapitre 10.
+STATUS.md mis à jour (3/6).
+Auteur : task automation
+
+## 2026-09-17 01:33 — Dashboard viz 4/6 : salaire moyen par pays (issue #96)
+Commande : cellule notebook section 8.4 (GROUP BY country HAVING
+COUNT(*) >= 20 ORDER BY AVG(annual_salary_usd) DESC LIMIT 10 sur
+df_raw_hdfs), exécutée réellement via nbconvert --execute.
+Resultat : USA en tête (226190$, 515 offres), Canada 10e (180588$) -
+écart de seulement 20,2% au sein du top 10, marché mondial homogène en
+haut de tableau. Barres horizontales affichées dans le notebook avec
+interprétation imprimée. Export etape4_dashboard_salaire_pays.png
+(54KB) intégré au chapitre 10. STATUS.md mis à jour (4/6).
+Auteur : task automation
+
+## 2026-09-17 01:38 — Dashboard viz 5/6 : top 10 compétences (issue #96)
+Commande : cellule notebook section 8.5 (spark.sql sur
+processed.competences, GROUP BY competence ORDER BY COUNT(*) DESC
+LIMIT 10), exécutée réellement via nbconvert --execute.
+Resultat : Python 942 offres (62,8%), SQL 452, Cloud 429 - cohérent
+avec le KPI 5 et l'analyse 4 de #95 (Python n°1 dans les 5 premiers
+pays). Bar chart affiché dans le notebook avec interprétation
+imprimée. Export etape4_dashboard_top_competences.png (59KB) intégré
+au chapitre 10. STATUS.md mis à jour (5/6).
+Auteur : task automation
+
+## 2026-09-17 01:44 — Dashboard viz 6/6 : heatmap de corrélation (issue #96)
+Commande : cellule notebook section 8.6 (matrice de corrélation Pearson
+sur les 4 mêmes variables que l'analyse 3 de #95, seaborn.heatmap),
+exécutée réellement via nbconvert --execute.
+Resultat : valeurs identiques au calcul SQL (corr salaire/demande
+0,292, corr salaire/expérience 0,079 quasi nulle) - cohérence croisée
+SQL/Spark confirmée. Heatmap affichée dans le notebook avec
+interprétation imprimée. Export
+etape4_dashboard_correlation_heatmap.png (83KB) intégré au chapitre 10.
+6/6 visualisations faites - issue #96 prête à fermer. STATUS.md mis à
+jour (ticket #96 passé à FAIT, ticket #98 passé à FAIT car ses 3
+dépendances #94/#95/#96 sont closes). DoD appliquée par sous-étape tout
+du long (requête + capture + chapitre + STATUS.md avant de passer à la
+visualisation suivante), pas en rattrapage.
+Auteur : task automation
+
+## 2026-09-17 01:50 — Recompilation finale et inspection visuelle (#95 + #96)
+Commande : xelatex main.tex (2 passes) puis pdftoppm page par page sur
+les pages du chapitre 10, inspection visuelle réelle (pas seulement
+"0 erreur").
+Resultat : 2 bugs trouvés et corrigés avant de considérer le rapport
+fini : (1) figure 10.3 (répartition télétravail) flottait après son
+paragraphe d'interprétation au lieu d'apparaître avant - ajout du
+package placeins et d'un \FloatBarrier après chaque figure du chapitre
+10 pour forcer l'ordre de lecture ; (2) titre de la heatmap de
+corrélation tronqué ("atrice" au lieu de "Matrice") par un bbox trop
+serré côté matplotlib - figure régénérée avec titre sur 2 lignes et
+fig.tight_layout(pad=1.5), notebook mis à jour et ré-exécuté pour
+correspondre. PDF final : 41 pages, 0 erreur, chapitre 10 vérifié page
+par page dans le bon ordre. 6 figures dashboard toutes <100KB (bien
+sous la limite pre-commit 1MB).
+Auteur : task automation

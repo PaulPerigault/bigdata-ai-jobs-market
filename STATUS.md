@@ -571,6 +571,26 @@ rapide :
     configuré, cellule 8 utilise `sha2(job_title, 256)` comme le reste
     du projet, cellule 14 (markdown) mise à jour pour ne plus affirmer
     une lecture locale qui n'est plus vraie.
+12. **Wrapper `./run` ajouté (18/09/2026)** : personne dans l'équipe
+    n'a go-task installé nativement, `task X` était donc inutilisable
+    sans avoir suivi la config exacte de ce dépôt. Ajout de
+    `Dockerfile.runner` (image minimale : go-task v3.53.1 + docker-cli,
+    121 Mo) et de `./run` (script POSIX, monte le dépôt + le socket
+    Docker de l'hôte, exécute `task "$@"` dans un conteneur jetable —
+    pas un service, pas de conteneur qui tourne en fond). Piège trouvé
+    et corrigé en le testant réellement : monter le dépôt sur
+    `/workspace` casse les volumes relatifs de `compose.yaml` (le
+    daemon Docker de l'hôte, pas le conteneur `./run`, résout ces
+    chemins) — corrigé en montant au même chemin absolu que l'hôte.
+    `task test` adaptée pour tourner dans un conteneur
+    `jupyter/pyspark-notebook` jetable plutôt que de dépendre d'un
+    Python/Java local (`pyproject.toml` : `requires-python` relâché à
+    `>=3.11,<3.13`, cette image a Python 3.11.6). Vérifié réellement :
+    binaire `task` local caché, `./run up/ingest/etl/test/report`
+    exécutés dans cet ordre depuis un état propre — les 5 fonctionnent.
+    README.md mis à jour (`./run X` recommandé, `task X` toujours
+    valide en note). Compromis du montage du socket Docker documenté
+    dans `SECURITY.md`. Détail complet dans `CLAUDE.md`.
 
 ## Règle de maintenance de ce fichier
 

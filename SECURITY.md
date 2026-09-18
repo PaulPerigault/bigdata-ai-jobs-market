@@ -42,6 +42,40 @@ les réflexes DevSecOps de base plutôt que de les ignorer parce que
   pas de plage ouverte non bornée sur les packages critiques comme
   `pyspark`).
 
+## Wrapper `./run` : montage du socket Docker (exception assumée)
+
+`./run` (voir `README.md`) exécute `task` dans un conteneur jetable
+construit depuis `Dockerfile.runner`, pour que personne dans l'équipe
+n'ait besoin d'installer go-task nativement. Ce conteneur monte le
+socket Docker de l'hôte (`-v /var/run/docker.sock:/var/run/docker.sock`)
+pour que les recettes du Taskfile puissent piloter `docker compose`
+(démarrer la stack, exécuter des commandes dans `jupyter`/`hive-server`,
+etc.).
+
+**Compromis assumé, à ne jamais généraliser** : monter le socket Docker
+donne au conteneur exactement les mêmes privilèges que l'utilisateur
+Docker de l'hôte — en pratique un accès root-équivalent au système
+Docker (et donc, transitivement, à la machine hôte : un conteneur avec
+accès au socket peut démarrer n'importe quel autre conteneur, monter
+n'importe quel chemin de l'hôte, etc.). Ce n'est **pas** un sandbox.
+
+Ce compromis est acceptable ici, et seulement ici, parce que :
+- Le conteneur `./run` n'exécute que du code du dépôt (`Dockerfile.runner`
+  + `Taskfile.yml`, tous deux versionnés et relus par l'équipe) — jamais
+  du code tiers non maîtrisé.
+- Usage strictement local, poste de développement individuel, projet
+  académique sans service exposé (voir sections précédentes).
+- L'alternative (installer go-task nativement sur 5 machines avec des
+  configurations différentes) coûtait plus cher en risque de dérive de
+  configuration que le montage du socket ne coûte en surface d'attaque,
+  vu le contexte.
+
+**Ne jamais reproduire ce pattern** dans un contexte où le conteneur
+exécuterait du code non maîtrisé (dépendance tierce non auditée, entrée
+utilisateur, CI partagée avec d'autres projets) : un conteneur compromis
+avec accès au socket Docker compromet l'hôte entier, pas seulement son
+propre système de fichiers.
+
 ## Accès et périmètre réseau
 
 - HDFS, Hive et Jupyter tournent uniquement sur le réseau Docker Compose

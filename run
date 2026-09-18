@@ -1,0 +1,48 @@
+#!/bin/sh
+# Wrapper Docker pour lancer `task` sans avoir go-task installé sur la
+# machine hôte. Usage : ./run <cible-taskfile> [args...] (ex. ./run up,
+# ./run etl, ./run report). Équivalent à `task <cible>` pour qui a déjà
+# go-task installé -- voir README.md, section Démarrage.
+#
+# Construit une image locale minimale (Dockerfile.runner : go-task +
+# CLI Docker, rien d'autre) puis l'exécute en montant le dépôt et le
+# socket Docker de l'hôte -- pas un service qui tourne en fond, un
+# conteneur jetable par invocation (--rm). Voir SECURITY.md pour le
+# compromis de sécurité du montage du socket Docker.
+set -eu
+
+REPO_ROOT="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
+IMAGE="bigdata-ai-jobs-market-runner:local"
+
+if ! command -v docker >/dev/null 2>&1; then
+    echo "Erreur : docker introuvable. Installez Docker (Docker Desktop ou colima sur Apple Silicon, voir README.md)." >&2
+    exit 1
+fi
+
+BUILD_LOG="$(mktemp)"
+trap 'rm -f "$BUILD_LOG"' EXIT
+
+if ! docker build -q -f "$REPO_ROOT/Dockerfile.runner" -t "$IMAGE" "$REPO_ROOT" >"$BUILD_LOG" 2>&1; then
+    echo "Erreur : construction de l'image $IMAGE (Dockerfile.runner) a échoué :" >&2
+    cat "$BUILD_LOG" >&2
+    exit 1
+fi
+
+if [ -t 1 ]; then
+    TTY_FLAG="-it"
+else
+    TTY_FLAG="-i"
+fi
+
+# Monté au même chemin absolu que sur l'hôte (pas /workspace) : le
+# Taskfile pilote `docker compose` via le socket monté ci-dessous, donc
+# c'est le daemon Docker de l'hôte qui résout les volumes relatifs de
+# compose.yaml (ex. ./scripts/hive-metastore-entrypoint.sh) -- il ne
+# connaît que les chemins réels de l'hôte, jamais /workspace. Monter au
+# même chemin est le seul moyen pour que ces volumes se résolvent
+# correctement (pattern Docker-outside-of-Docker classique).
+exec docker run --rm "$TTY_FLAG" \
+    -v "$REPO_ROOT":"$REPO_ROOT" \
+    -w "$REPO_ROOT" \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    "$IMAGE" "$@"

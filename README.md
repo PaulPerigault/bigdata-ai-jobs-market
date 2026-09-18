@@ -29,6 +29,11 @@ choix d'image dans `CLAUDE.md`.
 
 ## Prérequis (versions vérifiées, pas génériques)
 
+**Docker seul suffit.** Toutes les commandes (`up`, `ingest`, `etl`,
+`test`, `report`, ...) passent par `./run` (voir plus bas), un wrapper
+qui exécute `task` dans un conteneur jetable — pas besoin d'installer
+go-task, Python ou Java sur la machine hôte pour suivre ce README.
+
 - **Docker + Docker Compose v2** (le plugin intégré `docker compose`,
   pas l'outil autonome `docker-compose` v1) — vérifié avec Docker
   Engine 29.8.1 / Compose plugin v5.5.1. Sur Apple Silicon, la stack a
@@ -45,21 +50,15 @@ choix d'image dans `CLAUDE.md`.
   réellement consommée en simultané (d'où le fait que 8 Go suffisent en
   pratique), mais ne descendez pas en dessous sans marge si votre
   machine tourne d'autres services lourds en parallèle.
-- [`go-task`](https://taskfile.dev/) (`brew install go-task`).
-- **Python 3.12 exact** pour les tests locaux (`pyspark==3.5.0` ne
-  démarre pas sous Python ≥ 3.13) **et Java 17 ou 21 exact** (pas plus
-  récent — `pyspark==3.5.0` échoue sous un JDK ≥ 22 avec
-  `UnsupportedOperationException: getSubject is not supported`). Si
-  votre `python3`/`java` par défaut sont plus récents (fréquent avec
-  Homebrew qui pointe vers la dernière version), installez les bonnes
-  versions en parallèle sans les remplacer :
 
-  ```bash
-  brew install python@3.12 openjdk@21
-  ```
-
-  Voir l'étape 7 ci-dessous pour les utiliser explicitement sans
-  changer votre `python3`/`java` global.
+Si vous avez déjà [`go-task`](https://taskfile.dev/) installé
+nativement (`brew install go-task`), `task X` fonctionne directement en
+plus de `./run X` — les deux sont strictement équivalents, `./run` est
+juste ce qui marche pour tout le monde sans installation préalable.
+`task setup` et `task lint` (hooks git / pre-commit) restent une
+exception : ce sont des opérations qui configurent votre dépôt Git
+local, elles doivent tourner nativement (Python + `pip install
+pre-commit`), containeriser n'aurait pas de sens ici.
 
 ## Démarrage — de zéro à ça marche
 
@@ -77,7 +76,7 @@ cd bigdata-ai-jobs-market
 
 Le CSV `ai_jobs_market_2025_2026.csv` est **volontairement absent du
 dépôt** (`data/raw/` est gitignored, voir `.gitignore` et
-`SECURITY.md`). Sans cette étape, `task ingest` échouera avec un
+`SECURITY.md`). Sans cette étape, `./run ingest` échouera avec un
 fichier introuvable.
 
 - Télécharger le dataset **AI Jobs Market 2025-2026 | Salaries** sur
@@ -96,12 +95,12 @@ fichier introuvable.
 
 **3. Configurer l'environnement**
 
-`task up` copie automatiquement `.env.example` vers `.env` s'il est
+`./run up` copie automatiquement `.env.example` vers `.env` s'il est
 absent (voir la recette `up` dans `Taskfile.yml`) — vous n'êtes donc
 **pas bloqué** si vous oubliez cette étape. Mais si vous voulez
 personnaliser un identifiant avant le premier démarrage (rare, les
 valeurs par défaut suffisent pour un usage local), faites-le vous-même
-avant `task up` :
+avant `./run up` :
 
 ```bash
 cp .env.example .env
@@ -110,14 +109,15 @@ cp .env.example .env
 **4. Démarrer la stack**
 
 ```bash
-task up
+./run up
 ```
 
 Démarre HDFS (namenode/datanode), Hive (metastore + server, Postgres)
 et Jupyter/PySpark via Docker Compose. Premier démarrage lent (images à
-télécharger, plusieurs Go) ; les démarrages suivants sont rapides
-(images/volumes déjà en cache). Vérifiez que les 6 services sont
-`healthy` :
+télécharger, plusieurs Go — `./run` construit aussi sa propre petite
+image la première fois, quelques secondes) ; les démarrages suivants
+sont rapides (images/volumes déjà en cache). Vérifiez que les 6
+services sont `healthy` :
 
 ```bash
 docker compose ps
@@ -126,15 +126,14 @@ docker compose ps
 Sous émulation (Apple Silicon via colima/QEMU), il arrive que
 `datanode` crashe au tout premier démarrage (`exited (139)`,
 segfault JVM pendant le JIT — voir `JAVA_TOOL_OPTIONS=-Xint` dans
-`CLAUDE.md`) : relancez simplement `docker compose up -d`, ça repart
-sans intervention. Si `task up` remonte une erreur de dépendance
-(`dependency datanode failed to start`), c'est ce cas — un simple
-`docker compose up -d` supplémentaire suffit.
+`CLAUDE.md`) : relancez simplement `./run up`, ça repart sans
+intervention. Si `./run up` remonte une erreur de dépendance
+(`dependency datanode failed to start`), c'est ce cas.
 
 **5. Ingérer le CSV dans HDFS**
 
 ```bash
-task ingest
+./run ingest
 ```
 
 Dépose le CSV dans `/projet_ia/raw` sur HDFS et vérifie le dépôt
@@ -143,7 +142,7 @@ Dépose le CSV dans `/projet_ia/raw` sur HDFS et vérifie le dépôt
 **6. Lancer le pipeline ETL Spark**
 
 ```bash
-task etl
+./run etl
 ```
 
 Nettoie, transforme et écrit les tables `offres`/`metiers`/`competences`
@@ -152,60 +151,69 @@ externes (base `processed`).
 
 **7. Lancer les tests**
 
-`task test` fait un simple `pip install -e ".[test]"` puis `pytest` —
-il suppose que `pip`/`python`/`java` actifs dans votre shell pointent
-déjà vers les bonnes versions (étape « Prérequis » ci-dessus). Si votre
-`python3`/`java` par défaut sont plus récents, créez un environnement
-virtuel dédié et activez-le **avant** de lancer `task test` (sinon vous
-obtiendrez `ModuleNotFoundError`/`pip: command not found` ou un crash
-PySpark selon la version active) :
-
 ```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-export JAVA_HOME=/opt/homebrew/opt/openjdk@21
-export PATH="$JAVA_HOME/bin:$PATH"
-task test
+./run test
 ```
 
-Tests unitaires (`tests/unit/`, Spark local `local[2]`) — ne nécessitent
-pas la stack Docker démarrée, peuvent être lancés indépendamment des
-étapes 4-6.
+Tests unitaires (`tests/unit/`, Spark local `local[2]`), exécutés dans
+un conteneur `jupyter/pyspark-notebook` jetable — aucun Python/Java
+local requis, aucun risque de version incompatible. Ne nécessite pas la
+stack Docker démarrée, peut être lancé indépendamment des étapes 4-6.
 
 **8. Compiler le rapport**
 
 ```bash
-task report
+./run report
 ```
 
 Compile `report/main.tex` en PDF via un conteneur XeLaTeX pinné —
 aucune installation LaTeX locale requise. Résultat dans
 `report/main.pdf`.
 
+## Le wrapper `./run`
+
+`./run` (script POSIX à la racine, exécutable) construit une image
+Docker minimale (`Dockerfile.runner` : go-task + CLI Docker, rien
+d'autre — pas un service qui tourne en fond, un conteneur jetable par
+appel) et y exécute `task "$@"`, en montant le dépôt et le socket
+Docker de l'hôte. Résultat : personne n'a besoin d'installer go-task
+pour utiliser ce projet, seul Docker est requis. `./run X` et `task X`
+sont équivalents — utilisez celui que vous avez.
+
+Voir `SECURITY.md` pour le compromis de sécurité assumé du montage du
+socket Docker (usage local uniquement, jamais à reproduire dans un
+contexte qui exécute du code non maîtrisé).
+
 ## Utilisation — Taskfile (référence complète)
 
-Toutes les commandes passent par `task`, seul point d'entrée documenté :
+Toutes les commandes passent par `./run` (ou `task` en local) :
 
 | Commande | Rôle |
 |---|---|
-| `task setup` | Installe les dépendances locales (pre-commit, venv de test). |
-| `task up` | Démarre la stack Docker Compose (HDFS, Hive, Jupyter) — copie `.env.example` en `.env` si absent. |
-| `task down` | Arrête la stack. |
-| `task ingest` | Dépose le CSV brut dans HDFS (`/projet_ia/raw`). |
-| `task etl` | Lance le pipeline Spark : nettoyage + écriture des tables `offres`/`metiers`/`competences` sur HDFS et Hive. |
-| `task test` | Exécute les tests unitaires (`tests/unit/`, Spark local). |
-| `task hive-shell` | Ouvre un shell Beeline connecté à HiveServer2. |
-| `task jupyter` | Affiche l'URL du notebook Jupyter/PySpark. |
-| `task report` | Compile le rapport LaTeX (`report/main.tex`) via Docker, sans dépendance LaTeX locale. |
-| `task screenshots-cli` | Régénère les captures de commandes CLI (Hive/Spark) pour le rapport. |
-| `task screenshots-web` | Régénère les captures d'interfaces web (HDFS NameNode, Jupyter) pour le rapport. |
-| `task lint` | Lance `pre-commit run --all-files` (ruff, sqlfluff, gitleaks). |
+| `./run setup` \* | Installe les dépendances locales (pre-commit). |
+| `./run up` | Démarre la stack Docker Compose (HDFS, Hive, Jupyter) — copie `.env.example` en `.env` si absent. |
+| `./run down` | Arrête la stack. |
+| `./run ingest` | Dépose le CSV brut dans HDFS (`/projet_ia/raw`). |
+| `./run etl` | Lance le pipeline Spark : nettoyage + écriture des tables `offres`/`metiers`/`competences` sur HDFS et Hive. |
+| `./run test` | Exécute les tests unitaires (`tests/unit/`, Spark local, conteneur jetable). |
+| `./run hive-shell` | Ouvre un shell Beeline connecté à HiveServer2. |
+| `./run jupyter` | Affiche l'URL du notebook Jupyter/PySpark. |
+| `./run report` | Compile le rapport LaTeX (`report/main.tex`) via Docker, sans dépendance LaTeX locale. |
+| `./run screenshots-cli` | Régénère les captures de commandes CLI (Hive/Spark) pour le rapport. |
+| `./run screenshots-web` | Régénère les captures d'interfaces web (HDFS NameNode, Jupyter) pour le rapport. |
+| `./run lint` \* | Lance `pre-commit run --all-files` (ruff, sqlfluff, gitleaks). |
+
+\* `setup` et `lint` configurent des hooks Git sur votre dépôt local —
+ils ont besoin de Python/`pip` nativement (`pip install pre-commit`),
+containeriser n'aurait pas de sens pour une opération qui modifie
+`.git/hooks`. Toutes les autres commandes ne nécessitent que Docker.
 
 ## Structure du dépôt
 
 ```
 compose.yaml, compose.override.yaml   # stack Docker (services de base + overrides dev)
 Taskfile.yml                          # point d'entrée des commandes
+run, Dockerfile.runner                # wrapper Docker pour task (aucune install go-task requise)
 scripts/                              # ingestion HDFS, captures d'écran
 sql/hive/                             # DDL RAW, requêtes d'analyse, KPI
 src/etl/                              # schéma, nettoyage, construction des tables (Spark)
@@ -235,8 +243,8 @@ Détails et chiffres réels dans `report/chapters/07_construction_tables.tex`.
 
 Le rapport final (LaTeX, couleurs ESIEA) vit dans `report/` :
 `main.tex` + `preamble/` (charte graphique) + `chapters/` (un fichier
-par chapitre). Compilation via `task report` (XeLaTeX dans un conteneur
-Docker pinné, aucune dépendance LaTeX locale requise).
+par chapitre). Compilation via `./run report` (XeLaTeX dans un
+conteneur Docker pinné, aucune dépendance LaTeX locale requise).
 
 ## Conventions de contribution
 

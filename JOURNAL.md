@@ -434,3 +434,38 @@ Auteur : task automation
 Commande : docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)
 Résultat : report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus
 Auteur : task automation
+
+## 2026-09-18 13:25 — task up
+Commande : docker compose up -d
+Résultat : stack démarrée (namenode, datanode, hive-metastore, hive-server, jupyter)
+Auteur : task automation
+
+## 2026-09-18 13:27 — task ingest
+Commande : bash scripts/01_ingest_hdfs.sh
+Résultat : voir sortie ls/du/wc -l ci-dessus
+Auteur : task automation
+
+## 2026-09-18 13:29 — task etl
+Commande : docker compose exec jupyter spark-submit /home/jovyan/work/etl_pipeline.py
+Résultat : tables offres/metiers/competences (re)générées dans HDFS /projet_ia/processed
+Auteur : task automation
+
+## 2026-09-18 13:36 — task test
+Commande : docker run --rm jupyter/pyspark-notebook:spark-3.5.0 pytest tests/ -v
+Résultat : voir sortie pytest ci-dessus
+Auteur : task automation
+
+## 2026-09-18 13:38 — task report
+Commande : docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)
+Résultat : report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus
+Auteur : task automation
+
+## 2026-09-18 13:42 — task report
+Commande : docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)
+Résultat : report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus
+Auteur : task automation
+
+## 2026-09-18 — wrapper ./run (go-task containerise)
+Commande : creation Dockerfile.runner + run, test a blanc reel (binaire task local deplace hors PATH, docker compose down, puis ./run up / ./run ingest / ./run etl / ./run test / ./run report dans cet ordre)
+Resultat : les 5 commandes fonctionnent sans task installe sur l'hote. Piege trouve et corrige : montage du depot sur /workspace cassait les volumes relatifs de compose.yaml (hive-metastore crashait, "Is a directory") -- corrige en montant au meme chemin absolu que l'hote (pattern Docker-outside-of-Docker). task test adaptee pour tourner dans un conteneur jupyter/pyspark-notebook jetable (pyproject.toml requires-python relache a >=3.11,<3.13) plutot que de dependre d'un Python/Java local. Stack 6/6 healthy, 1500 offres/25 metiers/9428 competences confirmes via Beeline, 7/7 tests passes, rapport 46 pages recompile via ./run report. Binaire task local restaure apres le test. README.md mis a jour (./run X recommande), SECURITY.md documente le compromis du montage du socket Docker, CLAUDE.md/STATUS.md a jour.
+Auteur : Claude Code (mode auto)

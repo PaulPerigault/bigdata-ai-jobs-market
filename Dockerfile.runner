@@ -1,0 +1,29 @@
+# Image minimale pour exécuter `task` sans l'installer sur la machine
+# hôte -- utilisée uniquement via ./run, jamais comme service Compose
+# (pas de conteneur qui tourne en fond pour un projet qui se termine
+# dans 3 jours, voir README.md).
+#
+# Contient uniquement : go-task (l'orchestrateur de commandes) et le
+# CLI Docker (pour que les recettes du Taskfile puissent piloter
+# `docker compose` sur l'hôte via le socket monté par ./run -- voir
+# SECURITY.md pour le compromis de sécurité de ce montage).
+FROM alpine:3.20.3
+
+# docker-cli(-compose) : juste le client, jamais le daemon (le conteneur
+# ne fait que parler au docker.sock de l'hôte monté par ./run) --
+# docker-cli-compose est requis, les recettes du Taskfile utilisent
+# `docker compose` (plugin v2), pas l'outil `docker-compose` autonome.
+RUN apk add --no-cache docker-cli docker-cli-compose ca-certificates bash \
+    && case "$(uname -m)" in \
+         x86_64) TASK_ARCH=amd64 ;; \
+         aarch64) TASK_ARCH=arm64 ;; \
+         *) echo "architecture non supportée: $(uname -m)" >&2; exit 1 ;; \
+       esac \
+    && wget -qO- "https://github.com/go-task/task/releases/download/v3.53.1/task_linux_${TASK_ARCH}.tar.gz" \
+       | tar -xz -C /usr/local/bin task \
+    && chmod +x /usr/local/bin/task
+
+# Pas de WORKDIR fixe : ./run passe -w <chemin réel de l'hôte> (le
+# Taskfile pilote `docker compose` via le socket monté, qui doit voir
+# les mêmes chemins que l'hôte pour résoudre ses volumes relatifs).
+ENTRYPOINT ["task"]

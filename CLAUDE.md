@@ -372,6 +372,63 @@ les chiffres/l'UI changent avant le rendu) :
   prises à la main par l'équipe (voir le ticket associé pour la liste
   exacte).
 
+## Wrapper `./run` — go-task containerisé (validé réellement le 18/09/2026)
+
+Constat : personne dans l'équipe n'a go-task installé nativement, donc
+`task up`/`task etl`/... n'étaient utilisables que sur le poste ayant
+suivi la config exacte de ce fichier. Corrigé sans introduire de
+service qui tourne en fond (inutile à 3 jours du rendu) : un wrapper
+Docker jetable.
+
+- `Dockerfile.runner` : `alpine:3.20.3` + `docker-cli`/`docker-cli-compose`
+  (le plugin `docker compose` v2, pas l'outil autonome — les recettes
+  du Taskfile utilisent `docker compose`) + le binaire `go-task` v3.53.1
+  téléchargé depuis les releases GitHub (pin exact, pas d'install script
+  générique qui suivrait la dernière version). Rien d'autre — 121 Mo.
+- `./run` (script POSIX à la racine, exécutable) : construit cette image
+  (rapide, cache Docker) puis lance `task "$@"` dedans, en montant le
+  dépôt et `/var/run/docker.sock`.
+- **Piège découvert en le mettant en place, corrigé** : monter le dépôt
+  sur `/workspace` (comme demandé initialement) casse tout service
+  Compose qui déclare un volume relatif (ex.
+  `./scripts/hive-metastore-entrypoint.sh:/hive-metastore-entrypoint.sh`
+  dans `compose.yaml`) — `task` tourne dans le conteneur `./run`, donc
+  `docker compose` y résout les chemins relatifs contre `/workspace`,
+  mais c'est le **daemon Docker de l'hôte** (via le socket monté) qui
+  reçoit ce chemin pour créer le bind mount, et il ne connaît que le
+  vrai chemin de l'hôte, pas `/workspace` — résultat observé :
+  `hive-metastore` crashait avec `Is a directory` (Docker crée un
+  répertoire vide quand le chemin de bind mount source n'existe pas).
+  Corrigé : `./run` monte le dépôt **au même chemin absolu que sur
+  l'hôte** (`-v "$REPO_ROOT":"$REPO_ROOT" -w "$REPO_ROOT"`), motif
+  classique en Docker-outside-of-Docker (sibling containers). `task
+  report` (qui monte un chemin absolu réel vers un conteneur autonome,
+  pas via `docker compose`) n'était pas affecté par ce piège.
+- **`task test` cassée par le même changement, corrigée différemment** :
+  cette recette lançait `pip install -e ".[test]"` puis `pytest`
+  directement dans l'environnement d'exécution de `task` — qui était le
+  shell de l'hôte avant, donc n'importe quel Python installé localement,
+  mais devient l'image `alpine:3.20.3` minimale du wrapper (sans Python
+  du tout) une fois `task` containerisé. Plutôt que garder une
+  dépendance Python/Java locale (ce que le wrapper est censé éliminer),
+  la recette lance désormais elle-même un conteneur jetable
+  `jupyter/pyspark-notebook:spark-3.5.0` (déjà utilisé et pinné ailleurs
+  dans le projet, aucune nouvelle image à maintenir) pour y exécuter les
+  tests — même philosophie que `task report`. `pyproject.toml` :
+  `requires-python` relâché de `>=3.12` (strict) à `>=3.11,<3.13` — cette
+  image embarque Python 3.11.6, qui fonctionne tout aussi bien avec
+  `pyspark==3.5.0` que 3.12 (testé réellement) ; la seule contrainte
+  réelle documentée reste l'échec sous Python ≥ 3.13.
+- Vérifié réellement (pas supposé) : binaire `task` local temporairement
+  déplacé hors du `$PATH`, `./run up` / `./run ingest` / `./run etl` /
+  `./run test` / `./run report` exécutés dans cet ordre depuis un état
+  propre (`docker compose down` avant) — les 5 fonctionnent, stack 6/6
+  healthy, 1500 offres/25 métiers/9428 compétences confirmés via
+  Beeline, 7/7 tests passés, rapport 46 pages recompilé. Binaire `task`
+  restauré après le test.
+- Compromis de sécurité du montage du socket Docker documenté dans
+  `SECURITY.md` (exception assumée, jamais à généraliser).
+
 ## Ce que Claude Code ne doit PAS faire
 
 - Ne pas réintroduire Zeppelin/DAS.

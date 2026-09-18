@@ -349,3 +349,13 @@ GitHub manuelles), #116 (bonus, nouveau label créé). Toutes confirmées
 démarré). STATUS.md mis à jour avec les 4 nouveaux tickets et une note
 explicite sur l'erreur de doublon pour que le suivi reste fiable.
 Auteur : task automation
+
+## 2026-09-18 13:32 — task report
+Commande : docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)
+Résultat : report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus
+Auteur : task automation
+
+## 2026-09-18 — README.md
+Commande : rédaction manuelle (Claude Code, mode auto)
+Résultat : README.md créé à la racine (architecture, prérequis, commandes Taskfile, structure du dépôt, modèle de données, conventions de contribution) — n'existait pas jusqu'ici.
+Auteur : Claude Code (mode auto)

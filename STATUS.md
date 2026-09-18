@@ -47,8 +47,10 @@
 - [x] Table `offres` : 1500 lignes, 0 doublon `job_id`.
 - [x] Table `metiers` : 25 métiers distincts, `metier_id` corrigé en
       hash déterministe (plus de `monotonically_increasing_id()`).
-- [x] Table `competences` : 9548 liaisons job↔compétence (chiffre exact,
-      pas une approximation).
+- [x] Table `competences` : 9428 liaisons job↔compétence distinctes
+      (chiffre exact — corrigé de 9548 le 18/09/2026, 120 doublons
+      trouvés lors de l'audit HDFS/Hive/Spark, voir décision technique
+      #10 plus bas et `CLAUDE.md`).
 - [x] Écriture HDFS `/projet_ia/processed/{offres,metiers,competences}`
       + tables Hive externes correspondantes.
 - [x] Comptages NULLs/doublons avant-après nettoyage, chiffrés et
@@ -533,11 +535,42 @@ rapide :
    `ModuleNotFoundError: No module named 'pyspark'`. CLAUDE.md
    documentait déjà `spark-submit` comme la bonne approche — c'est le
    `Taskfile.yml` qui avait dérivé. Corrigé, vérifié réellement
-   (`task etl` relancé avec succès, 1500 offres/25 métiers/9548
-   compétences confirmés via Beeline). README complété avec les autres
-   points trouvés pendant ce test à blanc (venv Python 3.12 + JAVA_HOME
+   (`task etl` relancé avec succès, 1500 offres/25 métiers/9548 lignes
+   de compétences confirmés via Beeline — chiffre corrigé à 9428 le
+   même jour, voir point 10). README complété avec les autres points
+   trouvés pendant ce test à blanc (venv Python 3.12 + JAVA_HOME
    explicites pour `task test`, flake connu du `datanode` au premier
    `task up`).
+10. **`processed.competences` contenait 120 lignes en double** (trouvé
+    le 18/09/2026 lors d'un audit de bout en bout HDFS→Hive→Spark, pas
+    de mémoire — requêtes réellement ré-exécutées contre la stack) :
+    9548 lignes pour 9428 couples `(job_id, competence)` distincts.
+    Cause : `required_skills` liste parfois deux fois la même
+    compétence pour une offre, `explode()` sans dédoublonnage produit
+    une ligne par occurrence. Impact réel : le dashboard (chapitre 10,
+    "Top 10 compétences") utilisait `COUNT(*)` brut et affichait des
+    chiffres gonflés pour SQL (452→422), Cloud (429→402), et 5 autres
+    compétences — Python non affecté (942, inchangé). Les chapitres 8
+    et 9 étaient déjà corrects (`COUNT(DISTINCT job_id)`). Corrigé dans
+    `src/etl/tables.py::build_competences()` (`dropDuplicates`), testé,
+    `task etl` relancé (9428 confirmés, 0 doublon), figure
+    `etape4_dashboard_top_competences.png` régénérée, chapitres 07/10
+    du rapport mis à jour avec les vrais chiffres.
+11. **Notebook `Analyse_Marche_Emploi_IA_PySpark.ipynb` : deux violations
+    de règles `CLAUDE.md` trouvées lors du même audit**, dans la section
+    d'exploration Jour 1/2 (cellules 2-13, distincte de la section
+    dashboard #96 qui était déjà correcte) : (a) lecture du CSV en
+    local (`spark.read.csv("ai_jobs_market_2025_2026.csv", ...)`, chemin
+    relatif sans `fs.defaultFS` configuré — le fichier n'existe même pas
+    dans le conteneur, cette cellule aurait planté si exécutée) au lieu
+    de HDFS ; (b) `metier_id` généré via `monotonically_increasing_id()`
+    dans la table `metiers` de démonstration, alors que ce problème avait
+    déjà été corrigé dans `src/etl/tables.py` (chapitre 7) mais jamais
+    reporté dans le notebook. Corrigé : cellule 2 lit désormais
+    `hdfs://namenode:8020/projet_ia/raw/...csv` avec `fs.defaultFS`
+    configuré, cellule 8 utilise `sha2(job_title, 256)` comme le reste
+    du projet, cellule 14 (markdown) mise à jour pour ne plus affirmer
+    une lecture locale qui n'est plus vraie.
 
 ## Règle de maintenance de ce fichier
 

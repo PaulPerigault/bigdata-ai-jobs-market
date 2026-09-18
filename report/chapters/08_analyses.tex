@@ -63,11 +63,12 @@ SELECT c.competence, COUNT(DISTINCT o.job_id) AS nb_offres,
 FROM processed.offres o
 JOIN processed.competences c ON o.job_id = c.job_id
 GROUP BY c.competence
-ORDER BY nb_offres DESC
+ORDER BY nb_offres DESC, c.competence ASC
 LIMIT 10;
 \end{verbatim}
 
-\textbf{Résultat réel} :
+\textbf{Résultat réel} (ré-exécuté le 18/09/2026 après correction du
+dédoublonnage de \texttt{processed.competences}, voir chapitre~7) :
 
 \begin{center}
 \begin{tabular}{lrr}
@@ -75,13 +76,28 @@ LIMIT 10;
 Compétence & Offres & Salaire moyen (\$) \\
 \midrule
 Python & 942 & 197\,500 \\
-SQL & 422 & 188\,484 \\
-Cloud & 402 & 201\,822 \\
-Communication & 365 & 182\,952 \\
-Leadership & 363 & 198\,950 \\
+SQL & 422 & 188\,921 \\
+Cloud & 402 & 198\,644 \\
+Communication & 365 & 184\,460 \\
+Leadership & 363 & 199\,056 \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\begin{constat}[Correction du 18/09/2026]
+\texttt{nb\_offres} (\texttt{COUNT(DISTINCT job\_id)}) était déjà correct
+avant la correction du chapitre~7. \texttt{salaire\_moyen} en revanche
+\emph{était légèrement faussé} : les 120 lignes en double de
+\texttt{processed.competences} faisaient compter deux fois le salaire
+de certaines offres dans la moyenne (\texttt{AVG} porte sur toutes les
+lignes jointes, y compris les doublons, contrairement à
+\texttt{COUNT(DISTINCT job\_id)}). Écarts observés : SQL 188\,484\$
+$\to$ 188\,921\$, Cloud 201\,822\$ $\to$ 198\,644\$, Communication
+182\,952\$ $\to$ 184\,460\$, Leadership 198\,950\$ $\to$ 199\,056\$ —
+des écarts de moins de 2\,\%, sans changement de classement. Python,
+seule compétence sans doublon dans le dataset, reste inchangé
+(197\,500\$).
+\end{constat}
 
 \begin{figure}[h]
 \centering

@@ -46,7 +46,7 @@ SELECT
     COUNT(DISTINCT job_id) AS nb_offres
 FROM processed.competences
 GROUP BY competence
-ORDER BY nb_offres DESC
+ORDER BY nb_offres DESC, competence ASC
 LIMIT 5;
 
 -- KPI 6 : salaire moyen par pays (top 5).

@@ -409,3 +409,28 @@ Auteur : task automation
 Commande : suppression locale de data/raw/*.csv et .env (fichiers gitignorés, pas depuis git), puis parcours du README étape par étape (clone déjà en place, récupération dataset, .env, task up/ingest/etl/test/report) sans connaissance implicite du repo.
 Résultat : parcours complet réussi de bout en bout après corrections. Deux blocages réels trouvés et corrigés : (1) `task etl` échouait systématiquement sur un conteneur fraîchement démarré (`ModuleNotFoundError: No module named 'pyspark'`) car la recette Taskfile utilisait `python` au lieu de `spark-submit` (dérive vs ce que CLAUDE.md documentait déjà) -- corrigé dans Taskfile.yml, task etl relancé avec succès (1500 offres/25 métiers/9548 compétences confirmés via Beeline) ; (2) `task test`/`task setup` supposent un `pip`/`python`/`java` actif déjà aligné sur Python 3.12/Java 17-21, ce qui n'est pas le cas par défaut sur une install Homebrew récente (`pip: executable file not found`, ou crash PySpark sous Java 25) -- README complété avec la création explicite d'un venv Python 3.12 + JAVA_HOME=openjdk@21. Un faux positif noté sans correction : le crash `datanode` (segfault JVM, exited 139) au tout premier `task up` est un flake QEMU déjà documenté dans CLAUDE.md, résolu par un simple retry -- ajouté au README pour que ça ne bloque personne.
 Auteur : Claude Code (mode auto)
+
+## 2026-09-18 14:44 — task etl
+Commande : docker compose exec jupyter spark-submit /home/jovyan/work/etl_pipeline.py
+Résultat : tables offres/metiers/competences (re)générées dans HDFS /projet_ia/processed
+Auteur : task automation
+
+## 2026-09-18 — audit de bout en bout HDFS -> Hive -> Spark
+Commande : grep sur tout le repo pour tout accès fichier hors HDFS, SHOW CREATE TABLE + hdfs dfs -ls sur les 3 tables processed, re-execution en direct de toutes les requetes des chapitres 08/09/10 via Beeline et spark-submit (voir sorties capturees pendant la session)
+Resultat : HDFS confirme seule source de verite pour le pipeline officiel (etl_pipeline.py, notebook dashboard #96) ; 3 tables Hive EXTERNAL, LOCATION correcte, donnees Parquet reelles presentes sur HDFS, COUNT(*) confirmes (1500/25/9428 apres correction) ; toutes les requetes des chapitres 08/09/10 rejouees donnent des chiffres identiques au rapport, a deux exceptions documentees (PERCENTILE_APPROX non reproductible entre Hive et Spark SQL -- attendu, pas un bug -- et une egalite Leadership/Research a 363 offres corrigee par un tri secondaire alphabetique) ; comparaison Hive SQL vs Spark SQL du chapitre 8 confirmee comme deux moteurs reels sur la meme table Hive (scripts/screenshots_cli.sh). Deux ecarts reels trouves et corriges : (1) 120 lignes en double dans processed.competences (9548 -> 9428, cause : required_skills liste parfois deux fois la meme competence, explode() sans dedoublonnage) -- corrige dans src/etl/tables.py, teste, task etl relance, figure dashboard regeneree, chapitres 07/10 mis a jour ; (2) le notebook Jupyter contournait HDFS dans sa section d'exploration Jour1/2 (lecture CSV locale, jamais executable dans le conteneur reel) et utilisait encore monotonically_increasing_id() pour metier_id -- corrige (lecture HDFS, hash sha2 deterministe). STATUS.md/CLAUDE.md mis a jour avec le detail complet.
+Auteur : Claude Code (mode auto)
+
+## 2026-09-18 14:51 — task report
+Commande : docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)
+Résultat : report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus
+Auteur : task automation
+
+## 2026-09-18 14:53 — task test
+Commande : pytest tests/ -v
+Résultat : voir sortie pytest ci-dessus
+Auteur : task automation
+
+## 2026-09-18 14:55 — task report
+Commande : docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)
+Résultat : report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus
+Auteur : task automation

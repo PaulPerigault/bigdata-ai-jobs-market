@@ -120,23 +120,43 @@ au-delà de la seule compétence n°1 déjà citée au KPI~5 ?
 
 \begin{verbatim}
 SELECT competence, COUNT(*) FROM processed.competences
-GROUP BY competence ORDER BY COUNT(*) DESC LIMIT 10
+GROUP BY competence ORDER BY COUNT(*) DESC, competence ASC LIMIT 10
 \end{verbatim}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/etape4_dashboard_top_competences.png}
-\caption{Top 10 des compétences les plus demandées (sur 9\,548
-liaisons job/compétence).}
+\caption{Top 10 des compétences les plus demandées (sur 9\,428
+liaisons job/compétence distinctes).}
 \end{figure}
 \FloatBarrier
 
 \textbf{Interprétation} : Python domine très largement avec 942 offres
-(62,8\% du dataset), loin devant SQL (452) et Cloud (429), 2e et 3e du
+(62,8\% du dataset), loin devant SQL (422) et Cloud (402), 2e et 3e du
 classement. Cohérent avec l'analyse~4 du chapitre~9 (\#95) : Python
 n'est pas seulement dominant globalement mais n°1 dans les 5 premiers
 pays sans exception — une domination uniforme plutôt qu'un artefact de
 spécialisation régionale.
+
+\begin{constat}[Bug de données trouvé et corrigé le 18/09/2026]
+Un audit de bout en bout de la chaîne HDFS$\to$Hive$\to$Spark (voir
+\texttt{CLAUDE.md}) a révélé que la table \texttt{processed.competences}
+comptait \textbf{120 lignes en double} (9\,548 lignes pour seulement
+9\,428 couples \texttt{(job\_id, compétence)} distincts) :
+\texttt{required\_skills} liste parfois deux fois la même compétence
+pour une offre (ex. \texttt{Python\textbar SQL\textbar SQL}), et
+\texttt{explode()} produisait une ligne par occurrence sans
+dédoublonnage. Cela gonflait artificiellement ce graphique (SQL affiché
+à 452 au lieu de 422, Cloud à 429 au lieu de 402 — Python n'était pas
+affecté, aucune offre ne dupliquant ce mot-clé) alors que les chapitres
+8 et 9 utilisaient déjà \texttt{COUNT(DISTINCT job\_id)} et affichaient
+la valeur correcte. Corrigé dans
+\texttt{src/etl/tables.py::build\_competences()}
+(\texttt{dropDuplicates(["job\_id", "competence"])}), avec un test
+dédié (\texttt{tests/unit/test\_tables.py}) et un tri secondaire
+alphabétique ajouté aux requêtes concernées pour un ordre reproductible
+en cas d'égalité (Leadership/Research, à 363 offres chacune).
+\end{constat}
 
 \section{Matrice de corrélation — salaire, expérience, demande, premium IA}
 

@@ -134,3 +134,39 @@ def test_build_competences_explodes_pipe_separated_skills(spark):
         r.competence for r in df_competences.filter(df_competences.job_id == "J1").collect()
     }
     assert j1_skills == {"Python", "SQL"}
+
+
+def test_build_competences_deduplicates_repeated_skill_in_same_offer(spark):
+    # required_skills liste deux fois "SQL" pour la même offre (trouvé sur
+    # le dataset réel, 120 couples job_id/compétence en double sur 9548
+    # lignes avant correction) -- explode() sans dropDuplicates()
+    # produirait deux lignes identiques (J1, SQL).
+    rows = [
+        (
+            "J1",
+            "AI Engineer",
+            "Engineering",
+            "Senior",
+            7,
+            150000.0,
+            120000.0,
+            180000.0,
+            "Paris",
+            "France",
+            "Remote",
+            "Startup",
+            "Tech",
+            "Python|SQL|SQL",
+            5.0,
+            90,
+            2026,
+            1,
+        )
+    ]
+    df_cleaned = spark.createDataFrame(rows, COLUMNS)
+
+    df_competences = build_competences(df_cleaned)
+
+    assert df_competences.count() == 2
+    skills = {r.competence for r in df_competences.collect()}
+    assert skills == {"Python", "SQL"}

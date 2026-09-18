@@ -41,7 +41,7 @@ qui exécute \texttt{build\_metiers()} deux fois sur les mêmes données
 et compare les ID obtenus.
 \end{constat}
 
-\section{Chiffres réels (run du 16/09/2026)}
+\section{Chiffres réels (run du 18/09/2026)}
 
 \begin{center}
 \begin{tabular}{ll}
@@ -50,7 +50,7 @@ Table & Nombre de lignes \\
 \midrule
 \texttt{processed.offres} & 1500 \\
 \texttt{processed.metiers} & 25 (métiers distincts) \\
-\texttt{processed.competences} & 9548 (liaisons job\_id $\times$ compétence) \\
+\texttt{processed.competences} & 9428 (liaisons job\_id $\times$ compétence distinctes) \\
 \midrule
 Doublons \texttt{job\_id} (avant construction) & 0 \\
 \bottomrule
@@ -58,5 +58,22 @@ Doublons \texttt{job\_id} (avant construction) & 0 \\
 \end{center}
 
 Ces chiffres sont cohérents entre eux : 1500 offres pour 25 métiers
-distincts (60 offres en moyenne par métier), et 9548/1500 $\approx$
-6,4 compétences en moyenne par offre.
+distincts (60 offres en moyenne par métier), et 9428/1500 $\approx$
+6,3 compétences en moyenne par offre.
+
+\begin{constat}[Correction : dédoublonnage de \texttt{competences}]
+Un audit de bout en bout HDFS$\to$Hive$\to$Spark (18/09/2026, voir
+\texttt{CLAUDE.md}) a trouvé 120 lignes en double dans
+\texttt{processed.competences} (9\,548 lignes produites initialement
+pour seulement 9\,428 couples \texttt{(job\_id, compétence)} distincts)
+: \texttt{required\_skills} liste parfois deux fois la même compétence
+pour une même offre, et \texttt{explode()} sans dédoublonnage produisait
+alors une ligne par occurrence plutôt qu'une par couple unique. Corrigé
+dans \texttt{build\_competences()}
+(\texttt{dropDuplicates(["job\_id", "competence"])}), testé
+(\texttt{tests/unit/test\_tables.py}), \texttt{task etl} relancé pour
+régénérer la table sur HDFS. Impact limité aux compétences dont
+\texttt{required\_skills} contenait une répétition (SQL, Cloud,
+Leadership, Research, Communication, Agile, Statistics) — voir
+chapitre~10 pour le détail chiffré (dashboard top 10 compétences).
+\end{constat}

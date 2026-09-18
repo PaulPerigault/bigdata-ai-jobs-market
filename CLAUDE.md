@@ -238,7 +238,48 @@ fichier (append), jamais réorganiser ou supprimer des entrées passées.
   avant de lancer le driver. Corrigé dans `Taskfile.yml` (retour à
   `spark-submit`, cohérent avec ce que ce fichier a toujours documenté).
   Vérifié réellement après correction : `task etl` relance sans erreur,
-  1500 offres / 25 métiers / 9548 compétences confirmés via Beeline.
+  1500 offres / 25 métiers / 9548 lignes de compétences confirmés via
+  Beeline (chiffre corrigé à 9428 plus tard le même jour, voir
+  l'entrée suivante).
+- **Bug de données trouvé et corrigé le 18/09/2026, audit HDFS→Hive→Spark
+  de bout en bout** : `processed.competences` comptait 9548 lignes pour
+  seulement **9428 couples `(job_id, competence)` distincts** — 120
+  doublons. Cause : `required_skills` liste parfois deux fois la même
+  compétence pour une offre (ex. `Python|SQL|SQL`), et
+  `explode(split(...))` sans dédoublonnage produit alors une ligne par
+  occurrence plutôt qu'une par couple unique. Impact concret : le
+  dashboard (chapitre 10, section "Top 10 compétences") utilisait
+  `COUNT(*)` brut sur cette table et affichait des chiffres gonflés
+  pour les compétences touchées (SQL 452 au lieu de 422, Cloud 429 au
+  lieu de 402, Leadership/Communication/Research/Agile/Statistics
+  également affectées) — Python n'était pas concerné (aucune offre ne
+  dupliquant ce mot-clé), et les chapitres 8/9 étaient déjà corrects
+  car ils utilisaient `COUNT(DISTINCT job_id)` plutôt qu'un `COUNT(*)`
+  brut sur la table potentiellement dupliquée. Corrigé dans
+  `src/etl/tables.py::build_competences()`
+  (`dropDuplicates(["job_id", "competence"])`), test dédié ajouté
+  (`tests/unit/test_tables.py::test_build_competences_deduplicates_repeated_skill_in_same_offer`),
+  `task etl` relancé (9428 lignes confirmées, 0 doublon). Un tri
+  secondaire alphabétique (`ORDER BY nb_offres DESC, competence ASC`) a
+  aussi été ajouté aux requêtes concernées (`sql/hive/01_analyses.sql`,
+  `sql/hive/02_kpis.sql` KPI 5, cellule dashboard du notebook) : après
+  correction, Leadership et Research sont à égalité parfaite (363
+  offres chacune) — sans tri explicite sur un second critère, l'ordre
+  entre les deux au 5e rang n'est pas garanti reproductible d'une
+  exécution à l'autre (vérifié : Beeline a renvoyé une fois Leadership,
+  une fois Research, sur la même requête et les mêmes données).
+- **Nuance trouvée lors du même audit (pas un bug, juste une limite à
+  documenter)** : `PERCENTILE_APPROX` ne donne **pas nécessairement le
+  même résultat entre Hive-on-MR et Spark SQL** sur la même table Hive
+  — vérifié sur le salaire médian de `processed.offres` : Hive (Beeline)
+  renvoie 179421 (chiffre déjà utilisé au KPI 2, chapitre 9),
+  Spark SQL renvoie 180000 sur la même requête et les mêmes données.
+  C'est attendu (l'algorithme d'approximation diffère entre les deux
+  moteurs) et ne remet pas en cause le chiffre du rapport (sourcé de
+  Hive, reproduit à l'identique) — mais signifie que la comparaison
+  "les deux moteurs renvoient exactement le même résultat" du
+  chapitre 8 est vraie pour la requête `AVG`/`COUNT` qui y est utilisée,
+  pas généralisable à toute requête impliquant `PERCENTILE_APPROX`.
 
 ## Rapport LaTeX modulaire — structure réelle
 

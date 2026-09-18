@@ -40,7 +40,15 @@ def build_offres(df_cleaned: DataFrame, df_metiers: DataFrame) -> DataFrame:
 
 
 def build_competences(df_cleaned: DataFrame) -> DataFrame:
+    """Une ligne par couple (job_id, compétence).
+
+    dropDuplicates() : `required_skills` liste parfois deux fois la même
+    compétence pour une offre (ex. "Python|SQL|SQL") — sans dédoublonnage,
+    `explode()` produit une ligne en double par occurrence (trouvé lors de
+    l'audit HDFS/Hive du 18/09/2026 : 9548 lignes pour seulement 9428
+    couples distincts, voir CLAUDE.md).
+    """
     return df_cleaned.select(
         F.col("job_id"),
         F.explode(F.split(F.col("required_skills"), "\\|")).alias("competence"),
-    )
+    ).dropDuplicates(["job_id", "competence"])

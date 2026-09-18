@@ -7,7 +7,7 @@ SELECT
 FROM processed.offres AS o
 INNER JOIN processed.competences AS c ON o.job_id = c.job_id
 GROUP BY c.competence
-ORDER BY nb_offres DESC
+ORDER BY nb_offres DESC, c.competence ASC
 LIMIT 10;
 
 -- Requête GROUP BY + HAVING (Jour 2, requête 13).

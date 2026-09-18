@@ -58,15 +58,20 @@ tasks:
           RESULT: "tables offres/metiers/competences (re)générées dans HDFS /projet_ia/processed"
 
   test:
-    desc: Lance les tests unitaires (comptages, schémas)
+    desc: Lance les tests unitaires (comptages, schémas) dans un conteneur éphémère -- aucun Python/Java local requis
     cmds:
-      - pip install -e ".[test]"
-      - pytest tests/ -v
+      - >-
+        docker run --rm -v "{{.PWD}}":"{{.PWD}}" -w "{{.PWD}}"
+        jupyter/pyspark-notebook:spark-3.5.0
+        bash -c "pip install -q -e '.[test]' && pytest tests/ -v"
       - task: log
         vars:
           TASK_NAME: test
-          CMD: "pytest tests/ -v"
+          CMD: "docker run --rm jupyter/pyspark-notebook:spark-3.5.0 pytest tests/ -v"
           RESULT: "voir sortie pytest ci-dessus"
+    vars:
+      PWD:
+        sh: pwd
 
   hive-shell:
     desc: Ouvre un shell Beeline connecté à HiveServer2

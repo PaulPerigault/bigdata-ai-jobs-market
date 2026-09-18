@@ -132,7 +132,10 @@ chacune renvoie vers le commit exact qui la clôt :
 - [x] Restructuré en `report/main.tex` + `report/preamble/` +
       `report/chapters/*.tex` (15 chapitres), polices Roboto/Poppins
       versionnées (pas de dépendance système).
-- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 26 pages.
+- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 43 pages (chiffre du
+      18/09/2026, après rédaction des chapitres 01/02 — remplace le
+      chiffre de 26 pages resté obsolète depuis l'ajout des chapitres
+      09/10).
 - [x] Chapitres rédigés avec résultats réels : **03** (architecture +
       3 corrections sécurité), **04** (ingestion, bug 1501 lignes),
       **05** (DDL Hive + bug header), **06** (nulls/doublons), **07**
@@ -141,15 +144,17 @@ chacune renvoie vers le commit exact qui la clôt :
       Hive/Spark SQL), **09** (10 KPI obligatoires Jour 3 + 4 analyses
       au choix, chiffres réels), **10** (dashboard, 6 visualisations,
       chiffres réels) — Étapes 2, 3 et 4.
-- [ ] Chapitres encore en placeholder : **01** (introduction —
-      [#110](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/110)),
-      **02** (présentation dataset —
-      [#111](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/111)),
-      **11** à **15** (synthèse, recommandations, limites, conclusion,
-      annexes —
-      [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99)).
-      **#97** (qui référençait 01+02 en un seul ticket) fermée le
-      18/09/2026 en doublon de #110/#111 — voir note d'audit ci-dessous.
+- [x] **01** (introduction) et **02** (présentation dataset) rédigés
+      le 18/09/2026 — [#110](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/110)
+      et [#111](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/111)
+      (fermées) : contexte/problématique/objectifs, chiffres réels du
+      dataset (1500 lignes, 25 colonnes — pas 26, écart avec le
+      libellé initial de #111 documenté et corrigé au chapitre 02),
+      14 pays distincts, aucune valeur manquante sur les 25 colonnes.
+- [ ] Chapitres encore en placeholder : **11** à **15** (synthèse,
+      recommandations, limites, conclusion, annexes) — restent liés au
+      ticket
+      [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99).
 
 ## Ce qu'il reste à faire — prêt à découper en tickets
 
@@ -365,21 +370,27 @@ sujet PDF) cochée intégralement.
 
 ---
 
-**TICKET — Rapport : chapitre 01 (Introduction)** — [#110](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/110)
+**TICKET — Rapport : chapitre 01 (Introduction)** — ✅ FAIT — [#110](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/110) (fermée)
 Label : `rapport`
 Contexte du marché de l'emploi IA, problématique, objectifs
 pédagogiques/techniques, intérêt de la chaîne HDFS→Hive→Spark→Jupyter.
 Critère d'acceptation : chapitre rédigé, cohérent avec ce qui a été
 réellement construit (pas le plan initial), PDF recompile sans erreur.
+Rédigé le 18/09/2026, PDF recompilé (43 pages, inspection visuelle des
+pages concernées) — voir chapitre 01.
 
 ---
 
-**TICKET — Rapport : chapitre 02 (Présentation du dataset)** — [#111](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/111)
+**TICKET — Rapport : chapitre 02 (Présentation du dataset)** — ✅ FAIT — [#111](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/111) (fermée)
 Label : `rapport`
 Source du dataset, volumétrie (1500 lignes, 26 colonnes), variables
 principales, premières observations de qualité (avant nettoyage).
 Critère d'acceptation : chapitre rédigé avec les vrais chiffres, pas
 d'estimation.
+Rédigé le 18/09/2026 avec les vrais chiffres (**25 colonnes**, pas 26 —
+écart avec le libellé initial du ticket, corrigé et documenté au
+chapitre 02 ; 14 pays distincts, 0 valeur manquante). PDF recompilé et
+inspecté visuellement — voir chapitre 02.
 
 ---
 

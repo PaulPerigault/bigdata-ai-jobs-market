@@ -1,3 +1,95 @@
 \chapter{Présentation du dataset}
-% Source, nombre de lignes/colonnes, période couverte, variables principales,
-% premières observations sur la qualité des données.
+
+\section{Source et volumétrie}
+
+Le dataset utilisé est \emph{AI Jobs Market 2025-2026 | Salaries}
+(Kaggle), déposé tel quel dans \texttt{data/raw/} (gitignored, jamais
+commité — voir \texttt{CLAUDE.md}). Vérifié directement sur le fichier
+réel :
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Caractéristique & Valeur \\
+\midrule
+Nombre de lignes de données & 1500 \\
+Nombre de colonnes & 25 \\
+Séparateur & virgule (\texttt{,}) \\
+En-tête & présent (1 ligne, noms de colonnes explicites) \\
+Guillemets/virgules internes & aucun — un \texttt{SerDe} délimité simple suffit \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{constat}[Écart avec l'énoncé initial du sujet]
+Le ticket \#111 (comme certaines versions de suivi antérieures)
+mentionnait 26 colonnes par anticipation, avant inspection réelle du
+fichier. Le comptage effectif sur le CSV (\texttt{head -1 | tr ',' '\textbackslash n' | wc -l})
+donne \textbf{25 colonnes}, cohérent avec \texttt{CLAUDE.md} et le
+\texttt{StructType} de \texttt{src/etl/schema.py}. Conformément à la
+remarque de l'énoncé (\og les noms exacts des colonnes devront être
+adaptés après inspection du fichier Kaggle, vous devez documenter toute
+adaptation \fg{}), c'est le chiffre réel qui fait foi ici.
+\end{constat}
+
+\section{Variables principales}
+
+\begin{center}
+\small
+\begin{tabular}{ll}
+\toprule
+Catégorie & Colonnes \\
+\midrule
+Identifiant / métier & \texttt{job\_id}, \texttt{job\_title}, \texttt{job\_category} \\
+Expérience & \texttt{experience\_level}, \texttt{years\_of\_experience}, \texttt{is\_senior} \\
+Formation & \texttt{education\_required} \\
+Rémunération & \texttt{annual\_salary\_usd}, \texttt{salary\_min\_usd}, \texttt{salary\_max\_usd}, \texttt{salary\_tier} \\
+Localisation & \texttt{city}, \texttt{country} \\
+Organisation & \texttt{company\_size}, \texttt{industry} \\
+Travail à distance & \texttt{remote\_work}, \texttt{is\_remote\_friendly} \\
+Compétences & \texttt{required\_skills} (liste \texttt{\textbar}-séparée) \\
+Marché IA & \texttt{ai\_salary\_premium\_pct}, \texttt{demand\_score}, \texttt{demand\_growth\_yoy\_pct}, \texttt{is\_llm\_role} \\
+Temporel & \texttt{posting\_year}, \texttt{posting\_month} \\
+Autres & \texttt{benefits\_score\_10} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Ces colonnes couvrent directement les axes demandés par l'énoncé :
+offres, métiers, compétences, salaires, pays, secteurs et dates.
+\texttt{required\_skills} est la seule colonne multi-valuée (transformée
+en table \texttt{competences} au chapitre~7 via \texttt{split}/\texttt{explode}) ;
+toutes les autres colonnes sont directement exploitables telles quelles.
+
+\section{Premières observations de qualité (avant nettoyage)}
+
+Contrôle exécuté sur le fichier brut, avant toute transformation Spark
+(distinct des comptages post-nettoyage du chapitre~6, qui portent sur
+le DataFrame après lecture HDFS) :
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Contrôle & Résultat \\
+\midrule
+Valeurs manquantes (25 colonnes, 1500 lignes) & 0 \\
+\texttt{job\_id} en double & 0 \\
+\texttt{annual\_salary\_usd} $\leq$ 0 & 0 \\
+Métiers distincts (\texttt{job\_title}) & 25 \\
+Pays distincts (\texttt{country}) & 14 \\
+Salaire annuel (\texttt{annual\_salary\_usd}) & min 90\,000\$ / max 384\,000\$ / moyenne 194\,892\$ \\
+Répartition par expérience & Entry 385, Mid 370, Senior 364, Lead 381 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{constat}[Un dataset propre par construction]
+Aucune anomalie détectée sur les critères contrôlés (NULL, doublons,
+salaires invalides) — cohérent avec le résultat obtenu après nettoyage
+Spark au chapitre~6 (0 ligne affectée par les règles de nettoyage). Ce
+dataset est vraisemblablement généré/synthétisé plutôt que collecté
+directement (répartition d'expérience quasi uniforme, absence totale de
+valeur manquante sur 25 colonnes) — un point repris au chapitre~13
+(limites de l'étude) : la propreté du dataset ne garantit pas sa
+représentativité du marché réel de l'emploi IA.
+\end{constat}

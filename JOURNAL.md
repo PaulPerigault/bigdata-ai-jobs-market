@@ -364,3 +364,13 @@ Auteur : Claude Code (mode auto)
 Commande : lecture intégrale de documentation/Projet_BigData_IA_Version_Etudiants_...pdf, comparaison avec STATUS.md, report/chapters/*.tex et `gh issue list`
 Résultat : aucun point du sujet sans trace dans le suivi (déviation Zeppelin/DAS -> Jupyter déjà validée et documentée). Un doublon trouvé et corrigé : #97 (chapitres 01+02) fermée en "not planned", doublon de #110/#111. STATUS.md mis à jour avec le détail de l'audit.
 Auteur : Claude Code (mode auto)
+
+## 2026-09-18 13:39 — task report
+Commande : docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)
+Résultat : report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus
+Auteur : task automation
+
+## 2026-09-18 — Rapport chapitres 01/02 (issues #110, #111)
+Commande : rédaction manuelle + docker run ... xelatex main.tex (2 passes, task report)
+Résultat : chapitre 01 (introduction : contexte, problématique, objectifs, intérêt de la chaîne HDFS->Hive->Spark->Jupyter) et chapitre 02 (dataset : 1500 lignes, 25 colonnes réelles - pas 26 comme indiqué initialement dans #111, 14 pays distincts, 0 valeur manquante) rédigés avec les chiffres réels vérifiés sur le CSV. PDF recompilé (43 pages, 0 erreur), pages 3-6 inspectées visuellement. STATUS.md mis à jour, issues #110 et #111 fermées.
+Auteur : Claude Code (mode auto)

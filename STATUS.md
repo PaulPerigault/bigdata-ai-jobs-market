@@ -132,10 +132,10 @@ chacune renvoie vers le commit exact qui la clôt :
 - [x] Restructuré en `report/main.tex` + `report/preamble/` +
       `report/chapters/*.tex` (15 chapitres), polices Roboto/Poppins
       versionnées (pas de dépendance système).
-- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 43 pages (chiffre du
-      18/09/2026, après rédaction des chapitres 01/02 — remplace le
-      chiffre de 26 pages resté obsolète depuis l'ajout des chapitres
-      09/10).
+- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 46 pages (chiffre du
+      18/09/2026, après rédaction des chapitres 01/02/11/12/13 —
+      remplace le chiffre de 26 pages resté obsolète depuis l'ajout des
+      chapitres 09/10).
 - [x] Chapitres rédigés avec résultats réels : **03** (architecture +
       3 corrections sécurité), **04** (ingestion, bug 1501 lignes),
       **05** (DDL Hive + bug header), **06** (nulls/doublons), **07**
@@ -151,10 +151,15 @@ chacune renvoie vers le commit exact qui la clôt :
       dataset (1500 lignes, 25 colonnes — pas 26, écart avec le
       libellé initial de #111 documenté et corrigé au chapitre 02),
       14 pays distincts, aucune valeur manquante sur les 25 colonnes.
-- [ ] Chapitres encore en placeholder : **11** à **15** (synthèse,
-      recommandations, limites, conclusion, annexes) — restent liés au
-      ticket
-      [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99).
+- [x] **11** (synthèse), **12** (recommandations) et **13** (limites)
+      rédigés le 18/09/2026 — [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99)
+      (fermée) : 8 constats reliés aux KPI/analyses des chapitres 8-10,
+      3 recommandations argumentées, section limites distincte de la
+      synthèse.
+- [ ] Chapitres encore en placeholder : **14** (conclusion —
+      [#117](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/117),
+      trouvé vide sans ticket lors de la rédaction de #99), **15**
+      (annexes — pas de ticket dédié, contenu prévu en fin de projet).
 
 ## Ce qu'il reste à faire — prêt à découper en tickets
 
@@ -299,7 +304,7 @@ de placeholder. Voir chapitres 09 et 10.
 
 ---
 
-**TICKET — Rapport : chapitres 11-13 (synthèse, recommandations, limites)** — [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99)
+**TICKET — Rapport : chapitres 11-13 (synthèse, recommandations, limites)** — ✅ FAIT — [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99) (fermée)
 Label : `rapport`
 - 6 à 10 constats reliés à un indicateur/requête précis chacun.
 - 3 recommandations argumentées (résultat → interprétation →
@@ -309,6 +314,16 @@ Label : `rapport`
   causalité IA→emploi).
 Critère d'acceptation : sections rédigées, distinctes les unes des
 autres (ne pas mélanger constat et recommandation).
+Rédigé le 18/09/2026 : **8 constats** (chapitre 11, chacun relié à un
+KPI/analyse/requête précis des chapitres 8-10), **3 recommandations**
+argumentées (chapitre 12, schéma résultat→interprétation→recommandation :
+recrutement/rétention LLM Engineer, grille salariale indexée sur la
+tension du marché plutôt que l'ancienneté, politique hybride par
+défaut), **section limites distincte** (chapitre 13 : non-causalité,
+représentativité incertaine du dataset — probablement synthétique vu
+l'absence totale d'anomalie et la répartition d'expérience uniforme,
+limites méthodologiques spécifiques au pic 2026 et aux corrélations de
+Pearson). PDF recompilé (46 pages), pages 38-42 inspectées visuellement.
 
 ---
 
@@ -446,6 +461,17 @@ reste fermé.
 > commandes Taskfile, structure du dépôt, modèle de données, conventions
 > de contribution), sans ticket dédié (pas un livrable noté au barème,
 > mais une lacune de présentation du projet).
+
+---
+
+**TICKET — Rapport : chapitre 14 (Conclusion)** — [#117](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/117)
+Label : `rapport`
+Trouvé en marge de la rédaction des chapitres 11-13 (#99, 18/09/2026) :
+`report/chapters/14_conclusion.tex` ne contient que
+`\chapter{Conclusion}`, aucun contenu — aucun ticket existant ne le
+couvrait explicitement jusqu'ici.
+Critère d'acceptation : chapitre rédigé (clôture synthétique, sans
+redite des chapitres 11/12), PDF recompile sans erreur.
 
 ---
 

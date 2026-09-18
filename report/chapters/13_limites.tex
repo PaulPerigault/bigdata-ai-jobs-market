@@ -1,3 +1,74 @@
 \chapter{Limites de l'étude}
-% Représentativité, volume du dataset, limites techniques/méthodologiques.
-% Rappeler que le dataset ne mesure pas l'impact causal de l'IA sur l'emploi global.
+
+Cette section est volontairement distincte de la synthèse
+(chapitre~11) : elle ne redonne pas de résultats, elle cadre ce que ces
+résultats permettent — et ne permettent pas — d'affirmer.
+
+\section{Le dataset ne permet pas d'affirmer de causalité}
+
+Aucune conclusion de ce rapport ne doit être lue comme \og l'IA cause
+X sur l'emploi \fg{}. Le dataset décrit un ensemble d'offres à un
+instant donné (ou sur une période donnée) ; il ne contient ni série
+longitudinale par individu, ni groupe de contrôle, ni variable
+d'intervention. Les corrélations calculées au chapitre~9 §9.3.3
+(salaire/expérience, salaire/demande) sont des associations
+statistiques descriptives, pas des relations causales — et restent de
+toute façon faibles dans l'absolu (aucune ne dépasse 0,3).
+
+\section{Représentativité incertaine du dataset}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Volume limité} : 1500 offres, 25 métiers, 14 pays — un
+    échantillon, pas un recensement exhaustif du marché mondial de
+    l'emploi IA.
+  \item \textbf{Absence totale d'anomalie} : 0 valeur manquante sur les
+    25 colonnes, 0 doublon, 0 salaire invalide (chapitre~2 §2.3,
+    chapitre~6) — une propreté inhabituelle pour une extraction de
+    données réelle, qui suggère un dataset au moins partiellement
+    généré/synthétisé plutôt que collecté brut. Cela ne remet pas en
+    cause les calculs effectués, mais invite à ne pas sur-interpréter
+    la précision apparente des chiffres comme une exactitude du marché
+    réel.
+  \item \textbf{Répartition d'expérience quasi uniforme} (Entry 385,
+    Mid 370, Senior 364, Lead 381 — chapitre~2 §2.3) : un marché réel
+    présente rarement une distribution aussi équilibrée entre niveaux
+    d'expérience, ce qui renforce l'hypothèse d'un jeu de données
+    construit pour l'exercice pédagogique plutôt qu'une extraction
+    représentative d'un marché réel.
+  \item \textbf{Provenance Kaggle non vérifiable} : la méthode de
+    collecte du dataset \emph{AI Jobs Market 2025-2026 | Salaries}
+    (scraping, enquête, génération synthétique) n'est pas documentée
+    par sa source — impossible de garantir qu'il reflète fidèlement les
+    pratiques salariales réelles du secteur.
+\end{itemize}
+
+\section{Limites méthodologiques spécifiques}
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Pic d'activité 2026 (constat~8, chapitre~11)} : la
+    comparaison janvier-mars 2026 (271 à 306 offres/mois) contre
+    l'ensemble de 2025 (41 à 68/mois) oppose 3 mois à 12 mois — une
+    rupture de volume aussi nette peut refléter une réelle accélération
+    du marché, ou un artefact de construction du dataset (échantillonnage
+    non uniforme dans le temps, sur-représentation délibérée de la
+    période récente). Le dataset ne permet pas de trancher entre ces
+    deux hypothèses.
+  \item \textbf{Corrélations de Pearson uniquement} (chapitre~9
+    §9.3.3) : \texttt{CORR()} mesure une relation \emph{linéaire}
+    entre variables continues ; elle peut sous-estimer une relation
+    réelle non linéaire (effet de seuil par tranche catégorielle,
+    observé par ailleurs sur \texttt{experience\_level} au KPI~7) sans
+    que cela contredise le résultat obtenu, comme discuté au chapitre~9.
+  \item \textbf{\texttt{ai\_salary\_premium\_pct} sans référentiel
+    documenté} (KPI~9, chapitre~9) : le dataset ne précise pas contre
+    quel salaire de référence ce premium est calculé — les
+    comparaisons entre métiers ou catégories restent valides
+    relativement les unes aux autres, mais leur valeur absolue ne peut
+    pas être vérifiée indépendamment.
+  \item \textbf{Un seul dataset, une seule source} : aucune comparaison
+    à une source externe (LinkedIn, Glassdoor, INSEE) n'a été réalisée
+    dans ce rapport (piste identifiée comme bonus, voir issue~\#116,
+    hors périmètre du rendu principal) — les constats du chapitre~11
+    valent pour ce dataset, pas comme vérité générale du marché de
+    l'emploi IA.
+\end{itemize}

@@ -374,3 +374,13 @@ Auteur : task automation
 Commande : rédaction manuelle + docker run ... xelatex main.tex (2 passes, task report)
 Résultat : chapitre 01 (introduction : contexte, problématique, objectifs, intérêt de la chaîne HDFS->Hive->Spark->Jupyter) et chapitre 02 (dataset : 1500 lignes, 25 colonnes réelles - pas 26 comme indiqué initialement dans #111, 14 pays distincts, 0 valeur manquante) rédigés avec les chiffres réels vérifiés sur le CSV. PDF recompilé (43 pages, 0 erreur), pages 3-6 inspectées visuellement. STATUS.md mis à jour, issues #110 et #111 fermées.
 Auteur : Claude Code (mode auto)
+
+## 2026-09-18 13:43 — task report
+Commande : docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)
+Résultat : report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus
+Auteur : task automation
+
+## 2026-09-18 — Rapport chapitres 11-13 (issue #99)
+Commande : rédaction manuelle + docker run ... xelatex main.tex (2 passes, task report)
+Résultat : chapitre 11 (8 constats reliés chacun à un KPI/analyse/requête précis des chapitres 8-10), chapitre 12 (3 recommandations argumentées : recrutement/rétention LLM Engineer, grille salariale indexée sur la tension du marché, politique hybride par défaut), chapitre 13 (limites de l'étude, distincte de la synthèse : non-causalité, représentativité incertaine du dataset probablement synthétique, limites méthodologiques sur le pic 2026 et les corrélations de Pearson). PDF recompilé (46 pages, 0 erreur), pages 38-42 inspectées visuellement. Trouvé en marge : chapitre 14 (conclusion) totalement vide sans ticket associé -> issue #117 ouverte. STATUS.md mis à jour, issue #99 fermée.
+Auteur : Claude Code (mode auto)

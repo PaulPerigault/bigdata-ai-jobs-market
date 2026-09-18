@@ -1,5 +1,82 @@
 \chapter{Synthèse des résultats}
-% 6-10 constats, chacun relié à un indicateur ou une requête précise.
-\begin{constat}[Constat 1]
-% Relier chaque constat à un indicateur ou une requête précise.
+
+Huit constats, chacun relié à un indicateur ou une requête précise déjà
+détaillée dans les chapitres 8 à 10 — ce chapitre ne recalcule rien, il
+relie les résultats entre eux pour répondre à la question directrice
+du chapitre~1.
+
+\begin{constat}[Constat 1 — un marché tendu sur un profil précis]
+\textbf{LLM Engineer} est le seul métier présent à la fois dans le
+top~5 des salaires moyens (240\,960\$) et dans le top~5 des métiers les
+plus demandés (75 offres) — KPI~3-4, chapitre~9 §9.1. C'est le signal
+le plus net de tension du marché sur un profil unique : ni un métier
+rare et cher (comme AI Solutions Architect, mieux payé mais absent du
+top~4 demande), ni un métier massifié et peu rémunéré.
+\end{constat}
+
+\begin{constat}[Constat 2 — la rémunération suit la rareté plus que l'ancienneté]
+La corrélation salaire$\leftrightarrow$années d'expérience continue est
+quasi nulle (0,079), alors que la corrélation
+salaire$\leftrightarrow$\texttt{demand\_score} est la plus forte du
+tableau (0,292, analyse~3, chapitre~9 §9.3.3) — un résultat
+contre-intuitif qui coexiste avec la progression par tranche du KPI~7
+(150\,039\$ à 240\,055\$ d'Entry à Lead) sans la contredire (effet de
+seuil catégoriel vs relation linéaire continue, cf. l'interprétation
+détaillée du chapitre~9). Sur ce dataset, la tension de la demande pour
+un profil est un signal au moins aussi pertinent que son ancienneté
+brute.
+\end{constat}
+
+\begin{constat}[Constat 3 — le mode hybride est devenu la norme]
+Hybrid domine avec 45,7\,\% des offres, devant Fully Remote (29,7\,\%)
+et On-site (24,6\,\%) — KPI~8, chapitre~9 §9.1. Le télétravail intégral
+et le présentiel intégral se partagent presque à parts égales le solde
+restant : la flexibilité (hybride ou full-remote, 75,4\,\% cumulés) est
+majoritaire sur ce marché.
+\end{constat}
+
+\begin{constat}[Constat 4 — Python domine de façon uniforme, pas seulement globale]
+Python est la compétence la plus demandée (942 offres, 62,8\,\% du
+dataset — jointure offres$\leftrightarrow$competences, chapitre~8) et
+reste n°1 dans les 5 premiers pays du classement \emph{sans exception}
+(analyse~4, chapitre~9 §9.3.4). Ce n'est pas un artefact de
+spécialisation régionale : la compétence phare du marché IA est la
+même partout où le dataset a du volume.
+\end{constat}
+
+\begin{constat}[Constat 5 — prime salariale et salaire absolu sont deux mesures distinctes]
+Multimodal AI Engineer a le premium IA moyen le plus élevé (13,6\,\%)
+mais un salaire absolu modeste comparé au haut du classement — AI
+Compliance Manager (3e du classement premium, 155\,939\$) est même
+absent du top salaire absolu (analyse~1, chapitre~9 §9.3.1). Une
+lecture uniquement en salaire absolu masquerait ces métiers à forte
+prime relative.
+\end{constat}
+
+\begin{constat}[Constat 6 — le marché mondial des salaires IA est relativement homogène en haut de tableau]
+Les USA dominent en volume (515 offres) et en salaire moyen
+(226\,190\$), mais l'écart au sein du top~10 pays reste limité : le
+Canada, 10e du classement, reste à 180\,588\$, seulement 20,2\,\% en
+dessous du leader (dashboard, chapitre~10 §10.4). 12 pays comptent plus
+de 50 offres avec un salaire moyen supérieur à 150\,000\$ (requête
+\texttt{GROUP BY}+\texttt{HAVING}, chapitre~8).
+\end{constat}
+
+\begin{constat}[Constat 7 — les rôles LLM/GenAI sont mieux payés en moyenne, sans que la mesure de premium le confirme]
+Les 327 offres \texttt{is\_llm\_role=1} (21,8\,\% du dataset) devancent
+le reste du marché en salaire moyen (+8,6\,\%), salaire médian
+(+6,3\,\%) et \texttt{demand\_score} (92,9 contre 86,0) — mais leur
+\texttt{ai\_salary\_premium\_pct} moyen est plus bas (8,96\,\% contre
+11,39\,\%, KPI~9 et analyse~2, chapitre~9). Les deux mesures (salaire
+absolu vs premium relatif) racontent des histoires différentes et ne
+doivent pas être confondues.
+\end{constat}
+
+\begin{constat}[Constat 8 — un pic d'activité début 2026 à interpréter avec prudence]
+Le volume mensuel d'offres est environ 5,6 fois plus élevé sur
+janvier-mars 2026 (271 à 306 offres/mois) que sur l'ensemble de 2025
+(41 à 68/mois) — KPI~10 et dashboard, chapitre~10 §10.2. Le dataset ne
+documente pas sa méthode de collecte : ce constat descriptif est repris
+et nuancé au chapitre~13 (limites), il ne doit pas être lu comme une
+preuve de tendance de marché.
 \end{constat}

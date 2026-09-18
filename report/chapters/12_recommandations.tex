@@ -1,5 +1,64 @@
 \chapter{Recommandations}
-% 3 recommandations argumentées : résultat observé -> interprétation -> recommandation.
-\begin{recommandation}[Recommandation 1]
-% Résultat observé -> interprétation -> recommandation.
+
+Trois recommandations, chacune construite sur le schéma
+résultat~$\to$~interprétation~$\to$~recommandation, pour rester
+distinctes des constats du chapitre~11 (qui décrivent, sans prescrire).
+
+\begin{recommandation}[Recommandation 1 — sécuriser le recrutement et la rétention sur LLM Engineer]
+\textbf{Résultat observé} : LLM Engineer est l'unique métier du top~5
+salaire \emph{et} du top~5 demande (constat~1, chapitre~9 §9.1) — 75
+offres, salaire moyen 240\,960\$.
+
+\textbf{Interprétation} : ce double signal (rare et cher \emph{et}
+massifié) indique une tension de marché particulièrement forte sur ce
+profil précis, plus qu'un simple métier bien payé parmi d'autres — un
+risque de sous-effectif chronique si la demande de recrutement suit la
+même dynamique.
+
+\textbf{Recommandation} : prioriser un plan de recrutement et de
+formation interne dédié à ce profil (montée en compétence LLM plutôt
+que recrutement externe seul, vu la rareté constatée), et suivre son
+turnover séparément des autres métiers IA du portefeuille.
+\end{recommandation}
+
+\begin{recommandation}[Recommandation 2 — indexer une partie de la grille salariale sur la tension du marché, pas seulement sur l'ancienneté]
+\textbf{Résultat observé} : la corrélation salaire$\leftrightarrow$
+années d'expérience est quasi nulle (0,079), alors que la corrélation
+salaire$\leftrightarrow$\texttt{demand\_score} est la plus forte
+mesurée (0,292, constat~2, chapitre~9 §9.3.3) — un signal plus fort que
+n'importe quelle autre paire de variables du dataset, bien que ce
+niveau reste modeste dans l'absolu.
+
+\textbf{Interprétation} : sur ce marché, la rareté/tension d'un profil
+semble un signal au moins aussi pertinent que son ancienneté pour
+expliquer sa rémunération — une grille salariale purement indexée sur
+l'ancienneté risquerait de sous-payer des profils très demandés mais
+juniors, et de sur-payer des profils seniors sur des compétences peu
+tendues.
+
+\textbf{Recommandation} : introduire un ajustement salarial basé sur un
+indicateur de tension/rareté de compétence (par ex. un
+\texttt{demand\_score} interne équivalent), en complément — pas en
+remplacement — de la grille par ancienneté, en particulier pour les
+recrutements sur des compétences en forte demande.
+\end{recommandation}
+
+\begin{recommandation}[Recommandation 3 — généraliser une politique hybride/remote-friendly par défaut]
+\textbf{Résultat observé} : le mode hybride domine (45,7\,\%) et le
+cumul hybride + full-remote atteint 75,4\,\% des offres (constat~3,
+chapitre~9 §9.1) ; le présentiel intégral reste minoritaire
+(24,6\,\%).
+
+\textbf{Interprétation} : la flexibilité du mode de travail est devenue
+la norme majoritaire du marché de l'emploi IA plutôt qu'un avantage
+différenciant marginal — une offre uniquement présentielle réduit
+mécaniquement l'attractivité face à un marché où trois offres sur
+quatre proposent une forme de flexibilité.
+
+\textbf{Recommandation} : fixer l'hybride comme mode par défaut des
+offres IA (plutôt que le présentiel), avec une option full-remote
+documentée poste par poste — en particulier pour les profils identifiés
+en tension (recommandation~1), où la flexibilité peut être un
+différenciateur de recrutement plus rapide à activer qu'un ajustement
+salarial.
 \end{recommandation}

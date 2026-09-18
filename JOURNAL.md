@@ -384,3 +384,28 @@ Auteur : task automation
 Commande : rédaction manuelle + docker run ... xelatex main.tex (2 passes, task report)
 Résultat : chapitre 11 (8 constats reliés chacun à un KPI/analyse/requête précis des chapitres 8-10), chapitre 12 (3 recommandations argumentées : recrutement/rétention LLM Engineer, grille salariale indexée sur la tension du marché, politique hybride par défaut), chapitre 13 (limites de l'étude, distincte de la synthèse : non-causalité, représentativité incertaine du dataset probablement synthétique, limites méthodologiques sur le pic 2026 et les corrélations de Pearson). PDF recompilé (46 pages, 0 erreur), pages 38-42 inspectées visuellement. Trouvé en marge : chapitre 14 (conclusion) totalement vide sans ticket associé -> issue #117 ouverte. STATUS.md mis à jour, issue #99 fermée.
 Auteur : Claude Code (mode auto)
+
+## 2026-09-18 14:06 — task ingest
+Commande : bash scripts/01_ingest_hdfs.sh
+Résultat : voir sortie ls/du/wc -l ci-dessus
+Auteur : task automation
+
+## 2026-09-18 14:10 — task etl
+Commande : docker compose exec jupyter spark-submit /home/jovyan/work/etl_pipeline.py
+Résultat : tables offres/metiers/competences (re)générées dans HDFS /projet_ia/processed
+Auteur : task automation
+
+## 2026-09-18 14:13 — task test
+Commande : pytest tests/ -v
+Résultat : voir sortie pytest ci-dessus
+Auteur : task automation
+
+## 2026-09-18 14:15 — task report
+Commande : docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)
+Résultat : report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus
+Auteur : task automation
+
+## 2026-09-18 — test à blanc de l'onboarding (README)
+Commande : suppression locale de data/raw/*.csv et .env (fichiers gitignorés, pas depuis git), puis parcours du README étape par étape (clone déjà en place, récupération dataset, .env, task up/ingest/etl/test/report) sans connaissance implicite du repo.
+Résultat : parcours complet réussi de bout en bout après corrections. Deux blocages réels trouvés et corrigés : (1) `task etl` échouait systématiquement sur un conteneur fraîchement démarré (`ModuleNotFoundError: No module named 'pyspark'`) car la recette Taskfile utilisait `python` au lieu de `spark-submit` (dérive vs ce que CLAUDE.md documentait déjà) -- corrigé dans Taskfile.yml, task etl relancé avec succès (1500 offres/25 métiers/9548 compétences confirmés via Beeline) ; (2) `task test`/`task setup` supposent un `pip`/`python`/`java` actif déjà aligné sur Python 3.12/Java 17-21, ce qui n'est pas le cas par défaut sur une install Homebrew récente (`pip: executable file not found`, ou crash PySpark sous Java 25) -- README complété avec la création explicite d'un venv Python 3.12 + JAVA_HOME=openjdk@21. Un faux positif noté sans correction : le crash `datanode` (segfault JVM, exited 139) au tout premier `task up` est un flake QEMU déjà documenté dans CLAUDE.md, résolu par un simple retry -- ajouté au README pour que ça ne bloque personne.
+Auteur : Claude Code (mode auto)

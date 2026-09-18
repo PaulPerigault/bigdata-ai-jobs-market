@@ -50,11 +50,11 @@ tasks:
   etl:
     desc: Lance le pipeline Spark de nettoyage/transformation (RAW -> processed)
     cmds:
-      - docker compose exec jupyter python /home/jovyan/work/etl_pipeline.py
+      - docker compose exec jupyter spark-submit /home/jovyan/work/etl_pipeline.py
       - task: log
         vars:
           TASK_NAME: etl
-          CMD: "docker compose exec jupyter python /home/jovyan/work/etl_pipeline.py"
+          CMD: "docker compose exec jupyter spark-submit /home/jovyan/work/etl_pipeline.py"
           RESULT: "tables offres/metiers/competences (re)générées dans HDFS /projet_ia/processed"
 
   test:
@@ -77,6 +77,23 @@ tasks:
     desc: Affiche l'URL d'accès à Jupyter (token .env)
     cmds:
       - 'echo "http://localhost:8888/?token=$(grep JUPYTER_TOKEN .env | cut -d= -f2)"'
+
+  report:
+    desc: Compile report/main.tex en PDF via Docker (aucune installation LaTeX locale requise)
+    cmds:
+      - >-
+        docker run --rm --platform linux/amd64
+        -v "{{.PWD}}/report:/report" -w /report
+        texlive/texlive:TL2025-historic
+        bash -c "xelatex -interaction=nonstopmode -halt-on-error main.tex && xelatex -interaction=nonstopmode -halt-on-error main.tex"
+      - task: log
+        vars:
+          TASK_NAME: report
+          CMD: "docker run --rm --platform linux/amd64 -v report:/report texlive/texlive:TL2025-historic xelatex (2 passes)"
+          RESULT: "report/main.pdf régénéré, voir nombre de pages dans la sortie xelatex ci-dessus"
+    vars:
+      PWD:
+        sh: pwd
 
   screenshots-cli:
     desc: Régénère les captures terminal/requêtes de report/figures/ (freeze)

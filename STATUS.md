@@ -285,12 +285,17 @@ notebook lui-même. Voir section 8 du notebook
 
 ---
 
-**TICKET — Rapport : chapitres 01 (introduction) et 02 (dataset)** — [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97)
+**TICKET — Rapport : chapitres 01 (introduction) et 02 (dataset)** — ❌ FERMÉE EN DOUBLON — [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97) (not planned)
 Label : `rapport`
 Rédaction du contexte, de la problématique, des objectifs, et de la
 présentation du dataset (source, volumétrie, variables, premières
 observations qualité).
 Critère d'acceptation : chapitres rédigés, PDF recompile sans erreur.
+Fermée le 18/09/2026 en doublon de [#110](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/110)
+(chapitre 01) et [#111](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/111)
+(chapitre 02) — voir note d'audit plus bas dans ce fichier. Le travail
+réel est fait, voir ces deux tickets et les sections "Rapport LaTeX"
+ci-dessus.
 
 ---
 
@@ -518,6 +523,21 @@ rapide :
    compétences reformatée pour `LT09`/`AL01`. Vérifié avec
    `gh run watch` sur le run réel (pas seulement le pre-commit local) —
    `lint` et `test` verts sur `2347b81`.
+9. **`task etl` cassée sur tout conteneur fraîchement démarré**
+   (trouvé le 18/09/2026 lors d'un test à blanc réel de l'onboarding,
+   README) : la recette Taskfile utilisait
+   `docker compose exec jupyter python ...` au lieu de `spark-submit`
+   — `docker compose exec` n'hérite pas du `PYTHONPATH` que le hook
+   `before-notebook.d/spark-config.sh` ne configure que pour le
+   process du serveur Jupyter, jamais pour un `exec` externe, d'où
+   `ModuleNotFoundError: No module named 'pyspark'`. CLAUDE.md
+   documentait déjà `spark-submit` comme la bonne approche — c'est le
+   `Taskfile.yml` qui avait dérivé. Corrigé, vérifié réellement
+   (`task etl` relancé avec succès, 1500 offres/25 métiers/9548
+   compétences confirmés via Beeline). README complété avec les autres
+   points trouvés pendant ce test à blanc (venv Python 3.12 + JAVA_HOME
+   explicites pour `task test`, flake connu du `datanode` au premier
+   `task up`).
 
 ## Règle de maintenance de ce fichier
 

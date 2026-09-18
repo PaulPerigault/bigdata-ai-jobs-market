@@ -224,6 +224,21 @@ fichier (append), jamais réorganiser ou supprimer des entrées passées.
   `test_row_counts.py`) : Spark local (`local[2]`, pas de Hive), aucune
   dépendance à la stack Compose — c'est ce que `task test` et le job CI
   `test` exécutent.
+- **Bug trouvé et corrigé le 18/09/2026 lors d'un test à blanc de
+  l'onboarding (rédaction du README)** : la recette `etl` du
+  `Taskfile.yml` exécutait en réalité
+  `docker compose exec jupyter python /home/jovyan/work/etl_pipeline.py`
+  (pas `spark-submit`, contrairement à ce que ce fichier documentait
+  déjà juste au-dessus) — `docker compose exec` attache un nouveau
+  process au conteneur sans hériter du `PYTHONPATH` que
+  `before-notebook.d/spark-config.sh` ne configure que pour l'arbre de
+  processus du serveur Jupyter, pas pour un `exec` externe ; résultat :
+  `ModuleNotFoundError: No module named 'pyspark'` sur toute exécution
+  fraîche de `task etl`. `spark-submit` définit ce `PYTHONPATH` lui-même
+  avant de lancer le driver. Corrigé dans `Taskfile.yml` (retour à
+  `spark-submit`, cohérent avec ce que ce fichier a toujours documenté).
+  Vérifié réellement après correction : `task etl` relance sans erreur,
+  1500 offres / 25 métiers / 9548 compétences confirmés via Beeline.
 
 ## Rapport LaTeX modulaire — structure réelle
 
@@ -251,9 +266,29 @@ la Definition of Done dès l'Étape 2) :
   — normal, pas un oubli.
 - Compilation vérifiée avec `xelatex -interaction=nonstopmode
   -halt-on-error main.tex` (2 passes, depuis `report/`) — via
-  `mactex-no-gui` en local pour l'instant. Le conteneur `task report`
-  documenté dans l'Étape 5 du plan initial (image texlive pinnée) reste
-  à faire ; ne pas le considérer comme déjà en place.
+  `mactex-no-gui` en local pour l'instant, **et** via `task report`
+  (voir ci-dessous) sans dépendance LaTeX installée sur le poste.
+- **`task report`** (reprise le 18/09/2026, 3 jours avant le rendu) :
+  `docker run --rm --platform linux/amd64 -v "$(pwd)/report:/report"
+  -w /report texlive/texlive:TL2025-historic bash -c "xelatex
+  -interaction=nonstopmode -halt-on-error main.tex && xelatex
+  -interaction=nonstopmode -halt-on-error main.tex"` (2 passes,
+  sommaire/numérotation). Image choisie : **`texlive/texlive:TL2025-historic`**,
+  pas `texlive/texlive:latest`/`:latest-full` — ces derniers sont mis à
+  jour chaque semaine (même tag, contenu qui change), donc pas
+  réellement pinnés malgré l'absence de `:latest` littéral dans certains
+  cas. Les tags `TLxxxx-historic` sont des instantanés figés par année
+  (2025 = installation TeX Live complète gelée), donc reproductibles à
+  l'identique par toute l'équipe. Contient bien `fontspec`, `titlesec`,
+  `tcolorbox`, `xcolor` (vérifié via `kpsewhich`). Image amd64 uniquement
+  (comme les images `bde2020/*`) — `--platform linux/amd64` explicite
+  pour tourner sous émulation sur Apple Silicon sans avertissement.
+  Testé réellement le 18/09/2026 : compilation depuis un état propre
+  (PDF/aux/log/toc supprimés avant), 41 pages produites, PDF inspecté
+  (page de garde : fond marine, police Poppins, barre orange — pas
+  seulement "exit code 0"). Le Taskfile calcule `{{.PWD}}` via une var
+  `sh: pwd` scoped à la task (nécessaire pour le montage de volume,
+  `task` ne fournit pas de variable `$PWD` native portable).
 
 ## Captures d'écran (`report/figures/`) — automatisées, pas prises à la main
 

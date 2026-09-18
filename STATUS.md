@@ -141,12 +141,15 @@ chacune renvoie vers le commit exact qui la clôt :
       Hive/Spark SQL), **09** (10 KPI obligatoires Jour 3 + 4 analyses
       au choix, chiffres réels), **10** (dashboard, 6 visualisations,
       chiffres réels) — Étapes 2, 3 et 4.
-- [ ] Chapitres encore en placeholder : **01** (introduction), **02**
-      (présentation dataset), **11** à **15** (synthèse,
-      recommandations, limites, conclusion, annexes) — restent liés aux
-      tickets
-      [#97](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/97),
-      [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99).
+- [ ] Chapitres encore en placeholder : **01** (introduction —
+      [#110](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/110)),
+      **02** (présentation dataset —
+      [#111](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/111)),
+      **11** à **15** (synthèse, recommandations, limites, conclusion,
+      annexes —
+      [#99](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/99)).
+      **#97** (qui référençait 01+02 en un seul ticket) fermée le
+      18/09/2026 en doublon de #110/#111 — voir note d'audit ci-dessous.
 
 ## Ce qu'il reste à faire — prêt à découper en tickets
 
@@ -410,6 +413,28 @@ reste fermé.
 > Project board les affiche en "Done" comme tout ticket fermé, mais il
 > ne s'agit pas de travail réellement terminé : le vrai suivi reste sur
 > #99/#102/#104, toujours ouverts.
+
+> **Note du 18/09/2026 — audit complet des besoins du sujet** :
+> relecture intégrale de `documentation/Projet_BigData_IA_Version_
+> Etudiants_...pdf` (le sujet PDF réel, pas seulement le résumé qu'en
+> fait `CLAUDE.md`) confrontée à `STATUS.md`, aux chapitres du rapport
+> et aux issues ouvertes/fermées. Résultat : aucun point du sujet
+> (objectifs pédagogiques, jour 1/2/3, requêtes obligatoires, KPI,
+> livrables finaux, barème) sans trace dans le suivi — le remplacement
+> Zeppelin/DAS → Jupyter/PySpark reste la seule déviation, déjà validée
+> et documentée. Une incohérence de suivi trouvée et corrigée : **#97**
+> ("chapitres 01+02") faisait doublon avec **#110** (chapitre 01) et
+> **#111** (chapitre 02), créées séparément le 16/09/2026 pour
+> permettre une fermeture indépendante par chapitre — #97 n'apparaissait
+> déjà plus dans la liste "reste à faire" de ce fichier mais restait
+> ouverte sur GitHub (colonne Todo du Project board). Fermée en
+> "not planned" avec renvoi vers #110/#111, même pattern que
+> #112/#113/#114 ci-dessus. Par ailleurs, `README.md` n'existait pas à
+> la racine du dépôt malgré son rôle de point d'entrée attendu pour tout
+> nouveau lecteur (professeur, membre de l'équipe) — créé (architecture,
+> commandes Taskfile, structure du dépôt, modèle de données, conventions
+> de contribution), sans ticket dédié (pas un livrable noté au barème,
+> mais une lacune de présentation du projet).
 
 ---
 

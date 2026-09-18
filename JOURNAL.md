@@ -359,3 +359,8 @@ Auteur : task automation
 Commande : rédaction manuelle (Claude Code, mode auto)
 Résultat : README.md créé à la racine (architecture, prérequis, commandes Taskfile, structure du dépôt, modèle de données, conventions de contribution) — n'existait pas jusqu'ici.
 Auteur : Claude Code (mode auto)
+
+## 2026-09-18 — audit complet des besoins du sujet
+Commande : lecture intégrale de documentation/Projet_BigData_IA_Version_Etudiants_...pdf, comparaison avec STATUS.md, report/chapters/*.tex et `gh issue list`
+Résultat : aucun point du sujet sans trace dans le suivi (déviation Zeppelin/DAS -> Jupyter déjà validée et documentée). Un doublon trouvé et corrigé : #97 (chapitres 01+02) fermée en "not planned", doublon de #110/#111. STATUS.md mis à jour avec le détail de l'audit.
+Auteur : Claude Code (mode auto)

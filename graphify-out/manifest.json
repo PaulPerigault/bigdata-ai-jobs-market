@@ -1,0 +1,248 @@
+{
+  ".vscode/extensions.json": {
+    "mtime": 1790519977.4594119,
+    "seen": 1790521253.8414247,
+    "ast_hash": "357d866f2b0af24708e646f1bf554105",
+    "semantic_hash": "357d866f2b0af24708e646f1bf554105"
+  },
+  ".vscode/settings.json": {
+    "mtime": 1790519977.4599152,
+    "seen": 1790521253.841428,
+    "ast_hash": "59c27f7a730ba3a3e0ecce8c721fb31c",
+    "semantic_hash": "59c27f7a730ba3a3e0ecce8c721fb31c"
+  },
+  "pyproject.toml": {
+    "mtime": 1790519977.4629211,
+    "seen": 1790521253.8414292,
+    "ast_hash": "9c904c5d7a20a0d9947ea556c5cb646b",
+    "semantic_hash": "9c904c5d7a20a0d9947ea556c5cb646b"
+  },
+  "run": {
+    "mtime": 1790519977.490488,
+    "seen": 1790521253.84143,
+    "ast_hash": "84310e04676b20ba6aaf529cb057e559",
+    "semantic_hash": "84310e04676b20ba6aaf529cb057e559"
+  },
+  "scripts/01_ingest_hdfs.sh": {
+    "mtime": 1790519977.490488,
+    "seen": 1790521253.841431,
+    "ast_hash": "d596a75e2eedf9c370876141028ee2af",
+    "semantic_hash": "d596a75e2eedf9c370876141028ee2af"
+  },
+  "scripts/hive-metastore-entrypoint.sh": {
+    "mtime": 1790519977.4909892,
+    "seen": 1790521253.8414314,
+    "ast_hash": "181eb604484febed24e7b6a90e0233d1",
+    "semantic_hash": "181eb604484febed24e7b6a90e0233d1"
+  },
+  "scripts/screenshots_cli.sh": {
+    "mtime": 1790519977.4909892,
+    "seen": 1790521253.841432,
+    "ast_hash": "e92fb1ec70b94604fd6fa8ee84484dda",
+    "semantic_hash": "e92fb1ec70b94604fd6fa8ee84484dda"
+  },
+  "scripts/screenshots_web.py": {
+    "mtime": 1790519977.4914877,
+    "seen": 1790521253.8414326,
+    "ast_hash": "dba5343d1162478a4dc88db49a10f1d9",
+    "semantic_hash": "dba5343d1162478a4dc88db49a10f1d9"
+  },
+  "sql/hive/00_create_raw_table.sql": {
+    "mtime": 1790519977.4919891,
+    "seen": 1790521253.841433,
+    "ast_hash": "2fe94641f02660e14ded69e95fea21f4",
+    "semantic_hash": "2fe94641f02660e14ded69e95fea21f4"
+  },
+  "sql/hive/01_analyses.sql": {
+    "mtime": 1790519977.4919891,
+    "seen": 1790521253.8414335,
+    "ast_hash": "8903c331b041ea15e728a9c358547024",
+    "semantic_hash": "8903c331b041ea15e728a9c358547024"
+  },
+  "sql/hive/02_kpis.sql": {
+    "mtime": 1790519977.4924886,
+    "seen": 1790521253.841434,
+    "ast_hash": "17b53226b8ad899378ef7d306ac27a81",
+    "semantic_hash": "17b53226b8ad899378ef7d306ac27a81"
+  },
+  "sql/hive/03_analyses_choix.sql": {
+    "mtime": 1790519977.492988,
+    "seen": 1790521253.8414347,
+    "ast_hash": "72cc5e3cb84e7e8219e34fb3827cac45",
+    "semantic_hash": "72cc5e3cb84e7e8219e34fb3827cac45"
+  },
+  "src/etl/__init__.py": {
+    "mtime": 1790519977.4949973,
+    "seen": 1790521253.8414352,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "src/etl/cleaning.py": {
+    "mtime": 1790519977.4949973,
+    "seen": 1790521253.8414357,
+    "ast_hash": "136f6ebadeacb79e2f9faeb1c9879cbe",
+    "semantic_hash": "136f6ebadeacb79e2f9faeb1c9879cbe"
+  },
+  "src/etl/hive_io.py": {
+    "mtime": 1790519977.495497,
+    "seen": 1790521253.8414361,
+    "ast_hash": "ff1eeeda6030d39596c69f59ac6a84f1",
+    "semantic_hash": "ff1eeeda6030d39596c69f59ac6a84f1"
+  },
+  "src/etl/schema.py": {
+    "mtime": 1790519977.495497,
+    "seen": 1790521253.8414366,
+    "ast_hash": "b1cd10b2963013bcdd52c801ad770451",
+    "semantic_hash": "b1cd10b2963013bcdd52c801ad770451"
+  },
+  "src/etl/spark_session.py": {
+    "mtime": 1790519977.4959972,
+    "seen": 1790521253.841437,
+    "ast_hash": "45f533a279a15ec404c41f012f0c6d4d",
+    "semantic_hash": "45f533a279a15ec404c41f012f0c6d4d"
+  },
+  "src/etl/tables.py": {
+    "mtime": 1790519977.4959972,
+    "seen": 1790521253.8414376,
+    "ast_hash": "e4734b4db736957d09bb0e2aad213193",
+    "semantic_hash": "e4734b4db736957d09bb0e2aad213193"
+  },
+  "src/etl_pipeline.py": {
+    "mtime": 1790519977.4964964,
+    "seen": 1790521253.8414383,
+    "ast_hash": "cf9ab8619815a18de876ae129901d348",
+    "semantic_hash": "cf9ab8619815a18de876ae129901d348"
+  },
+  "tests/conftest.py": {
+    "mtime": 1790519977.496997,
+    "seen": 1790521253.8414388,
+    "ast_hash": "e78702fbb288ff0a6caa2106ae28f0bf",
+    "semantic_hash": "e78702fbb288ff0a6caa2106ae28f0bf"
+  },
+  "tests/unit/test_cleaning.py": {
+    "mtime": 1790519977.496997,
+    "seen": 1790521253.8414392,
+    "ast_hash": "3ebccb155fc03a839e53c871a73d202e",
+    "semantic_hash": "3ebccb155fc03a839e53c871a73d202e"
+  },
+  "tests/unit/test_row_counts.py": {
+    "mtime": 1790519977.496997,
+    "seen": 1790521253.8414397,
+    "ast_hash": "e1219a5011e9e9c55f31515a8f191dcd",
+    "semantic_hash": "e1219a5011e9e9c55f31515a8f191dcd"
+  },
+  "tests/unit/test_tables.py": {
+    "mtime": 1790519977.496997,
+    "seen": 1790521253.8414414,
+    "ast_hash": "56d41781949f52269fd10d8bdeb24c49",
+    "semantic_hash": "56d41781949f52269fd10d8bdeb24c49"
+  },
+  ".github/ISSUE_TEMPLATE/academic-deliverable.yml": {
+    "mtime": 1790519977.456401,
+    "seen": 1790521253.8414416,
+    "ast_hash": "ba45ca78f567b5041bbd25fd917c0982",
+    "semantic_hash": "ba45ca78f567b5041bbd25fd917c0982"
+  },
+  ".github/ISSUE_TEMPLATE/bug.yml": {
+    "mtime": 1790519977.4569018,
+    "seen": 1790521253.841442,
+    "ast_hash": "6403d3e7bf7114095bf90663951fe8db",
+    "semantic_hash": "6403d3e7bf7114095bf90663951fe8db"
+  },
+  ".github/ISSUE_TEMPLATE/infra-task.yml": {
+    "mtime": 1790519977.4569018,
+    "seen": 1790521253.8414426,
+    "ast_hash": "e88ed75f5037a85d1ff00c234b48e72c",
+    "semantic_hash": "e88ed75f5037a85d1ff00c234b48e72c"
+  },
+  ".github/PULL_REQUEST_TEMPLATE.md": {
+    "mtime": 1790519977.4569018,
+    "seen": 1790521253.841443,
+    "ast_hash": "4bd21486e5d94cda2790f7d4994ee1d6",
+    "semantic_hash": "4bd21486e5d94cda2790f7d4994ee1d6"
+  },
+  ".github/workflows/ci.yml": {
+    "mtime": 1790519977.4579043,
+    "seen": 1790521253.8414435,
+    "ast_hash": "dde52795685aae109c76c91b99bdac2d",
+    "semantic_hash": "dde52795685aae109c76c91b99bdac2d"
+  },
+  ".github/workflows/project-status-sync.yml": {
+    "mtime": 1790519977.4579043,
+    "seen": 1790521253.841444,
+    "ast_hash": "ae62b17cc88de0caf6798d06439b5da2",
+    "semantic_hash": "ae62b17cc88de0caf6798d06439b5da2"
+  },
+  ".pre-commit-config.yaml": {
+    "mtime": 1790519977.4584086,
+    "seen": 1790521253.8414443,
+    "ast_hash": "8be336d82f47163889269a92cab57523",
+    "semantic_hash": "8be336d82f47163889269a92cab57523"
+  },
+  ".yamllint.yml": {
+    "mtime": 1790519977.4599152,
+    "seen": 1790521253.841445,
+    "ast_hash": "a074331982a901ad6d29d74df261eb74",
+    "semantic_hash": "a074331982a901ad6d29d74df261eb74"
+  },
+  "AGENTS.md": {
+    "mtime": 1790521520.5787494,
+    "seen": 1790529602.3265896,
+    "ast_hash": "88b2695cc326e72d5c6639302ebcdae7",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1790521424.4666498,
+    "seen": 1790529602.326591,
+    "ast_hash": "40ed71ec016ab3b36ded7c1353fb6d8a",
+    "semantic_hash": ""
+  },
+  "JOURNAL.md": {
+    "mtime": 1790529587.2197742,
+    "seen": 1790529602.326592,
+    "ast_hash": "c90deb021c5157e147f3be1b7ba73632",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1790519977.4614217,
+    "seen": 1790521253.8414469,
+    "ast_hash": "582ac65d4fbddb0e36af317c8f0a8280",
+    "semantic_hash": "582ac65d4fbddb0e36af317c8f0a8280"
+  },
+  "SECURITY.md": {
+    "mtime": 1790519977.4619207,
+    "seen": 1790521253.8414474,
+    "ast_hash": "70127bb4335c51c7ec116f7e0a96dcbc",
+    "semantic_hash": "70127bb4335c51c7ec116f7e0a96dcbc"
+  },
+  "STATUS.md": {
+    "mtime": 1790529566.8197827,
+    "seen": 1790529602.3265944,
+    "ast_hash": "db7488dbbf5144663057a014c0254f6f",
+    "semantic_hash": ""
+  },
+  "Taskfile.yml": {
+    "mtime": 1790519977.4624224,
+    "seen": 1790521253.8414485,
+    "ast_hash": "4ccddf0af46641c67d1366ae862f8164",
+    "semantic_hash": "4ccddf0af46641c67d1366ae862f8164"
+  },
+  "compose.override.yaml": {
+    "mtime": 1790519977.4624224,
+    "seen": 1790521253.841449,
+    "ast_hash": "13f3fd6f465b6f6bc0a16f49c596ecc2",
+    "semantic_hash": "13f3fd6f465b6f6bc0a16f49c596ecc2"
+  },
+  "compose.yaml": {
+    "mtime": 1790519977.4629211,
+    "seen": 1790521253.8414495,
+    "ast_hash": "256cefb7f038d1b791547edfb1d9cb46",
+    "semantic_hash": "256cefb7f038d1b791547edfb1d9cb46"
+  },
+  "report/fonts/README.md": {
+    "mtime": 1790519977.482967,
+    "seen": 1790521253.84145,
+    "ast_hash": "5397eec45c9d6e99b054344a3a7e17ef",
+    "semantic_hash": "5397eec45c9d6e99b054344a3a7e17ef"
+  }
+}

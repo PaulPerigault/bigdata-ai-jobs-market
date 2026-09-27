@@ -13,9 +13,8 @@ nettoyage, modélisation, requêtage et visualisation.
 Le sujet, proposé par M.~Touati Zouhaier dans le cadre du module
 Fondamentaux du Big Data (ESIEA), encadre le projet sur 3 jours
 d'autonomie croissante (Jour 1 très guidé, Jour 2 semi-guidé, Jour 3
-autonome). Ce rapport documente le résultat réel obtenu à chaque étape,
-pas uniquement le plan initial — y compris les écarts et corrections
-survenus en cours de route (voir notamment chapitres~4, 5 et 7).
+autonome). Ce rapport documente le résultat obtenu à chaque étape, pas
+uniquement le plan initial.
 
 \section{Problématique}
 
@@ -27,14 +26,14 @@ rémunérations ?}
 
 Cette question directrice structure l'ensemble du projet : chaque
 étape technique (HDFS, Hive, Spark, requêtage) est un moyen au service
-de cette analyse, jamais une fin en soi. Le chapitre~13 (limites de
-l'étude) rappelle explicitement ce que ce dataset — 1500 offres à un
-instant donné, sans dimension causale — permet et ne permet pas
+de cette analyse, jamais une fin en soi. La section sur les limites
+de l'étude rappelle explicitement ce que ce dataset, 1500 offres à un
+instant donné sans dimension causale, permet et ne permet pas
 d'affirmer sur le marché réel.
 
 \section{Objectifs}
 
-Objectifs techniques (repris de l'énoncé, section~3) :
+Objectifs techniques :
 
 \begin{itemize}[leftmargin=1.5em]
   \item Organiser un espace HDFS en zones \texttt{raw}, \texttt{processed}
@@ -49,9 +48,7 @@ Objectifs techniques (repris de l'énoncé, section~3) :
     SQL, et comparer les deux approches.
   \item Produire des analyses et un dashboard d'au moins 6
     visualisations.
-  \item Interpréter les résultats sans généraliser au-delà du dataset —
-    exigence reprise dans chaque section d'interprétation de ce rapport
-    (encadrés \emph{Constat}).
+  \item Interpréter les résultats sans généraliser au-delà du dataset.
 \end{itemize}
 
 \section{\texorpdfstring{Intérêt de la chaîne HDFS $\to$ Hive $\to$ Spark $\to$ Jupyter/PySpark}{Intérêt de la chaîne HDFS - Hive - Spark - Jupyter/PySpark}}
@@ -62,18 +59,18 @@ dupliquer les autres :
 \begin{itemize}[leftmargin=1.5em]
   \item \textbf{HDFS} sépare physiquement les zones \texttt{raw}
     (donnée brute, jamais modifiée) et \texttt{processed} (donnée
-    nettoyée et modélisée) — une donnée corrompue en aval peut toujours
+    nettoyée et modélisée). Une donnée corrompue en aval peut toujours
     être reconstruite depuis la zone \texttt{raw}, sans dépendre d'une
     sauvegarde externe.
   \item \textbf{Hive} expose ces deux zones comme des tables SQL
-    interrogeables sans réécrire de code de parsing — utile pour les
+    interrogeables sans réécrire de code de parsing, utile pour les
     contrôles rapides (\texttt{DESCRIBE}, \texttt{COUNT}) et pour les
-    requêtes d'analyse du chapitre~8.
+    requêtes d'analyse.
   \item \textbf{Spark} est le seul des trois composants capable
     d'exprimer des transformations programmatiques (nettoyage,
     \texttt{split}/\texttt{explode} pour les compétences, hash
-    déterministe pour les clés) — Hive SQL seul ne suffit pas à
-    construire le modèle en 3 tables du chapitre~7.
+    déterministe pour les clés). Hive SQL seul ne suffit pas à
+    construire le modèle en 3 tables.
   \item \textbf{Jupyter/PySpark} centralise l'exploration interactive,
     le requêtage Hive SQL/Spark SQL et le dashboard final dans un
     même environnement versionnable (notebook), connecté à HDFS et
@@ -84,6 +81,6 @@ dupliquer les autres :
 Le sujet original prévoit Zeppelin et Data Analytics Studio pour
 l'étape d'analyse et de visualisation. Ce choix a été remplacé par
 Jupyter/PySpark, validé avec M.~Touati~: HDFS et Hive restent le socle
-de stockage et de requêtage obligatoire (barème), Jupyter/PySpark en
-assure l'exploitation. Détail de la justification au chapitre~3.
+de stockage et de requêtage obligatoire, Jupyter/PySpark en
+assure l'exploitation.
 \end{constat}

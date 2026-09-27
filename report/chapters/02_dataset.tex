@@ -3,9 +3,7 @@
 \section{Source et volumétrie}
 
 Le dataset utilisé est \emph{AI Jobs Market 2025-2026 | Salaries}
-(Kaggle), déposé tel quel dans \texttt{data/raw/} (gitignored, jamais
-commité — voir \texttt{CLAUDE.md}). Vérifié directement sur le fichier
-réel :
+(Kaggle). Vérifié directement sur le fichier source :
 
 \begin{center}
 \begin{tabular}{ll}
@@ -16,21 +14,10 @@ Nombre de lignes de données & 1500 \\
 Nombre de colonnes & 25 \\
 Séparateur & virgule (\texttt{,}) \\
 En-tête & présent (1 ligne, noms de colonnes explicites) \\
-Guillemets/virgules internes & aucun — un \texttt{SerDe} délimité simple suffit \\
+Guillemets/virgules internes & aucun ; un \texttt{SerDe} délimité simple suffit \\
 \bottomrule
 \end{tabular}
 \end{center}
-
-\begin{constat}[Écart avec l'énoncé initial du sujet]
-Le ticket \#111 (comme certaines versions de suivi antérieures)
-mentionnait 26 colonnes par anticipation, avant inspection réelle du
-fichier. Le comptage effectif sur le CSV (\texttt{head -1 | tr ',' '\textbackslash n' | wc -l})
-donne \textbf{25 colonnes}, cohérent avec \texttt{CLAUDE.md} et le
-\texttt{StructType} de \texttt{src/etl/schema.py}. Conformément à la
-remarque de l'énoncé (\og les noms exacts des colonnes devront être
-adaptés après inspection du fichier Kaggle, vous devez documenter toute
-adaptation \fg{}), c'est le chiffre réel qui fait foi ici.
-\end{constat}
 
 \section{Variables principales}
 
@@ -57,15 +44,13 @@ Autres & \texttt{benefits\_score\_10} \\
 
 Ces colonnes couvrent directement les axes demandés par l'énoncé :
 offres, métiers, compétences, salaires, pays, secteurs et dates.
-\texttt{required\_skills} est la seule colonne multi-valuée (transformée
-en table \texttt{competences} au chapitre~7 via \texttt{split}/\texttt{explode}) ;
+\texttt{required\_skills} est la seule colonne multi-valuée, transformée
+en table \texttt{competences} via \texttt{split}/\texttt{explode} ;
 toutes les autres colonnes sont directement exploitables telles quelles.
 
 \section{Premières observations de qualité (avant nettoyage)}
 
-Contrôle exécuté sur le fichier brut, avant toute transformation Spark
-(distinct des comptages post-nettoyage du chapitre~6, qui portent sur
-le DataFrame après lecture HDFS) :
+Contrôle exécuté sur le fichier brut, avant toute transformation Spark :
 
 \begin{center}
 \begin{tabular}{ll}
@@ -85,11 +70,9 @@ Répartition par expérience & Entry 385, Mid 370, Senior 364, Lead 381 \\
 
 \begin{constat}[Un dataset propre par construction]
 Aucune anomalie détectée sur les critères contrôlés (NULL, doublons,
-salaires invalides) — cohérent avec le résultat obtenu après nettoyage
-Spark au chapitre~6 (0 ligne affectée par les règles de nettoyage). Ce
-dataset est vraisemblablement généré/synthétisé plutôt que collecté
-directement (répartition d'expérience quasi uniforme, absence totale de
-valeur manquante sur 25 colonnes) — un point repris au chapitre~13
-(limites de l'étude) : la propreté du dataset ne garantit pas sa
-représentativité du marché réel de l'emploi IA.
+salaires invalides). Le dataset est vraisemblablement généré ou
+synthétisé plutôt que collecté directement : répartition d'expérience
+quasi uniforme, absence totale de valeur manquante sur 25 colonnes. La
+propreté du dataset ne garantit donc pas sa représentativité du marché
+réel de l'emploi IA, un point développé dans les limites de l'étude.
 \end{constat}

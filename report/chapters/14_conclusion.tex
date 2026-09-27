@@ -1,1 +1,75 @@
 \chapter{Conclusion}
+
+Ce dernier chapitre répond directement à la question posée en
+introduction, puis donne un regard d'ensemble sur ce que la chaîne Big
+Data a produit. Les constats détaillés et les recommandations ne sont
+pas repris ici : l'objectif est de prendre du recul sur l'ensemble, pas
+de refaire la synthèse.
+
+\section{Réponse à la question directrice}
+
+La question était : \emph{quelles tendances du marché des emplois IA
+peut-on mettre en évidence à partir des offres, des métiers, des
+compétences et des rémunérations ?} Après avoir transformé 1500 offres
+brutes en un modèle exploitable de 25 métiers et 9\,428 liaisons
+offre-compétence, notre réponse tient en une idée : sur ce dataset, le
+marché de l'emploi IA se distingue moins par des écarts salariaux
+spectaculaires entre profils que par la \textbf{concentration de la
+valeur sur quelques signaux précis}. Un métier rare et massivement
+demandé (LLM Engineer), une compétence universelle (Python), et un mode
+de travail devenu flexible par défaut (hybride ou remote) structurent le
+marché bien plus fortement que la seule ancienneté.
+
+Quelques chiffres pour fixer les ordres de grandeur :
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Indicateur & Valeur (dataset complet) \\
+\midrule
+Offres analysées & 1500 \\
+Métiers distincts & 25 \\
+Salaire moyen / médian & 194\,892\$ / 179\,421\$ \\
+Compétence la plus demandée & Python (942 offres, 62,8\,\%) \\
+Métier le plus tendu & LLM Engineer (75 offres, 240\,960\$ en moyenne) \\
+Pays le plus représenté et le mieux payé & USA (515 offres, 226\,190\$) \\
+Mode de travail dominant & Hybrid (45,7\,\%) \\
+Rôles LLM/GenAI & 327 offres (21,8\,\%) \\
+Écart de salaire au sein du top 10 pays & 20,2\,\% seulement \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Ce que ces chiffres racontent, une fois reliés, c'est un marché où la
+rémunération traduit surtout la tension d'une compétence ou d'un profil,
+et assez peu l'accumulation d'années d'expérience (corrélation de 0,079
+contre 0,292 pour la demande). Le salaire reste élevé partout dans le
+haut du tableau, sans abîme entre les pays : le marché mondial de l'IA
+semble se jouer davantage sur la capacité à attirer les bons profils que
+sur l'arbitrage géographique.
+
+\section{Apports du projet}
+
+Au-delà des résultats métier, le projet a produit une chaîne complète et
+reproductible : ingestion HDFS, tables Hive RAW et processed,
+transformations Spark, requêtes Hive SQL et Spark SQL, analyses KPI,
+visualisations Jupyter/PySpark. Chaque étape est chiffrée, versionnée et
+testée. Le passage systématique par HDFS et Hive garantit que les
+analyses ne s'appuient jamais sur une copie locale du CSV, et que les
+données brutes restent immuables.
+
+\section{Perspectives}
+
+À titre de suite, une comparaison systématique à des sources externes
+(benchmarks salariaux, offres d'emploi temps réel) permettrait de juger
+de la représentativité du dataset. Une actualisation régulière des
+offres et l'intégration de séries temporelles plus longues seraient
+également nécessaires pour transformer les constats descriptifs en
+indicateurs de tendance fiables.
+
+La réponse à la question directrice est donc nuancée : oui, des
+tendances nettes existent (concentration de la demande, prééminence des
+compétences sur l'ancienneté, flexibilité par défaut), mais elles valent
+pour \emph{ce} dataset, à \emph{cet} instant. Le principal apport du
+projet est une chaîne reproductible, testée et chiffrée, capable de
+produire ces constats et de les réviser si la donnée change.

@@ -1,8 +1,7 @@
 \chapter{Analyse des métiers, salaires et compétences}
-% KPI Jour 3 obligatoires (10) — issue #94. Requêtes dans
-% sql/hive/02_kpis.sql, exécutées via Beeline le 16/09/2026.
-% Les 4 analyses au choix (issue #95) et le dashboard (issue #96)
-% restent à faire — voir STATUS.md.
+% KPI Jour 3 obligatoires (10). Requêtes exécutées via Beeline le
+% 16/09/2026. Les 4 analyses au choix et le dashboard sont présentés
+% dans les chapitres suivants.
 
 \section{KPI obligatoires (10)}
 
@@ -56,7 +55,7 @@ AI Product Manager & 70 \\
 
 \begin{constat}[Interprétation]
 \textbf{LLM Engineer} est le seul métier présent dans les deux top 5
-(rémunération \emph{et} volume) — un signal de tension du marché
+(rémunération \emph{et} volume), un signal de tension du marché
 particulièrement fort sur ce profil. \textbf{AI Solutions Architect}
 rémunère le mieux mais ne figure pas dans le top 4 des métiers les plus
 demandés (volume plus faible), cohérent avec un poste senior/rare plutôt
@@ -96,7 +95,7 @@ On-site & 369 & 24,6 \\
 \end{center}
 
 Le mode \textbf{hybride} domine largement (45,7\,\%) sur ce marché de
-l'IA, devant le full-remote (29,7\,\%) — le présentiel intégral reste
+l'IA, devant le full-remote (29,7\,\%). Le présentiel intégral reste
 minoritaire (24,6\,\%) mais loin d'être marginal.
 
 \subsection{KPI 9 : analyse LLM/GenAI}
@@ -112,16 +111,16 @@ Oui (1) & 327 & 207\,746 & 8,96 \\
 \end{tabular}
 \end{center}
 
-\begin{constat}[Interprétation — à ne pas sur-interpréter]
+\begin{constat}[Interprétation]
 Les rôles LLM/GenAI (\texttt{is\_llm\_role=1}) sont mieux rémunérés en
-moyenne (+16\,437\$, soit +8,6\,\%) que le reste du marché IA — mais leur
+moyenne (+16\,437\$, soit +8,6\,\%) que le reste du marché IA, mais leur
 \texttt{ai\_salary\_premium\_pct} moyen est \emph{plus bas}
 (8,96\,\% contre 11,39\,\%). Ce n'est pas contradictoire : le premium
 mesure un écart relatif à un référentiel qui n'est pas détaillé dans le
 dataset, alors que le salaire absolu compare directement deux
 populations de métiers différents. Le dataset ne permet pas de trancher
 si les rôles LLM/GenAI sont \og mieux payés parce que rares \fg{} ou
-\og mieux payés par nature du poste \fg{} — une affirmation causale
+\og mieux payés par nature du poste \fg{}, une affirmation causale
 irait au-delà de ce que ces chiffres montrent.
 \end{constat}
 
@@ -145,18 +144,16 @@ Année & Mois & Offres & Salaire moyen (\$) \\
 Le volume d'offres par mois est environ \textbf{5 fois plus élevé} sur
 les 3 premiers mois de 2026 (271 à 306/mois) que sur l'ensemble de 2025
 (41 à 68/mois). Le dataset ne documente pas la méthode de collecte
-sous-jacente : cette rupture peut refléter une réelle accélération du
+sous-jacente : cette rupture peut refléter une accélération du
 marché de l'emploi IA sur cette période, ou un artefact de construction
-du jeu de données (échantillonnage non uniforme dans le temps). À
-traiter comme un constat descriptif, pas comme une preuve de tendance
-de marché — repris au chapitre~13 (limites de l'étude).
+du jeu de données (échantillonnage non uniforme dans le temps). Ce
+constat descriptif est repris et nuancé dans les limites de l'étude.
 \end{constat}
 
-\section{Captures des 10 KPI (exécution réelle)}
+\section{Captures des 10 KPI}
 
-Sortie complète de \texttt{sql/hive/02\_kpis.sql} via Beeline, capture
-régénérée par \texttt{task screenshots-cli} — preuve d'exécution
-réelle correspondant aux chiffres ci-dessus.
+Sortie complète des requêtes KPI via Beeline, correspondant aux
+chiffres ci-dessus.
 
 \begin{figure}[p]
 \centering
@@ -173,8 +170,6 @@ LLM/GenAI, évolution 2025-2026).}
 \end{figure}
 
 \section{4 analyses au choix}
-% Issue #95. Une sous-section par analyse, ajoutée au fur et à mesure
-% de son exécution réelle (DoD appliquée par sous-étape).
 
 \subsection{Analyse 1 : prime salariale IA par métier}
 
@@ -195,18 +190,17 @@ LIMIT 5;
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/etape3_analyse1_prime_ia.png}
-\caption{Top 5 métiers par prime salariale IA moyenne — capture
-régénérée par \texttt{task screenshots-cli}.}
+\caption{Top 5 métiers par prime salariale IA moyenne.}
 \end{figure}
 
 \begin{constat}[Interprétation]
 \textbf{Multimodal AI Engineer} arrive en tête avec un premium moyen de
 13,6\,\%, suivi de près par Robotics Engineer (AI, 13,55\,\%) et AI
-Compliance Manager (13,45\,\%) — un métier pourtant absent des tops
-volume/rémunération absolue des chapitres précédents. Le premium le
+Compliance Manager (13,45\,\%), un métier pourtant absent des tops
+volume/rémunération absolue présentés précédemment. Le premium le
 plus élevé ne coïncide pas nécessairement avec le salaire absolu le
 plus élevé (AI Compliance Manager : 155\,939\$, contre 251\,577\$ pour
-AI Solutions Architect qui n'apparaît pas dans ce top 5) — le premium
+AI Solutions Architect qui n'apparaît pas dans ce top 5). Le premium
 mesure une prime relative, pas un niveau de rémunération.
 \end{constat}
 
@@ -214,7 +208,7 @@ mesure une prime relative, pas un niveau de rémunération.
 
 \textbf{Question} : au-delà de la moyenne simple du KPI~9, comment les
 rôles LLM/GenAI se comparent-ils au reste du marché sur la médiane et
-la demande ?
+le score de demande ?
 
 \begin{verbatim}
 SELECT is_llm_role, COUNT(*) AS nb_offres,
@@ -228,29 +222,28 @@ GROUP BY is_llm_role;
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/etape3_analyse2_llm_vs_autres.png}
-\caption{LLM/GenAI vs autres métiers — salaire moyen, médian et
-\texttt{demand\_score} — capture régénérée par
-\texttt{task screenshots-cli}.}
+\caption{Comparaison LLM/GenAI vs autres métiers : salaire moyen,
+médian et \texttt{demand\_score}.}
 \end{figure}
 
 \begin{constat}[Interprétation]
 Les rôles LLM/GenAI (327 offres, 21,8\,\% du dataset) devancent le
 reste du marché sur les trois indicateurs : salaire moyen (+8,6\,\%,
 207\,746\$ contre 191\,309\$), salaire \textbf{médian} (+6,3\,\%,
-190\,500\$ contre 179\,125\$ — l'écart de médiane est plus resserré que
+190\,500\$ contre 179\,125\$, l'écart de médiane étant plus resserré que
 l'écart de moyenne, signe que quelques offres très bien payées tirent
 la moyenne LLM vers le haut sans que la tendance centrale soit
 totalement différente), et \texttt{demand\_score} moyen (92,9 contre
-86,0 sur 100) — cohérent avec un segment de marché en tension.
+86,0 sur 100), ce qui est cohérent avec un segment de marché en tension.
 \end{constat}
 
 \subsection{Analyse 3 : expérience-salaire et matrice de corrélation}
 
 \textbf{Question} : au-delà de la moyenne par tranche d'expérience du
-KPI~7, quelle est la force réelle de la relation entre expérience et
-salaire — et comment se comparent-elles à d'autres relations du
-dataset ? Analyse descriptive (coefficients de corrélation de Pearson
-via \texttt{CORR()}), aucun modèle entraîné.
+KPI~7, quelle est la force de la relation entre expérience et
+salaire, et comment se compare-t-elle à d'autres relations du dataset ?
+Analyse descriptive (coefficients de corrélation de Pearson via
+\texttt{CORR()}), aucun modèle entraîné.
 
 \begin{verbatim}
 SELECT
@@ -269,27 +262,27 @@ FROM projet_ia.ai_jobs_raw;
 \centering
 \includegraphics[width=0.85\linewidth]{figures/etape3_analyse3_correlation.png}
 \caption{Corrélations de Pearson entre salaire, expérience, demande et
-premium IA — capture régénérée par \texttt{task screenshots-cli}.}
+premium IA.}
 \end{figure}
 
-\begin{constat}[Interprétation — résultat contre-intuitif, à ne pas sur-interpréter]
+\begin{constat}[Interprétation]
 La corrélation \texttt{salaire}$\leftrightarrow$\texttt{expérience}
-(années continues) est \textbf{quasi nulle} (0,079) — un résultat qui
-semble contredire le KPI~7 (chapitre~9.1), où le salaire moyen progresse
+(années continues) est \textbf{quasi nulle} (0,079), un résultat qui
+semble contredire le KPI~7, où le salaire moyen progresse
 clairement de 150\,039\$ (Entry) à 240\,055\$ (Lead). Ce n'est pas une
 contradiction : le KPI~7 agrège par \emph{tranche catégorielle}
 (\texttt{experience\_level}), qui peut capturer un effet de seuil non
 linéaire (un saut de rémunération à l'entrée dans une tranche), alors
 que la corrélation de Pearson mesure une relation \emph{linéaire} sur
-la variable continue \texttt{years\_of\_experience} — une forte
-variance intra-tranche peut aussi diluer la corrélation globale. Le
-salaire est plus corrélé au \texttt{demand\_score} (0,292, la relation
-la plus forte du tableau, bien que toujours modeste) qu'à l'expérience
-ou au premium IA (quasi nuls, -0,02 et -0,096) : sur ce dataset, la
-tension du marché pour un profil semble un signal aussi ou plus
-pertinent que son ancienneté brute. Ces coefficients restent faibles
-dans l'absolu (aucun ne dépasse 0,3) : le dataset ne permet pas
-d'affirmer une relation forte entre ces variables, linéaire ou non.
+la variable continue \texttt{years\_of\_experience}. Une forte variance
+intra-tranche peut aussi diluer la corrélation globale. Le salaire est
+plus corrélé au \texttt{demand\_score} (0,292, la relation la plus forte
+du tableau, bien que toujours modeste) qu'à l'expérience ou au premium
+IA (quasi nuls, -0,02 et -0,096) : sur ce dataset, la tension du marché
+pour un profil semble un signal aussi ou plus pertinent que son
+ancienneté brute. Ces coefficients restent faibles dans l'absolu (aucun
+ne dépasse 0,3) : le dataset ne permet pas d'affirmer une relation forte
+entre ces variables, linéaire ou non.
 \end{constat}
 
 \subsection{Analyse 4 : pays et compétences}
@@ -318,18 +311,17 @@ LIMIT 5;
 \centering
 \includegraphics[width=0.85\linewidth]{figures/etape3_analyse4_pays_competences.png}
 \caption{Compétence n°1 par pays (top 5 paires pays/compétence par
-volume) — capture régénérée par \texttt{task screenshots-cli}.}
+volume).}
 \end{figure}
 
 \begin{constat}[Interprétation]
 \textbf{Python est la compétence n°1 dans les 5 premiers pays du
-classement} (USA, Chine, Allemagne, Canada, UK), sans exception —
-l'écart de volume entre pays (334 offres pour les USA contre 52-58
-pour les autres) reflète surtout le poids des USA dans le dataset
-(chapitre~6) plutôt qu'une préférence de compétence différente. Ce
-résultat renforce le constat du chapitre~8 (jointure
-offres$\leftrightarrow$competences) : Python n'est pas seulement la
-compétence la plus demandée globalement, elle domine de façon
-\emph{uniforme} d'un pays à l'autre — le dataset ne fait apparaître
-aucune spécialisation nationale marquée sur la compétence phare.
+classement} (USA, Chine, Allemagne, Canada, UK), sans exception. L'écart
+de volume entre pays (334 offres pour les USA contre 52--58 pour les
+autres) reflète surtout le poids des USA dans le dataset plutôt
+qu'une préférence de compétence différente. Ce résultat renforce le
+constat précédent : Python n'est pas seulement la compétence la
+plus demandée globalement, elle domine de façon \emph{uniforme} d'un
+pays à l'autre. Le dataset ne fait apparaître aucune spécialisation
+nationale marquée sur la compétence phare.
 \end{constat}

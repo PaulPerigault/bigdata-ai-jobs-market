@@ -1,0 +1,27 @@
+\usetikzlibrary{positioning,arrows.meta}
+\begin{tikzpicture}[
+  font=\small\sffamily,
+  node distance=0.8cm,
+  box/.style={
+    rectangle, rounded corners=3pt, minimum width=3.6cm, minimum height=0.8cm,
+    text centered, align=center, draw=white, very thick, text=white
+  },
+  rawbox/.style={box, fill=esienavy},
+  procbox/.style={box, fill=esieaorange},
+  storebox/.style={box, fill=esieablue},
+  arrow/.style={-{Stealth[length=2.5mm]}, thick, esieagray},
+  lbl/.style={font=\scriptsize\sffamily\color{esieagray}, align=center}
+]
+\node[storebox] (csv) {CSV brut\\ \texttt{data/raw/}};
+\node[rawbox, below=of csv] (raw) {HDFS \texttt{/projet\_ia/raw}};
+\node[procbox, below=of raw] (spark) {Spark\\nettoyage + transformation};
+\node[rawbox, below=of spark] (proc) {HDFS \texttt{/projet\_ia/processed}};
+\node[storebox, below=of proc] (hive) {Hive\\tables externes RAW + processed};
+\node[procbox, below=of hive] (jupyter) {Jupyter/PySpark\\requêtes + dashboard};
+
+\draw[arrow] (csv) -- node[lbl, right] {ingestion\\HDFS} (raw);
+\draw[arrow] (raw) -- node[lbl, right] {lecture\\HDFS} (spark);
+\draw[arrow] (spark) -- node[lbl, right] {écriture\\Parquet} (proc);
+\draw[arrow] (proc) -- node[lbl, right] {DDL\\EXTERNAL} (hive);
+\draw[arrow] (hive) -- node[lbl, right] {Hive SQL /\\Spark SQL} (jupyter);
+\end{tikzpicture}

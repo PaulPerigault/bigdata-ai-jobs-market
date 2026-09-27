@@ -1,0 +1,33 @@
+\begin{tikzpicture}[
+  font=\small\sffamily,
+  actor/.style={rectangle, rounded corners=3pt, fill=esieablue, text=white,
+    minimum width=2.2cm, minimum height=0.75cm, align=center, draw=none},
+  lifeline/.style={dashed, esieagray, line width=0.4pt},
+  msg/.style={->, >=stealth, thick, esieagray},
+  lbl/.style={font=\scriptsize\sffamily\color{esieagray}, align=center,
+    fill=white, inner sep=1.5pt}
+]
+% Acteurs
+\node[actor] (user) at (0,0) {Utilisateur};
+\node[actor] (jupyter) at (3.8,0) {Jupyter/\\PySpark};
+\node[actor] (hive) at (7.6,0) {Hive\\metastore};
+\node[actor] (hdfs) at (11.4,0) {HDFS\\processed};
+
+% Lifelines
+\draw[lifeline] (user.south) -- (0,-5.5);
+\draw[lifeline] (jupyter.south) -- (3.8,-5.5);
+\draw[lifeline] (hive.south) -- (7.6,-5.5);
+\draw[lifeline] (hdfs.south) -- (11.4,-5.5);
+
+% Messages
+\draw[msg] (0,-0.9) -- (3.8,-0.9) node[lbl, midway, above] {requête SQL / Spark SQL};
+\draw[msg] (3.8,-1.7) -- (7.6,-1.7) node[lbl, midway, above] {demande de metadata};
+\draw[msg] (7.6,-2.5) -- (3.8,-2.5) node[lbl, midway, above] {location Parquet};
+\draw[msg] (3.8,-3.3) -- (11.4,-3.3) node[lbl, midway, above] {lecture des fichiers Parquet};
+\draw[msg] (11.4,-4.1) -- (3.8,-4.1) node[lbl, midway, above] {DataFrame / résultats};
+\draw[msg] (3.8,-4.9) -- (0,-4.9) node[lbl, midway, above] {tableau / visualisation};
+
+% Zone d'activation Jupyter
+\draw[fill=esieaoffwhite, draw=esieagray, rounded corners=2pt, line width=0.5pt]
+  (3.5,-0.7) rectangle (4.1,-5.1);
+\end{tikzpicture}

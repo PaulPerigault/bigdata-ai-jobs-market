@@ -1,0 +1,10 @@
+# graphify ignore rules — project-specific, merged with .gitignore.
+# Syntax is the same as .gitignore (including ! negation).
+
+# Graphify's own installed skill + plugin are tooling, not project content:
+# including them would flood the graph with graphify's own documentation.
+.opencode/
+
+# report/figures/ holds binary screenshots (PNG). They carry no text, and the
+# vision pass is out of scope for the initial graph (see CLAUDE.md/JOURNAL.md).
+report/figures/

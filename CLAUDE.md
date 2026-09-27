@@ -429,6 +429,63 @@ Docker jetable.
 - Compromis de sécurité du montage du socket Docker documenté dans
   `SECURITY.md` (exception assumée, jamais à généraliser).
 
+## Graphify (knowledge graph du dépôt) — installé le 27/09/2026
+
+Outil de cartographie du dépôt en graphe de connaissance
+([Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify)), ajouté
+comme **outillage agent**, hors barème. Le `.gitignore` prévoyait déjà
+`graphify-out/cost.json` depuis le scaffolding initial.
+
+- **CLI** : package PyPI `graphifyy` (le nom `graphify` seul n'est **pas** le
+  bon package), commande `graphify`. Installé sur le Python système 3.13 avec
+  l'extra `sql` (`pip install "graphifyy[sql]"`) — sans `tree_sitter_sql`, les
+  4 fichiers `sql/hive/*.sql` ne contribuent rien au graphe. Graphify exige
+  Python 3.10+ ; ce Python ne sert **qu'à** graphify, pas à `pyspark==3.5.0`
+  (voir « Tests locaux » : Python 3.12 requis).
+- **Skill `/graphify`** : installé en scope projet pour OpenCode
+  (`graphify install --project --platform opencode`) dans
+  `.opencode/skills/graphify/` (SKILL.md + `references/`), versionné et
+  partagé avec l'équipe.
+- **Plugin always-on** : `.opencode/plugins/graphify.js`, **porté en API plugin
+  OpenCode V2** (`Plugin.define` + `ctx.shell.hook("create.before")`). Le
+  fichier livré par `graphify install` utilise l'API V1
+  (`export const GraphifyPlugin = … "tool.execute.before"`), qui ne s'exécute
+  **pas** sous OpenCode V2 (cf. doc « Migrate plugins from V1 ») : ne pas le
+  remplacer par une réinstallation brute de graphify sans re-porter le plugin.
+  `.opencode/opencode.json` (créé par l'installeur avec la clé V1 `plugin`) a
+  été supprimé — les plugins de `.opencode/plugins/` sont auto-découverts en V2.
+- **Règles always-on** : `AGENTS.md` (OpenCode V2 lit `AGENTS.md`, **pas**
+  `CLAUDE.md`) contient le bloc graphify écrit par l'installeur — questions sur
+  le code → `graphify query` avant de grepper.
+- **Périmètre** : `.graphifyignore` exclut `.opencode/` (l'outil lui-même) et
+  `report/figures/` (captures binaires, passe vision hors périmètre). Graphify
+  respecte `.gitignore` par défaut ; `.graphifyignore` ne peut qu'exclure
+  davantage.
+- **Sorties** (`graphify-out/`) : `graph.html` (interactif), `GRAPH_REPORT.md`,
+  `graph.json`, `manifest.json`. Le dépôt prévoit de committer `graphify-out/`
+  sauf `cost.json` (voir `.gitignore`) ; ailleurs graphify gitignore
+  `graphify-out/` par défaut, donc au premier commit il faut `git add -f
+  graphify-out/graph.json graphify-out/GRAPH_REPORT.md`.
+- **Rebuild** : `graphify hook install` (fait) ajoute `post-commit`/
+  `post-checkout` (AST seul, gratuit, aucun LLM) + un merge driver
+  `graph.json` (`graphify-out/graph.json merge=graphify` dans
+  `.gitattributes`) ; après un `git pull`, `graphify update .` resynchronise.
+  Les **documents** (README/CLAUDE/STATUS/JOURNAL/…) passent par la passe
+  sémantique (LLM) : `graphify extract` headless exige une clé (Gemini/…) ;
+  sinon utiliser le skill `/graphify --update`, où l'agent hôte fait office de
+  LLM.
+- **Build initial (27/09/2026)** : 41 fichiers (23 code + 18 docs), 201 nœuds,
+  242 arêtes, 36 communautés, 86 % d'arêtes EXTRACTED. 14 arêtes *dangling*
+  (endpoints non résolus produits par la passe sémantique) signalées par
+  `graphify diagnose` — non bloquant.
+- **Limite connue** : graphify ne parse pas les `.tex`. Les chapitres de
+  `report/chapters/*.tex` ne sont donc **pas** dans le graphe (seulement les
+  documents `.md`/`.yml` et le code).
+- **Windows/PowerShell** : le `SKILL.md` livré est écrit en bash (`which`,
+  `head`, `$(cat …)`, heredocs). `query`/`path`/`explain` passent par le CLI
+  `graphify` et fonctionnent tels quels ; un rebuild complet via le skill
+  demande d'adapter les blocs de commandes à PowerShell.
+
 ## Ce que Claude Code ne doit PAS faire
 
 - Ne pas réintroduire Zeppelin/DAS.

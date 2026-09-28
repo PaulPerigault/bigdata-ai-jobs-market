@@ -1,23 +1,21 @@
 \chapter{Architecture Big Data retenue}
 
 \section{Schéma d'architecture}
-% \includegraphics[width=\linewidth]{figures/architecture.png}
 
-\begin{center}
-\small
-CSV (\texttt{data/raw/}) $\to$ HDFS \texttt{/projet\_ia/raw}
-$\to$ Spark (nettoyage, transformation)
-$\to$ HDFS \texttt{/projet\_ia/processed}
-$\to$ Hive (tables externes)
-$\to$ Jupyter/PySpark
-\end{center}
+\begin{figure}[h]
+\centering
+\resizebox{!}{0.55\textheight}{\input{figures/architecture.tex}}
+\caption{Flux de données de l'architecture retenue : CSV brut
+  $\to$ HDFS \texttt{raw} $\to$ Spark (nettoyage/transformation)
+  $\to$ HDFS \texttt{processed} $\to$ Hive (tables externes)
+  $\to$ Jupyter/PySpark (requêtes et dashboard).}
+\label{fig:architecture}
+\end{figure}
 
 \section{Rôle de chaque composant}
 
-La stack est orchestrée via Docker Compose (\texttt{compose.yaml} +
-\texttt{compose.override.yaml}), pilotée par un unique point d'entrée
-documenté, le \texttt{Taskfile.yml} (\texttt{task up}, \texttt{task
-ingest}, \texttt{task etl}, \dots).
+La stack est orchestrée via Docker Compose et pilotée par un unique
+point d'entrée documenté.
 
 \begin{itemize}[leftmargin=1.5em]
   \item \textbf{HDFS} (\texttt{bde2020/hadoop-namenode} /
@@ -42,113 +40,39 @@ stockage et de requêtage, conformément au sujet.
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/etape1_task_up_healthy.png}
-\caption{\texttt{docker compose ps} — les 6 services de la stack
-healthy (\texttt{task up}, capture régénérée par
-\texttt{task screenshots-cli}).}
+\caption{Les 6 services de la stack Docker Compose sont healthy.}
 \end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.75\linewidth]{figures/etape2_jupyter_notebook.png}
-\caption{Environnement Jupyter/PySpark connecté à la stack, notebook du
-projet ouvert (capture régénérée par \texttt{task screenshots-web}).
-Le dashboard final (6+ visualisations, issue \#96) n'existe pas encore
-à ce stade — cette capture montre l'environnement, pas le livrable
-final du chapitre~10.}
+\caption{Environnement Jupyter/PySpark connecté à la stack, avec le
+notebook du projet ouvert.}
+\end{figure}
+
+\section{Flux d'une requête type}
+
+Le schéma d'architecture montre les composants et le flux de données au
+niveau du pipeline. Le diagramme de séquence ci-dessous montre ce que
+voit un utilisateur lors d'une requête interactive classique depuis
+Jupyter/PySpark : chaque étape reste dans la stack, aucun accès direct au
+CSV local n'est nécessaire.
+
+\begin{figure}[h]
+\centering
+\resizebox{\linewidth}{!}{\input{figures/sequence_requete.tex}}
+\caption{Flux d'une requête type : utilisateur $\to$ Jupyter/PySpark
+  $\to$ Hive (métadonnées) $\to$ HDFS (fichiers Parquet) $\to$ retour
+  des résultats sous forme de tableau ou de visualisation.}
+\label{fig:sequence_requete}
 \end{figure}
 
 \section{Organisation raw / processed / output}
 
 \begin{itemize}[leftmargin=1.5em]
-  \item \texttt{/projet\_ia/raw} : CSV brut déposé par ingestion (chapitre~4).
+  \item \texttt{/projet\_ia/raw} : CSV brut déposé par ingestion.
   \item \texttt{/projet\_ia/processed/\{offres,metiers,competences\}} :
-    tables Parquet issues du pipeline ETL (chapitre~7).
+    tables Parquet issues du pipeline ETL.
   \item \texttt{/projet\_ia/output} : réservé aux exports du dashboard
     et analyses finales.
 \end{itemize}
-
-\section{Adaptation à l'émulation amd64 sur Apple Silicon}
-
-Les images \texttt{bde2020/*} n'existent qu'en \texttt{amd64} ; sur les
-postes Apple Silicon de l'équipe, elles tournent sous émulation QEMU
-via \textbf{colima} (Docker Desktop s'étant révélé installé mais cassé
-sur un des postes de développement — \texttt{Docker.app} absent malgré
-l'installation Homebrew). Deux effets concrets de cette émulation ont
-été rencontrés et corrigés :
-
-\begin{itemize}[leftmargin=1.5em]
-  \item démarrage JVM figé plusieurs minutes en CPU à 100\,\% (format
-    du namenode, initialisation du schéma Hive) — contourné en forçant
-    le mode interprété (\texttt{JAVA\_TOOL\_OPTIONS=-Xint}) plutôt que
-    le JIT HotSpot, qui présente un bug de traduction sous QEMU ;
-  \item l'image \texttt{bde2020/hive-metastore-postgresql:2.3.0}
-    (ancien entrypoint Go) plante au démarrage
-    (\texttt{fatal error: newosproc}) sous cette même émulation —
-    remplacée par l'image officielle \texttt{postgres:13.18} (native
-    arm64), avec un script dédié
-    (\texttt{scripts/hive-metastore-entrypoint.sh}) pour initialiser le
-    schéma Hive (\texttt{schematool -initSchema}) que l'image
-    officielle ne pré-charge pas.
-\end{itemize}
-
-\section{Recul critique : corrections de sécurité}
-
-Un scan de sécurité automatique exécuté après le premier push a
-identifié trois problèmes réels sur la configuration Docker Compose
-initiale, corrigés avant de poursuivre :
-
-\begin{enumerate}[leftmargin=1.5em]
-  \item \textbf{Exposition réseau non intentionnelle} : les ports
-    publiés (\texttt{"8888:8888"}, \texttt{"9083:9083"}, etc.) étaient
-    bindés par défaut sur \texttt{0.0.0.0}, donc accessibles depuis tout
-    le réseau local (Wi-Fi partagé) et pas seulement depuis la machine
-    du développeur — contraire à la règle explicite de
-    \texttt{SECURITY.md}. Corrigé en préfixant chaque port publié par
-    \texttt{127.0.0.1:} (ex. \texttt{"127.0.0.1:8888:8888"}).
-  \item \textbf{Élévation de privilèges superflue} : la variable
-    \texttt{GRANT\_SUDO=yes} avait été ajoutée au conteneur
-    \texttt{jupyter} sans besoin réel (aucune commande du pipeline ne
-    nécessite \texttt{sudo} à l'intérieur du conteneur) — retirée.
-  \item \textbf{Identifiants par défaut} : les identifiants Postgres
-    (\texttt{hive}/\texttt{hive}) et le token Jupyter par défaut
-    (\texttt{bigdata}) restent volontairement des valeurs par défaut
-    documentées dans \texttt{.env.example} — acceptable dans le
-    périmètre explicitement défini par \texttt{SECURITY.md} (stack
-    strictement locale, non exposée), d'autant plus maintenant que les
-    ports ne sont plus accessibles au-delà de \texttt{localhost}.
-\end{enumerate}
-
-Cet épisode illustre concrètement l'intérêt d'outiller la revue de
-sécurité même sur un projet pédagogique local : les deux premiers
-points étaient de vraies failles de configuration, pas des faux
-positifs, corrigées avant qu'elles ne deviennent une habitude reproduite
-sur d'autres services de la stack.
-
-\section{Intégration continue}
-
-\texttt{.github/workflows/ci.yml} définit deux jobs déclenchés à chaque
-push/PR sur \texttt{main} :
-
-\begin{itemize}[leftmargin=1.5em]
-  \item \textbf{lint} : \texttt{pre-commit run --all-files} (ruff,
-    sqlfluff, gitleaks).
-  \item \textbf{test} : \texttt{pytest tests/} avec Spark en local
-    (\texttt{local[2]}), sans dépendance à la stack Docker Compose —
-    Java 17 (\texttt{actions/setup-java}) et Python 3.12
-    (\texttt{actions/setup-python}).
-\end{itemize}
-
-\begin{constat}[Recul critique : CI jamais vérifiée en conditions réelles]
-Le job \texttt{lint} a échoué sur \textbf{tous} les runs GitHub Actions
-depuis le commit qui l'a introduit, jusqu'à un audit de cohérence mené
-le 16/09/2026 : \texttt{ruff} reformatait
-\texttt{src/Analyse\_Marche\_Emploi\_IA\_PySpark.ipynb} à chaque run
-(fichier jamais passé par \texttt{pre-commit run --all-files} en local
-— seulement des runs limités aux fichiers touchés à chaque commit), ce
-qui fait échouer le hook (« files were modified by this hook »). Le
-travail avait été déclaré « CI en place » sans jamais consulter le
-résultat réel sur GitHub — un manquement à la rigueur de vérification
-appliquée par ailleurs sur ce projet. Corrigé en reformatant le
-notebook et en ajoutant la règle « toujours \texttt{--all-files} avant
-de committer » à \texttt{CLAUDE.md}.
-\end{constat}

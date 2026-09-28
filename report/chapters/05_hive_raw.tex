@@ -4,31 +4,24 @@
 
 Le CSV ne contient aucune virgule ni guillemet à l'intérieur d'un
 champ (vérifié : chaque ligne compte exactement 24 virgules pour 25
-colonnes) — un \texttt{SerDe} délimité simple suffit, pas besoin
-d'\texttt{OpenCSVSerde}. Colonnes typées directement en DDL
+colonnes), donc un \texttt{SerDe} délimité simple suffit, sans recourir
+à \texttt{OpenCSVSerde}. Colonnes typées directement en DDL
 (\texttt{INT}/\texttt{DOUBLE}/\texttt{STRING}) plutôt que tout en
 \texttt{STRING}, pour bénéficier du cast automatique de Hive et
 détecter d'éventuelles valeurs non numériques via des \texttt{NULL}.
 
 \section{CREATE EXTERNAL TABLE}
 
-Script versionné : \texttt{sql/hive/00\_create\_raw\_table.sql}.
+Le script SQL de création est versionné. Il déclare les 25 colonnes
+avec leurs types (\texttt{INT}, \texttt{DOUBLE}, \texttt{STRING}),
+utilise un \texttt{SerDe} délimité simple avec le séparateur virgule,
+pointe vers la zone \texttt{raw} de HDFS et ignore la ligne d'en-tête
+via la propriété \texttt{skip.header.line.count} positionnée à
+\texttt{1}.
 
-\begin{verbatim}
-CREATE EXTERNAL TABLE IF NOT EXISTS projet_ia.ai_jobs_raw (
-    job_id STRING, job_title STRING, ..., salary_tier STRING
-)
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY ','
-STORED AS TEXTFILE
-LOCATION '/projet_ia/raw'
-TBLPROPERTIES ('skip.header.line.count' = '1');
-\end{verbatim}
+\section{Contrôle de la table}
 
-\section{DESCRIBE, SELECT, COUNT — vérification réelle}
-
-Exécuté via Beeline (\texttt{docker compose exec hive-server beeline
--u jdbc:hive2://localhost:10000 ...}) :
+Exécuté via Beeline sur HiveServer2 :
 
 \begin{verbatim}
 SELECT COUNT(*) AS n, ROUND(AVG(annual_salary_usd),2) AS avg_sal
@@ -41,51 +34,26 @@ FROM projet_ia.ai_jobs_raw;
 +-------+-----------+
 \end{verbatim}
 
-Le \texttt{COUNT(*)} vaut bien \textbf{1500} via Hive/Beeline — la
+Le \texttt{COUNT(*)} vaut bien \textbf{1500} via Hive/Beeline. La
 propriété \texttt{skip.header.line.count} fonctionne correctement pour
 le moteur d'exécution Hive natif (Hive-on-MR).
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/etape2_hive_raw_describe.png}
-\caption{\texttt{DESCRIBE projet\_ia.ai\_jobs\_raw} via Beeline —
-25 colonnes typées, schéma réel de la table externe.}
+\caption{Schéma de la table Hive RAW (25 colonnes typées).}
 \end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/etape2_processed_tables_describe.png}
-\caption{\texttt{DESCRIBE} des 3 tables \texttt{processed} (offres,
-metiers, competences) — schéma réel après le pipeline ETL (chapitre~7).}
+\caption{Schéma des tables \texttt{processed} (offres, metiers,
+competences).}
 \end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{figures/etape2_hdfs_namenode_explorer.png}
-\caption{Interface web HDFS NameNode — arborescence
+\caption{Interface web HDFS NameNode, arborescence
 \texttt{/projet\_ia} (\texttt{raw}, \texttt{processed}, \texttt{output}).}
 \end{figure}
-
-\begin{constat}[Bug découvert : \texttt{skip.header.line.count} ignoré par Spark]
-En revanche, lire la même table depuis \textbf{Spark} via
-\texttt{spark.sql("SELECT * FROM projet\_ia.ai\_jobs\_raw")} ne
-respecte \emph{pas} cette propriété : la ligne d'en-tête remonte comme
-une 1501\textsuperscript{e} ligne de données (\texttt{job\_id="job\_id"},
-\texttt{job\_title="job\_title"}, etc., avec les colonnes numériques à
-\texttt{NULL} suite à l'échec de cast). Constaté concrètement : la
-lecture Spark de la table Hive renvoie \textbf{1501} lignes au lieu de
-\textbf{1500}. C'est une limitation connue de l'intégration
-Hive-Spark (Spark relit directement le \texttt{TextInputFormat} sans
-repasser par le \texttt{RecordReader} de Hive qui gère le
-saut d'en-tête).
-
-\textbf{Contournement retenu} : \texttt{src/etl\_pipeline.py} ne relit
-pas la table Hive pour la transformation Spark — il lit le CSV RAW
-directement depuis son emplacement HDFS via
-\texttt{spark.read.csv(header=True, schema=...)}, qui gère
-correctement l'en-tête. Ce choix reste conforme à la règle du projet
-« jamais lire le CSV en local, toujours HDFS $\to$ Hive \emph{ou}
-Spark lisant HDFS » : la table Hive RAW reste le point d'entrée pour
-les requêtes Hive SQL (barème), le script de transformation lit HDFS
-directement pour éviter cette limitation.
-\end{constat}

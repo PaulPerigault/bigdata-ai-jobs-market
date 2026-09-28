@@ -1,0 +1,47 @@
+\usetikzlibrary{shapes.multipart}
+\newcommand{\pk}[1]{{\color{esieaorange}\bfseries#1}}
+\newcommand{\fk}[1]{{\color{esieablue}#1}}
+\begin{tikzpicture}[
+  font=\small\sffamily,
+  table/.style={
+    rectangle split, rectangle split parts=2,
+    rectangle split part align={center, left},
+    draw=esienavy, thick, rounded corners=3pt,
+    fill=esieaoffwhite, text width=4.4cm, inner sep=6pt
+  },
+  arrow/.style={->, >=stealth, thick, esieagray}
+]
+\node[table] (metiers) {
+  \textbf{metiers}
+  \nodepart{second}
+  \pk{metier\_id} (PK)\\
+  job\_title\\
+  job\_category
+};
+\node[table, anchor=west] (offres) at ([xshift=1.4cm]metiers.east) {
+  \textbf{offres}
+  \nodepart{second}
+  \pk{job\_id} (PK)\\
+  \fk{metier\_id} (FK)\\
+  experience\_level\\
+  years\_of\_experience\\
+  annual\_salary\_usd\\
+  salary\_min\_usd, salary\_max\_usd\\
+  city, country\\
+  remote\_work\\
+  company\_size, industry\\
+  ai\_salary\_premium\_pct\\
+  demand\_score\\
+  posting\_year, posting\_month
+};
+\node[table, anchor=west] (competences) at ([xshift=1.4cm]offres.east) {
+  \textbf{competences}
+  \nodepart{second}
+  \fk{job\_id} (FK)\\
+  competence\\[4pt]
+  {\scriptsize PK = (job\_id, competence)}
+};
+
+\draw[arrow] (metiers.east) -- node[above, pos=0.12, font=\scriptsize] {1} node[above, pos=0.88, font=\scriptsize] {n} (offres.west);
+\draw[arrow] (offres.east) -- node[above, pos=0.12, font=\scriptsize] {1} node[above, pos=0.88, font=\scriptsize] {n} (competences.west);
+\end{tikzpicture}

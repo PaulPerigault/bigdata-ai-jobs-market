@@ -2,46 +2,45 @@
 
 \section{Modèle relationnel}
 
-Trois tables construites dans \texttt{src/etl/tables.py} à partir du
-DataFrame nettoyé (chapitre~6), écrites en Parquet sur HDFS
-(\texttt{/projet\_ia/processed/}) puis exposées comme tables Hive
-externes (\texttt{processed.offres}, \texttt{processed.metiers},
-\texttt{processed.competences}) via \texttt{src/etl/hive\_io.py}.
+Trois tables sont construites à partir du DataFrame nettoyé, écrites
+en Parquet sur HDFS puis exposées comme tables Hive externes :
+\texttt{processed.offres}, \texttt{processed.metiers} et
+\texttt{processed.competences}.
 
 \begin{itemize}[leftmargin=1.5em]
-  \item \textbf{metiers} — référentiel : une ligne par
-    \texttt{job\_title} distinct (\texttt{job\_title},
-    \texttt{job\_category}, \texttt{metier\_id}).
-  \item \textbf{offres} — grain = une ligne par offre
+  \item \textbf{metiers}, référentiel : une ligne par
+    \texttt{job\_title} distinct, avec son \texttt{job\_category} et
+    son \texttt{metier\_id}.
+  \item \textbf{offres}, grain = une ligne par offre
     (\texttt{job\_id}, \texttt{metier\_id}, salaires, localisation,
-    expérience, \dots), jointe au référentiel \texttt{metiers}.
-  \item \textbf{competences} — une ligne par couple
-    (\texttt{job\_id}, compétence), obtenue par
-    \texttt{split(required\_skills, "\textbackslash{}|")} puis
-    \texttt{explode()}.
+    expérience), jointe au référentiel \texttt{metiers}.
+  \item \textbf{competences}, une ligne par couple
+    (\texttt{job\_id}, compétence). La colonne
+    \texttt{required\_skills} est d'abord découpée sur le caractère
+    pipe, puis chaque compétence est extraite par \texttt{explode()}.
 \end{itemize}
 
-\begin{constat}[Correction : \texttt{metier\_id} déterministe]
-La première version (issue du notebook d'exploration) générait
-\texttt{metier\_id} avec
-\texttt{monotonically\_increasing\_id()}. Cette fonction Spark
-\textbf{n'est pas stable} entre deux exécutions ni entre partitions
-(elle encode le numéro de partition dans les bits hauts de l'ID) : deux
-exécutions du pipeline sur le même dataset peuvent produire des
-\texttt{metier\_id} différents pour le même métier, ce qui casserait
-silencieusement toute jointure historique ou tout ré-exécution
-partielle du pipeline.
+\begin{figure}[h]
+\centering
+\resizebox{\linewidth}{!}{\input{figures/modele_3_tables.tex}}
+\caption{Modèle relationnel des trois tables cibles : \texttt{metiers}
+  (référentiel), \texttt{offres} (grain offre, FK sur \texttt{metiers})
+  et \texttt{competences} (grain offre-compétence, FK sur
+  \texttt{offres}).}
+\label{fig:modele_3_tables}
+\end{figure}
 
-Corrigé en \texttt{src/etl/tables.py} :
-\texttt{metier\_id = substring(sha2(job\_title, 256), 1, 16)} — un
-hash déterministe de \texttt{job\_title}, identique à chaque exécution
-et à travers les partitions. Vérifié par le test
-\texttt{tests/unit/test\_tables.py::test\_build\_metiers\_is\_deterministic\_and\_deduplicated}
-qui exécute \texttt{build\_metiers()} deux fois sur les mêmes données
-et compare les ID obtenus.
+\begin{constat}[\texttt{metier\_id} déterministe]
+Le champ \texttt{metier\_id} est généré par un hash déterministe de
+\texttt{job\_title} : \texttt{substring(sha2(job\_title, 256), 1, 16)}.
+Cette méthode garantit que chaque métier reçoit le même identifiant à
+chaque exécution et à travers les partitions, ce qui est indispensable
+pour la stabilité des jointures et la reproductibilité du pipeline. Le
+test unitaire correspondant exécute \texttt{build\_metiers()} deux fois
+sur les mêmes données et compare les identifiants obtenus.
 \end{constat}
 
-\section{Chiffres réels (run du 18/09/2026)}
+\section{Chiffres obtenus}
 
 \begin{center}
 \begin{tabular}{ll}
@@ -61,19 +60,12 @@ Ces chiffres sont cohérents entre eux : 1500 offres pour 25 métiers
 distincts (60 offres en moyenne par métier), et 9428/1500 $\approx$
 6,3 compétences en moyenne par offre.
 
-\begin{constat}[Correction : dédoublonnage de \texttt{competences}]
-Un audit de bout en bout HDFS$\to$Hive$\to$Spark (18/09/2026, voir
-\texttt{CLAUDE.md}) a trouvé 120 lignes en double dans
-\texttt{processed.competences} (9\,548 lignes produites initialement
-pour seulement 9\,428 couples \texttt{(job\_id, compétence)} distincts)
-: \texttt{required\_skills} liste parfois deux fois la même compétence
-pour une même offre, et \texttt{explode()} sans dédoublonnage produisait
-alors une ligne par occurrence plutôt qu'une par couple unique. Corrigé
-dans \texttt{build\_competences()}
-(\texttt{dropDuplicates(["job\_id", "competence"])}), testé
-(\texttt{tests/unit/test\_tables.py}), \texttt{task etl} relancé pour
-régénérer la table sur HDFS. Impact limité aux compétences dont
-\texttt{required\_skills} contenait une répétition (SQL, Cloud,
-Leadership, Research, Communication, Agile, Statistics) — voir
-chapitre~10 pour le détail chiffré (dashboard top 10 compétences).
+\begin{constat}[Dédoublonnage de \texttt{competences}]
+La table \texttt{processed.competences} contient 9\,428 couples
+\texttt{(job\_id, compétence)} distincts. \texttt{required\_skills}
+listant parfois deux fois la même compétence pour une même offre, la
+transformation applique un dédoublonnage
+(\texttt{dropDuplicates(["job\_id", "competence"])}) après l'opération
+\texttt{explode()}. Cela évite de compter plusieurs fois la même
+compétence pour une offre.
 \end{constat}

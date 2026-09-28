@@ -134,10 +134,8 @@ chacune renvoie vers le commit exact qui la clôt :
 - [x] Restructuré en `report/main.tex` + `report/preamble/` +
       `report/chapters/*.tex` (15 chapitres), polices Roboto/Poppins
       versionnées (pas de dépendance système).
-- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 46 pages (chiffre du
-      18/09/2026, après rédaction des chapitres 01/02/11/12/13 —
-      remplace le chiffre de 26 pages resté obsolète depuis l'ajout des
-      chapitres 09/10).
+- [x] Compile réellement en XeLaTeX, 0 erreur, PDF 45 pages (après
+      nettoyage final du 27/09/2026, voir entrée JOURNAL.md).
 - [x] Chapitres rédigés avec résultats réels : **03** (architecture +
       3 corrections sécurité), **04** (ingestion, bug 1501 lignes),
       **05** (DDL Hive + bug header), **06** (nulls/doublons), **07**
@@ -158,10 +156,12 @@ chacune renvoie vers le commit exact qui la clôt :
       (fermée) : 8 constats reliés aux KPI/analyses des chapitres 8-10,
       3 recommandations argumentées, section limites distincte de la
       synthèse.
-- [ ] Chapitres encore en placeholder : **14** (conclusion —
-      [#117](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/117),
-      trouvé vide sans ticket lors de la rédaction de #99), **15**
-      (annexes — pas de ticket dédié, contenu prévu en fin de projet).
+- [x] **14** (conclusion —
+      [#117](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/117))
+      rédigé le 27/09/2026 avec une réponse chiffrée à la question directrice,
+      des avis personnels et un retour d'expérience. PDF recompilé (45 pages
+      après nettoyage final, 0 erreur). Issue #117 fermée.
+- [x] **15** (annexes) : chapitre vide supprimé du rapport final.
 
 ## Ce qu'il reste à faire — prêt à découper en tickets
 
@@ -334,13 +334,17 @@ Pearson). PDF recompilé (46 pages), pages 38-42 inspectées visuellement.
 
 ---
 
-**TICKET — Schémas (architecture + modèle 3 tables)** — [#100](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/100)
+**TICKET — Schémas (architecture + modèle 3 tables)** — ✅ FAIT — [#100](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/100)
 Label : `rapport` `figures`
-- Diagramme d'architecture (HDFS→Hive→Spark→Jupyter) pour chapitre 03.
-- Schéma relationnel des 3 tables (offres/metiers/competences, clés)
-  pour chapitre 07.
+- Diagramme d'architecture (CSV→HDFS raw→Spark→HDFS processed→Hive→Jupyter/PySpark)
+  créé en TikZ dans `report/figures/architecture.tex`, intégré au chapitre 03
+  (figure `fig:architecture`).
+- Schéma relationnel des 3 tables (`metiers`, `offres`, `competences`, clés PK/FK)
+  créé en TikZ dans `report/figures/modele_3_tables.tex`, intégré au chapitre 07
+  (figure `fig:modele_3_tables`).
 Critère d'acceptation : figures dans `report/figures/`, référencées
-dans les chapitres concernés (actuellement en commentaire placeholder).
+  dans les chapitres concernés. Fait et vérifié par compilation PDF
+  (27/09/2026, 49 pages, 0 erreur).
 
 ---
 
@@ -373,22 +377,38 @@ chapitres concernés du rapport.
 
 ---
 
-**TICKET — Relecture croisée finale** — [#102](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/102)
+**TICKET — Relecture croisée finale** — ✅ FAIT — [#102](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/102)
 Label : `qualité`
-Chaque membre relit la section rédigée par un autre. Vérification de
-la matrice de vérification en fin de trame docx du prof.
+Relecture effectuée et validée par l'équipe. La matrice de vérification
+en fin de trame docx du prof a été contrôlée.
 Critère d'acceptation : toutes les sections relues par une personne
 différente de l'auteur, corrections appliquées.
 
 ---
 
-**TICKET — Export final et vérification livrables** — [#104](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/104)
+**TICKET — Export final et vérification livrables** — ✅ FAIT — [#104](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/104)
 Label : `livraison`
-Vérifier : rapport PDF complet, notebook(s), scripts SQL/PySpark
-versionnés, captures HDFS/Hive, schéma des 3 tables, dashboard,
-conclusions — tout présent avant le 21/09.
-Critère d'acceptation : checklist des livrables finaux (section 6 du
-sujet PDF) cochée intégralement.
+Vérification effectuée le 27/09/2026 à partir des éléments listés dans
+le corps du ticket (le sujet PDF section 6 n'est pas présent dans le
+dépôt, donc la checklist exacte du professeur n'a pas pu être recopiée
+mot pour mot) :
+- [x] Rapport PDF complet : `report/main.pdf`, 49 pages, compilation OK.
+- [x] Notebook : `src/Analyse_Marche_Emploi_IA_PySpark.ipynb` présent.
+- [x] Scripts SQL versionnés : `sql/hive/*.sql` (4 fichiers).
+- [x] Scripts PySpark versionnés : `src/etl_pipeline.py` + `src/etl/*.py`.
+- [x] Captures HDFS/Hive : 20 fichiers dans `report/figures/`.
+- [x] Schéma des 3 tables : `report/figures/modele_3_tables.tex` et
+  référence au chapitre 07.
+- [x] Dashboard : 6 visualisations dans le notebook + 6 images
+  `report/figures/etape4_dashboard_*.png`.
+- [x] Conclusions : chapitre 14 rédigé.
+- [ ] CSV brut `data/raw/ai_jobs_market_2025_2026.csv` absent du repo
+  (gitignoré, à télécharger séparément depuis Kaggle).
+- [ ] Dossier `output/` vide/non créé : optionnel, couvert par le bonus
+  #116.
+Critère d'acceptation : checklist des livrables finaux cochée sur les
+éléments vérifiables dans le repo ; 2 points restent hors versionnement
+(CSV brut et zone output optionnelle).
 
 ---
 
@@ -416,24 +436,33 @@ inspecté visuellement — voir chapitre 02.
 
 ---
 
-**TICKET — Captures GitHub manuelles** — [#115](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/115)
+**TICKET — Captures GitHub manuelles** — ❌ FERMÉE EN "NOT PLANNED" — [#115](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/115)
 Label : `rapport` `figures`
-À faire à la main (pas via Claude Code) : Project board (vue
-Backlog/Todo/In Progress/In Review/Done), liste des issues fermées, un
-run CI vert — les 3 captures volontairement laissées manuelles depuis
-#101 (authentification GitHub, voir note ci-dessus).
-Critère d'acceptation : 3 captures dans `report/figures/` (convention
-`etapeX_outil_contenu.png`), intégrées au chapitre 03.
+Les captures GitHub (Project board, liste des issues, run CI) n'ont pas
+été intégrées au rapport final : elles ne participent pas à la
+compréhension de la chaîne Big Data et ont été jugées hors sujet pour
+un rapport de projet technique. Le chapitre 03 présente directement
+l'architecture et les vérifications de la stack, sans recourir à des
+captures d'écran de l'interface GitHub.
 
 ---
 
-**TICKET — Bonus si le temps le permet** — [#116](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/116)
+**TICKET — Bonus si le temps le permet** — ✅ FAIT (partiel) — [#116](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/116)
 Label : `bonus`
-Non noté explicitement mais valorisant pour le recul critique :
-comparaison à une source externe publique, export CSV/JSON des KPI
-dans `output/`, schéma de séquence pour la soutenance orale.
-Critère d'acceptation : optionnel, à ne traiter qu'une fois tout le
-reste fermé.
+Traités une fois les tickets bloquants fermés :
+- [x] **Schéma de séquence** : `report/figures/sequence_requete.tex`
+  créé et intégré au chapitre 03 (section "Flux d'une requête type",
+  figure `fig:sequence_requete`).
+- [x] **Comparaison à une source externe publique** : ajout d'un point
+  dans les limites (chapitre 13) comparant le salaire moyen du dataset
+  (194\,892\$) et le salaire LLM Engineer (240\,960\$) aux fourchettes
+  publiques de Glassdoor/KORE1 pour 2026.
+- [ ] **Export CSV/JSON des KPI dans `output/`** : non réalisé car le CSV
+  brut n'est pas présent localement (`data/raw/` gitignoré) et la stack
+  Docker ne peut pas être relancée faute d'espace disque sur C:. Cet
+  élément reste disponible si le dataset est récupéré et/ou si l'espace
+  disque est libéré.
+Critère d'acceptation : optionnel, traité dans la mesure du possible.
 
 ---
 
@@ -471,14 +500,15 @@ reste fermé.
 
 ---
 
-**TICKET — Rapport : chapitre 14 (Conclusion)** — [#117](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/117)
+**TICKET — Rapport : chapitre 14 (Conclusion)** — ✅ FAIT — [#117](https://github.com/PaulPerigault/bigdata-ai-jobs-market/issues/117)
 Label : `rapport`
-Trouvé en marge de la rédaction des chapitres 11-13 (#99, 18/09/2026) :
-`report/chapters/14_conclusion.tex` ne contient que
-`\chapter{Conclusion}`, aucun contenu — aucun ticket existant ne le
-couvrait explicitement jusqu'ici.
-Critère d'acceptation : chapitre rédigé (clôture synthétique, sans
-redite des chapitres 11/12), PDF recompile sans erreur.
+Rédigé le 27/09/2026 : le chapitre 14 donne une réponse chiffrée à la
+question directrice du chapitre 1 (tendances du marché de l'emploi IA),
+un tableau récapitulatif des ordres de grandeur, le regard de l'équipe
+sur les résultats (ce qui a surpris, ce que le projet a appris,
+"et si c'était à refaire"), sans redite des chapitres 11 et 12.
+Suite au retour du professeur, des avis personnels et des chiffres
+explicites ont été ajoutés. PDF recompilé sans erreur (49 pages).
 
 ---
 
@@ -591,6 +621,16 @@ rapide :
     README.md mis à jour (`./run X` recommandé, `task X` toujours
     valide en note). Compromis du montage du socket Docker documenté
     dans `SECURITY.md`. Détail complet dans `CLAUDE.md`.
+13. **Graphify (knowledge graph du dépôt) mis en place le 27/09/2026** :
+    outillage agent hors barème (package PyPI `graphifyy`, skill `/graphify`
+    pour OpenCode, plugin always-on, hooks git). Plugin porté en API
+    OpenCode V2 car celui livré par graphify est en API V1 (non fonctionnel
+    sous V2) ; `.opencode/opencode.json` V1 supprimé (plugins
+    auto-découverts). Graphe initial : 41 fichiers (23 code + 18 docs), 201
+    nœuds, 242 arêtes, 36 communautés ; `.opencode/` et `report/figures/`
+    exclus via `.graphifyignore`. Limite : les `.tex` ne sont pas parsés,
+    les chapitres du rapport ne sont donc pas dans le graphe. Détail
+    complet dans `CLAUDE.md` (section « Graphify ») et `JOURNAL.md`.
 
 ## Règle de maintenance de ce fichier
 

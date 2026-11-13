@@ -14,7 +14,7 @@ dev = [
     "pytest==9.2.0",
     "ruff==0.17.5",
     "nbstripout==0.9.1",
-    "sqlfluff==3.1.0",
+    "sqlfluff==4.5.0",
 ]
 
 [tool.uv]

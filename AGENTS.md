@@ -6,7 +6,7 @@ then house skills, then `encre-*` skills, then third-party skills. A skill is me
 ## Project
 
 `bigdata-ai-jobs-market`: a Big Data chain (HDFS, Hive, Spark, Jupyter) over a public AI job-market dataset, ESIEA
-coursework rebuilt to be reproducible. Python 3.11, PySpark 3.5.0, MIT. Owner: Paul Perigault (paulperigault.fr).
+coursework rebuilt to be reproducible. Python 3.11, PySpark 3.5.8, MIT. Owner: Paul Perigault (paulperigault.fr).
 
 | Path | Role | May import |
 | --- | --- | --- |

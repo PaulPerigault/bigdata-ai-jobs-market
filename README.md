@@ -121,7 +121,7 @@ What runs, and what does not:
 - **CI has never run on GitHub runners** at the time of writing.
 - The **real dataset is not in the repository** and its licence is not stated on its public page. The figures in the report come from it; the repository can only reproduce them if you download it and `task data:raw:check` passes.
 - The **images are old and unpatched**: Hadoop 2.7.4, Hive 2.3.2, amd64 only (emulated on Apple Silicon, slow). They carry known vulnerabilities; this is a local teaching stack, not a service. `task docker:scan` scans the repository files, not these images.
-- **PySpark 3.5.0 needs Java 11 or 17 and, on Windows, CPython 3.11** ([ADR 0003](docs/adr/0003-java-and-python-pins-for-spark-tests.md)).
+- **PySpark 3.5 (pinned 3.5.8) needs Java 11 or 17 and, on Windows, CPython 3.11** ([ADR 0003](docs/adr/0003-java-and-python-pins-for-spark-tests.md)).
 - Median salary from `PERCENTILE_APPROX` differs between Hive and Spark SQL; the report uses the Hive value.
 - The report and the SQL comments are in French.
 

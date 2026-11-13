@@ -10,7 +10,7 @@ dependencies = []
 [dependency-groups]
 # Exact versions: uv.lock adds the hashes. pyspark 3.5.0 matches the jupyter/pyspark-notebook:spark-3.5.0 image.
 dev = [
-    "pyspark==3.5.0",
+    "pyspark==4.3.0",
     "pytest==9.2.0",
     "ruff==0.17.5",
     "nbstripout==0.9.1",

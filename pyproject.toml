@@ -11,7 +11,7 @@ dependencies = []
 # Exact versions: uv.lock adds the hashes. pyspark stays on the 3.5 line of the jupyter/pyspark-notebook:spark-3.5.0 image
 # (3.5.8 carries the fixes of two advisories; ADR 0003).
 dev = [
-    "pyspark==3.5.8",
+    "pyspark==3.5.9",
     "pytest==9.2.0",
     "ruff==0.17.5",
     "nbstripout==0.9.1",

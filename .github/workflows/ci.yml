@@ -20,7 +20,6 @@ concurrency:
 
 env:
   TASK_VERSION: 3.54.0
-  UV_VERSION: 0.13.8
 
 jobs:
   lint:
@@ -39,7 +38,11 @@ jobs:
       - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
         with:
           version: ${{ env.TASK_VERSION }}
-      - run: pip install "uv==${UV_VERSION}"
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: 0.13.8
+          checksum: 5acfd9177cfecf0bf87578f059728215ccc884388988f55f7a65041b57387d91
+          enable-cache: false
       - run: uv sync --frozen
       - run: task fmt:check
       - run: task lint
@@ -89,7 +92,11 @@ jobs:
       - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
         with:
           version: ${{ env.TASK_VERSION }}
-      - run: pip install "uv==${UV_VERSION}"
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: 0.13.8
+          checksum: 5acfd9177cfecf0bf87578f059728215ccc884388988f55f7a65041b57387d91
+          enable-cache: false
       - run: uv sync --frozen
       - run: task test
 
@@ -110,7 +117,11 @@ jobs:
       - uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
         with:
           version: ${{ env.TASK_VERSION }}
-      - run: pip install "uv==${UV_VERSION}"
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: 0.13.8
+          checksum: 5acfd9177cfecf0bf87578f059728215ccc884388988f55f7a65041b57387d91
+          enable-cache: false
       - run: uv sync --frozen
       - name: docs match the repository
         run: task check:docs

@@ -8,13 +8,14 @@ readme = "README.md"
 dependencies = []
 
 [dependency-groups]
-# Exact versions: uv.lock adds the hashes. pyspark 3.5.0 matches the jupyter/pyspark-notebook:spark-3.5.0 image.
+# Exact versions: uv.lock adds the hashes. pyspark stays on the 3.5 line of the jupyter/pyspark-notebook:spark-3.5.0 image
+# (3.5.8 carries the fixes of two advisories; ADR 0003).
 dev = [
-    "pyspark==3.5.0",
+    "pyspark==3.5.8",
     "pytest==9.2.0",
     "ruff==0.17.5",
     "nbstripout==0.9.1",
-    "sqlfluff==3.1.0",
+    "sqlfluff==4.5.0",
 ]
 
 [tool.uv]

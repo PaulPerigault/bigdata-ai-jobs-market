@@ -87,7 +87,7 @@ services:
     # ce dernier embarque un ancien entrypoint Go qui crashe (fatal error:
     # newosproc) sous émulation amd64->arm64 (colima/QEMU sur Apple Silicon).
     # Le schéma metastore est créé par Hive lui-même au premier démarrage.
-    image: postgres:13.18@sha256:6e9d119d87918877260a709895c08208b89d267d622ac7ad07b0ef7d215c435d
+    image: postgres:18.0@sha256:41fc5342eefba6cc2ccda736aaf034bbbb7c3df0fdb81516eba1ba33f360162c
     hostname: hive-metastore-postgresql
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-metastore}

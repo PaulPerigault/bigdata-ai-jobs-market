@@ -27,13 +27,13 @@ GROUP BY is_llm_role;
 -- salaire, expérience, demande et premium IA.
 SELECT
     ROUND(CORR(annual_salary_usd, years_of_experience), 3)
-    AS corr_sal_exp,
+        AS corr_sal_exp,
     ROUND(CORR(annual_salary_usd, demand_score), 3)
-    AS corr_sal_demande,
+        AS corr_sal_demande,
     ROUND(CORR(annual_salary_usd, ai_salary_premium_pct), 3)
-    AS corr_sal_premium,
+        AS corr_sal_premium,
     ROUND(CORR(years_of_experience, demand_score), 3)
-    AS corr_exp_demande
+        AS corr_exp_demande
 FROM projet_ia.ai_jobs_raw;
 
 -- Analyse 4 : pays et compétences — compétence n°1 par pays (top 5

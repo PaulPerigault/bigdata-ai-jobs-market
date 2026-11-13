@@ -34,6 +34,14 @@ The JDK is no longer left to the machine: `task test` resolves a JDK 17 with `de
 local `task verify` runs the Spark tests or fails ([ADR 0005](0005-pinned-jdk-resolved-by-the-project.md)). The skip
 remains only for a bare `uv run pytest`.
 
+## Addendum, 2026-11-13 (security patch release)
+
+`pyspark` moves from 3.5.0 to 3.5.8, the last patch of the 3.5 line, to close advisories GHSA-9437-39hj-3c93 (fixed in
+3.5.8) and GHSA-6p6v-m64v-jx8q (fixed in 3.5.2). No move to 4.x is needed, so this ADR holds. The test client (3.5.8) is
+now newer than the Spark of the Compose images (3.5.0), which only run the stack and do not use the Python wheel pinned
+here; the 12 Spark tests pass on 3.5.8. `.github/dependabot.yml` ignores `pyspark` updates outside 3.5.x, so a 4.x
+proposal is never opened again.
+
 ## Alternatives rejected
 
 - Run the tests in the Jupyter container only: needs a Docker daemon for every test run, slower, and absent here.

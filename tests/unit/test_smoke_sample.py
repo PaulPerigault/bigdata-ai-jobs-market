@@ -21,7 +21,7 @@ def test_pipeline_on_the_sample(spark):
 
     cleaned, stats = clean(raw)
     assert stats["duplicates_removed"] == 0
-    assert stats["rows_removed_salary_leq_0"] == 0
+    assert stats["rows_removed_non_positive"] == 0
 
     metiers = build_metiers(cleaned)
     offres = build_offres(cleaned, metiers)

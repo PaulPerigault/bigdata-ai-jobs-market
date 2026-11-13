@@ -25,7 +25,7 @@ def test_clean_removes_duplicates_and_invalid_salaries(spark):
     assert stats["duplicate_job_ids_before"] == 1
     assert stats["total_rows_after_dedup"] == 3
     assert stats["duplicates_removed"] == 1
-    assert stats["rows_removed_salary_leq_0"] == 1
+    assert stats["rows_removed_non_positive"] == 1
     assert stats["total_rows_after"] == 2
 
     remaining_ids = {row.job_id for row in df_cleaned.select("job_id").collect()}

@@ -38,7 +38,7 @@ def clean(df_raw: DataFrame) -> tuple[DataFrame, dict]:
 
     rows_before_salary_filter = df_dedup.count()
     df_filtered = df_dedup.filter(F.col("annual_salary_usd") > 0)
-    stats["rows_removed_salary_leq_0"] = rows_before_salary_filter - df_filtered.count()
+    stats["rows_removed_non_positive"] = rows_before_salary_filter - df_filtered.count()
 
     df_cleaned = df_filtered.na.fill({"required_skills": "Unknown", "job_title": "Unknown"})
 
@@ -56,7 +56,7 @@ def print_stats(stats: dict) -> None:
         f"Lignes après dropDuplicates(job_id) : {stats['total_rows_after_dedup']} "
         f"({stats['duplicates_removed']} lignes supprimées)"
     )
-    print(f"Lignes filtrées (annual_salary_usd <= 0) : {stats['rows_removed_salary_leq_0']}")
+    print(f"Lignes filtrées (annual_salary_usd <= 0) : {stats['rows_removed_non_positive']}")
     print(f"Lignes finales après nettoyage : {stats['total_rows_after']}")
     print("NULLs par colonne (avant -> après) :")
     for col in IMPORTANT_COLUMNS:

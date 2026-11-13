@@ -1,0 +1,40 @@
+version: 2
+# `cooldown`: a version must be 7 days old before it is proposed (a compromised release is usually pulled in
+# that time). Security updates do not wait. Patch and minor updates are auto-merged by dependabot-automerge.yml once
+# `ci` is green; majors stay as separate PRs for review. Image digests of compose.yaml are refreshed by the
+# docker-compose ecosystem; the Spark and Hadoop images are major-version choices, reviewed by hand (ADR 0004).
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule: {interval: weekly, day: monday}
+    cooldown: {default-days: 7}
+    commit-message: {prefix: 'chore(deps)'}
+    labels: [dependencies, 'pkg:etl']
+  - package-ecosystem: gomod
+    directory: /
+    schedule: {interval: weekly, day: monday}
+    cooldown: {default-days: 7}
+    commit-message: {prefix: 'chore(deps)'}
+    labels: [dependencies, 'pkg:ci']
+  - package-ecosystem: gomod
+    directory: /tools
+    schedule: {interval: weekly, day: monday}
+    cooldown: {default-days: 7}
+    commit-message: {prefix: 'chore(deps-dev)'}
+    labels: [dependencies, 'pkg:ci']
+    groups:
+      dev-tools:
+        patterns: ['*']
+        update-types: [minor, patch]
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule: {interval: weekly, day: monday}
+    cooldown: {default-days: 7}
+    commit-message: {prefix: 'chore(deps)'}
+    labels: [dependencies, 'pkg:compose']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly, day: monday}
+    cooldown: {default-days: 7}
+    commit-message: {prefix: 'ci'}
+    labels: [dependencies, 'pkg:ci']

@@ -1,0 +1,19 @@
+% ---------- Encodage / langue ----------
+\usepackage{fontspec}
+\usepackage[french]{babel}
+\usepackage{microtype}
+
+% ---------- Polices (Poppins = titres, Roboto = corps) ----------
+% Chargées depuis report/fonts/ (fichiers versionnés, licence Apache —
+% voir report/fonts/README.md) plutôt que supposées installées au niveau
+% système : la compilation ne doit pas dépendre de polices présentes ou
+% non sur la machine de chaque membre de l'équipe.
+\setmainfont{Roboto-Regular.ttf}[
+  Path=fonts/,
+  BoldFont=Roboto-Bold.ttf,
+  ItalicFont=Roboto-Italic.ttf
+]
+\newfontfamily\titlefont{Poppins-Regular.ttf}[
+  Path=fonts/,
+  BoldFont=Poppins-SemiBold.ttf
+]

@@ -1,0 +1,16 @@
+# Default gitleaks rules, plus one allowlist: local environments that Git ignores. `gitleaks dir` walks the
+# disk, not the Git index, so it would scan the locked Python packages in .venv (a test string of PySpark
+# matches generic-api-key). Nothing under these paths is ever committed, and the Git history scan is unaffected.
+title = "bigdata-ai-jobs-market"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Local environments and tool binaries, ignored by Git"
+paths = [
+  '''^\.venv/''',
+  '''^\.tools/''',
+  '''^\.ruff_cache/''',
+  '''^\.pytest_cache/''',
+]

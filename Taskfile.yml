@@ -1,0 +1,224 @@
+# https://taskfile.dev : single entry point. `task` lists the targets.
+# Dev tools (task, lefthook, gitleaks, govulncheck, golangci-lint) are pinned in tools/go.mod (hashes in
+# tools/go.sum): nothing is downloaded unverified. Run the pinned Task with
+# `go tool -modfile=tools/go.mod task <target>` if `task` is not installed.
+# Python is managed by uv (uv.lock carries the hashes). uv itself: `pip install uv==0.13.8`.
+# If `uv` is not on PATH, set UV_CMD, for example UV_CMD="python -m uv".
+version: '3'
+
+vars:
+  TOOL: go tool -modfile=tools/go.mod
+  UV: '{{default "uv" .UV_CMD}}'
+  EXE: '{{if eq OS "windows"}}.exe{{end}}'
+  CSV_NAME: ai_jobs_market_2025_2026.csv
+  # Tag AND digest: never `latest`. Refresh both together after reading the release notes.
+  TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+  TEXLIVE_IMAGE: texlive/texlive:TL2025-historic@sha256:dbd65d778eb83de9b45fb0a8deb3afe44cbbaba2272e4e1e644e94dda52c7109
+  BEELINE: docker compose exec -T hive-server beeline -u jdbc:hive2://localhost:10000
+
+dotenv: ['.env']
+
+tasks:
+  default:
+    desc: List the targets
+    silent: true
+    cmds:
+      - task --list || go tool -modfile=tools/go.mod task --list
+
+  setup:
+    desc: Install the locked Python environment, create .env, verify pinned tools, install Git hooks (Lefthook)
+    cmds:
+      - go -C tools mod download
+      - go -C tools mod verify
+      - '{{.UV}} sync --frozen'
+      - test -f .env || cp .env.example .env
+      - go build -modfile=tools/go.mod -o .tools/bin/lefthook{{.EXE}} github.com/evilmartians/lefthook
+      - '{{.TOOL}} lefthook install'
+      - task: hooks:pin
+
+  hooks:pin:
+    desc: Make the Git hooks run the pinned Lefthook (tools/go.sum), not whatever is in PATH
+    cmds:
+      - |
+        for h in "$(git rev-parse --git-path hooks)"/*; do
+          grep -q 'call_lefthook run' "$h" 2>/dev/null || continue
+          grep -q 'LEFTHOOK_BIN=' "$h" && continue
+          sed -i 's|^call_lefthook run|LEFTHOOK_BIN="$(git rev-parse --show-toplevel)/.tools/bin/lefthook{{.EXE}}"; export LEFTHOOK_BIN\ncall_lefthook run|' "$h"
+        done
+
+  verify:
+    desc: Everything CI runs locally (pre-push hook and CI job). Spark tests run for real, JDK 17 resolved by task jdk
+    cmds:
+      - task: fmt:check
+      - task: lint
+      - task: test
+      - task: check:docs
+      - task: data:check
+      - task: skills:verify
+      - task: security
+
+  jdk:
+    desc: Print the JAVA_HOME Spark uses - a valid JDK 11 or 17 from the environment, else the pinned Temurin 17 in .tools/jdk (SHA-256 checked)
+    silent: true
+    cmds:
+      - go run ./dev/jdk
+
+  test:
+    desc: Python tests (Spark local[2], no HDFS or Hive) and Go tests of dev/. JAVA_HOME resolved by task jdk, REQUIRE_SPARK=1 (no silent skip)
+    vars:
+      # Not `env:`: an inherited JAVA_HOME (say a Java 22) would win over the task environment.
+      JDK: {sh: go run ./dev/jdk}
+    cmds:
+      - JAVA_HOME='{{.JDK}}' REQUIRE_SPARK=1 {{.UV}} run pytest
+      - go test -count=1 ./dev/...
+
+  lint:
+    desc: ruff, sqlfluff (Hive dialect), go vet on dev/
+    cmds:
+      - '{{.UV}} run ruff check .'
+      - '{{.UV}} run sqlfluff lint sql'
+      - go vet ./dev/...
+
+  lint:zizmor:
+    desc: "zizmor 1.32.0 (same version as CI) offline via Docker pinned by digest; not part of verify (needs Docker)"
+    cmds:
+      - docker run --rm -v "{{.ROOT_DIR}}:/w:ro" -w /w ghcr.io/zizmorcore/zizmor@sha256:3014cc8f68f663935f69b3c3e0e41f5ce102b268d97db13db0f62208747f860d --offline --no-progress .github/workflows
+
+  fmt:
+    desc: Format Python (ruff) and Go (gofmt) code, strip notebook outputs
+    cmds:
+      - '{{.UV}} run ruff format .'
+      - gofmt -s -w dev
+      - '{{.UV}} run nbstripout src/Analyse_Marche_Emploi_IA_PySpark.ipynb'
+
+  fmt:check:
+    desc: Fail if code is not formatted or a notebook holds outputs
+    cmds:
+      - '{{.UV}} run ruff format --check .'
+      - cmd: test -z "$(gofmt -s -l dev)" || { gofmt -s -l dev; echo "run task fmt"; exit 1; }
+      - task: nb:check
+
+  nb:check:
+    desc: Fail if a notebook carries outputs, execution counts or machine metadata
+    cmds:
+      - '{{.UV}} run nbstripout --verify src/Analyse_Marche_Emploi_IA_PySpark.ipynb'
+
+  security:
+    desc: gitleaks on the tree and the whole Git history (pinned by tools/go.sum)
+    cmds:
+      - '{{.TOOL}} gitleaks dir . --redact --no-banner'
+      - '{{.TOOL}} gitleaks git . --redact --no-banner'
+
+  check:docs:
+    desc: Fail if the docs mention a task, path or relative link that no longer exists, or if README Context is missing
+    cmds:
+      - go run ./dev/checkdocs
+
+  skills:verify:
+    desc: Project skills match .claude/skills.lock.json; at most 12 auto-triggered
+    cmds:
+      - go run ./dev/skillscheck
+
+  data:gen:
+    desc: Regenerate data/sample/ from the fixed seed (deterministic, synthetic)
+    cmds:
+      - '{{.UV}} run python data/gen_sample.py'
+
+  data:check:
+    desc: Fail if data/sample/ differs from what the generator produces
+    cmds:
+      - '{{.UV}} run python data/gen_sample.py --check'
+
+  data:raw:check:
+    desc: Check the real dataset you downloaded into data/raw/ (SHA-256, size, rows). See data/README.md
+    cmds:
+      - '{{.UV}} run python data/verify_raw.py'
+
+  compose:check:
+    desc: Validate the Compose files and refuse any image that is not pinned by digest (needs the Docker CLI, no daemon)
+    cmds:
+      - docker compose config -q
+      - cmd: test -z "$(grep -E '^\s+image:' compose.yaml | grep -v '@sha256:')" || { echo "image without digest in compose.yaml"; exit 1; }
+
+  docker:scan:
+    desc: Trivy on the repository, vulnerabilities in uv.lock, misconfigurations, secrets (HIGH and CRITICAL fail)
+    cmds:
+      - docker run --rm -v "{{.ROOT_DIR}}:/src:ro" {{.TRIVY_IMAGE}} fs /src --scanners vuln,misconfig,secret --severity HIGH,CRITICAL --exit-code 1 --skip-dirs /src/.venv --skip-dirs /src/.tools --skip-dirs /src/.git
+
+  up:
+    desc: Start the stack (HDFS, Hive, Jupyter/PySpark) with Docker Compose; creates .env if absent
+    cmds:
+      - test -f .env || cp .env.example .env
+      - docker compose up -d --wait
+
+  down:
+    desc: Stop the stack (named volumes are kept)
+    cmds:
+      - docker compose down
+
+  ingest:
+    desc: Put data/raw/ai_jobs_market_2025_2026.csv into HDFS /projet_ia/raw (download it first, see data/README.md)
+    cmds:
+      - task: data:raw:check
+      - task: ingest:file
+        vars: {CSV: 'data/raw/{{.CSV_NAME}}'}
+
+  ingest:sample:
+    desc: Put the synthetic sample (60 rows) into HDFS under the expected file name
+    cmds:
+      - task: ingest:file
+        vars: {CSV: 'data/sample/ai_jobs_sample.csv'}
+
+  ingest:file:
+    internal: true
+    requires:
+      vars: [CSV]
+    cmds:
+      - docker compose exec -T namenode hdfs dfs -mkdir -p /projet_ia/raw /projet_ia/processed /projet_ia/output
+      - docker compose cp {{.CSV}} namenode:/tmp/{{.CSV_NAME}}
+      - docker compose exec -T namenode hdfs dfs -put -f /tmp/{{.CSV_NAME}} /projet_ia/raw/{{.CSV_NAME}}
+      - docker compose exec -T namenode rm -f /tmp/{{.CSV_NAME}}
+      - docker compose exec -T namenode hdfs dfs -ls /projet_ia/raw
+      - echo "lines in HDFS (header included):" && docker compose exec -T namenode hdfs dfs -cat /projet_ia/raw/{{.CSV_NAME}} | wc -l
+
+  hive:raw:
+    desc: Create the Hive RAW external table projet_ia.ai_jobs_raw
+    cmds:
+      - '{{.BEELINE}} -f /dev/stdin < sql/hive/00_create_raw_table.sql'
+
+  etl:
+    desc: Run the Spark pipeline RAW to processed (offres, metiers, competences) in the Jupyter container
+    cmds:
+      - docker compose exec -T jupyter spark-submit /home/jovyan/work/etl_pipeline.py
+
+  hive-shell:
+    desc: Open a Beeline shell connected to HiveServer2
+    cmds:
+      - docker compose exec hive-server beeline -u jdbc:hive2://localhost:10000
+
+  jupyter:
+    desc: Print the URL of the Jupyter notebook (token from .env, default in compose.yaml)
+    cmds:
+      - echo "http://localhost:8888/?token=${JUPYTER_TOKEN:-bigdata}"
+
+  demo:
+    desc: Whole chain on the synthetic sample, offline apart from the first image pull (HDFS, Hive RAW, Spark, one Hive query)
+    cmds:
+      - task: up
+      - task: ingest:sample
+      - task: hive:raw
+      - task: etl
+      - '{{.BEELINE}} -e "SELECT COUNT(*) AS offres FROM processed.offres"'
+
+  report:
+    desc: Build report/main.pdf with XeLaTeX in a container pinned by digest (two passes)
+    cmds:
+      - >-
+        docker run --rm --platform linux/amd64 -v "{{.ROOT_DIR}}/report:/report" -w /report {{.TEXLIVE_IMAGE}}
+        bash -c "xelatex -interaction=nonstopmode -halt-on-error main.tex && xelatex -interaction=nonstopmode -halt-on-error main.tex"
+
+  clean:
+    desc: Remove local output (virtualenv, caches, tool binaries, compiled report)
+    cmds:
+      - rm -rf .venv .tools .pytest_cache .ruff_cache spark-warehouse metastore_db derby.log
+      - rm -f report/main.pdf report/main.aux report/main.log report/main.toc report/main.out

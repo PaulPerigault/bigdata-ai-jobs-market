@@ -1,0 +1,36 @@
+[project]
+name = "bigdata-ai-jobs-market"
+version = "0.1.0"
+description = "Big Data pipeline (HDFS, Hive, Spark, Jupyter) on an AI job-market dataset, ESIEA coursework."
+requires-python = ">=3.11,<3.12"
+license = "MIT"
+readme = "README.md"
+dependencies = []
+
+[dependency-groups]
+# Exact versions: uv.lock adds the hashes. pyspark 3.5.0 matches the jupyter/pyspark-notebook:spark-3.5.0 image.
+dev = [
+    "pyspark==3.5.0",
+    "pytest==9.2.0",
+    "ruff==0.17.5",
+    "nbstripout==0.9.1",
+    "sqlfluff==3.1.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "data"]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"

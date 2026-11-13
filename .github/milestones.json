@@ -1,0 +1,18 @@
+[
+  {
+    "title": "v0.1.0 Initial public release",
+    "description": "Cleaned base: tooling, tests on a synthetic sample, pinned stack, documentation. No open issue: everything is in the initial commit."
+  },
+  {
+    "title": "v0.2.0 Reproducible local run",
+    "description": "The whole chain verified on clean machines: CI green with Spark on Java 17, the Compose stack and task demo run and recorded, the real dataset fetched and checked."
+  },
+  {
+    "title": "v0.3.0 Analysis quality",
+    "description": "Schema validation at the boundary, notebook reusing src/etl, Hive and Spark SQL result comparison in tests, report build in CI."
+  },
+  {
+    "title": "v0.4.0 Modern stack",
+    "description": "Decision and migration to maintained images (Hadoop 3, Hive 4, Spark 4) with the tests and the demo kept green."
+  }
+]

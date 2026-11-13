@@ -1,0 +1,53 @@
+# Secrets and local configuration: only *.example files are versioned
+.env
+.env.*
+!.env.example
+*.secrets.yaml
+secrets/
+.claude/settings.local.json
+
+# Real dataset: downloaded locally and checked by `task data:raw:check`, never committed (data/README.md)
+data/raw/*
+!data/raw/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Spark and Hive local state
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Tools installed by `task setup`
+.tools/
+
+# Editors and agents: personal, never shared
+.idea/
+.vscode/
+graphify-out/
+
+# OS and logs
+.DS_Store
+Thumbs.db
+*.log
+
+# LaTeX build output
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.synctex.gz
+report/*.fls
+report/*.fdb_latexmk
+report/*.pdf
+
+# Course material is not mine to redistribute
+docs/sujet/

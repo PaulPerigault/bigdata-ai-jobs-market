@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "auditDate": "2026-11-12",
+  "profiles": [
+    "core",
+    "docs"
+  ],
+  "skills": {
+    "conventional-git": {
+      "origine": "tiers",
+      "source": "samber/cc-skills",
+      "url": "https://github.com/samber/cc-skills",
+      "path": "skills/conventional-git",
+      "sha": "50a33836b20f690c668af557bd9ef9d07a8c7ef2",
+      "licence": "MIT",
+      "licenceFile": "_licenses/samber/LICENSE",
+      "auditDate": "2026-11-12",
+      "trigger": "auto",
+      "audit_level": "full-read",
+      "profils": [
+        "core"
+      ],
+      "files": {
+        "SKILL.md": "89790641e8b48c9ad7993c1a6a3bb6d2de94df4d30df81186e251c8f3502145d",
+        "evals/evals.json": "683d191ecb64e50eee4e732e5f8f73a795b76ac04f04c82773548eb4bf70900f"
+      },
+      "treeSha256": "4e2536c39273a4e87276fa236803776c28a77db6bad53c4c92ac710af6664087",
+      "notes": "Forbids any AI signature or Co-authored-by trailer (consistent with CLAUDE.md rule 2). allowed-tools includes Bash(gh:*): settings deny rules (gh writes) win. Worktree dir .claude/worktrees is a local convention."
+    },
+    "copy-editing": {
+      "origine": "tiers",
+      "source": "coreyhaines31/marketingskills",
+      "url": "https://github.com/coreyhaines31/marketingskills",
+      "path": "skills/copy-editing",
+      "sha": "96798cf38736ecdba015a1d2b0521b0c8f8f41dd",
+      "licence": "MIT",
+      "licenceFile": "_licenses/marketing/LICENSE",
+      "auditDate": "2026-11-12",
+      "trigger": "manual",
+      "audit_level": "full-read",
+      "profils": [
+        "copy-fr-en",
+        "marketing",
+        "docs"
+      ],
+      "files": {
+        "SKILL.md": "cec5a771ce37ade292f7f1f6b418e8a6ce6ec3f50163fa5e664afbcb03e085fc",
+        "evals/evals.json": "cc18c9f51094058759267d465cfcc50da65f248f66b923326781aa642d622ca7",
+        "references/checklist.md": "4cf94c922286223681fc53721fcc65ae7299f1e36e797e7397d369d674580c60",
+        "references/content-refresh.md": "ba73cdf278fe6b552eee27eb1452494f11f9d17ef67d720657e0982f76fb961b",
+        "references/plain-english-alternatives.md": "df4f820d4c63ae8a517c64a243c101658352cd07d002355bf3c97de0a00f3775"
+      },
+      "treeSha256": "e1093d98b14245f7e31891d9ea1fd6d454013f428836df55165a8f314379042e",
+      "notes": "Reads optional .agents/product-marketing.md context file."
+    },
+    "encre-processus": {
+      "origine": "encre",
+      "source": "PaulPerigault/design-system",
+      "url": "https://github.com/PaulPerigault/design-system",
+      "path": ".claude/skills/encre-processus",
+      "sha": "44badf1cdd7536cfc0b98014b6feec78936065af",
+      "licence": "MIT (c) 2026 Paul Perigault",
+      "licenceFile": "_licenses/maison/LICENSE",
+      "auditDate": "2026-11-12",
+      "trigger": "auto",
+      "audit_level": "full-read",
+      "profils": [
+        "core"
+      ],
+      "files": {
+        "SKILL.md": "c7f030bd332ea20a8fd62c2d84c3d72953c84d71f365a60e025599ca2af5808f"
+      },
+      "treeSha256": "e6b1abbe1bc53814d7ddcd47cbc41b67e16d0f2a623d0f31b2e7eb2aea73d3af",
+      "notes": "Written for the design-system repo: some paths (apps/docs, crates pp-*) are specific to it; the consuming repo's AGENTS.md translates them."
+    },
+    "encre-securite": {
+      "origine": "encre",
+      "source": "PaulPerigault/design-system",
+      "url": "https://github.com/PaulPerigault/design-system",
+      "path": ".claude/skills/encre-securite",
+      "sha": "44badf1cdd7536cfc0b98014b6feec78936065af",
+      "licence": "MIT (c) 2026 Paul Perigault",
+      "licenceFile": "_licenses/maison/LICENSE",
+      "auditDate": "2026-11-12",
+      "trigger": "auto",
+      "audit_level": "full-read",
+      "profils": [
+        "core"
+      ],
+      "files": {
+        "SKILL.md": "2daf1b82597dd297d24e37200971c9208045b78303db6e353976c20e5d31c380"
+      },
+      "treeSha256": "9f003cc840900c85c239d01c01cdeb9faf08f767b5283e2af0a25c8b37000ba6",
+      "notes": "Written for the design-system repo: some paths (apps/docs, crates pp-*) are specific to it; the consuming repo's AGENTS.md translates them."
+    },
+    "encre-veille": {
+      "origine": "encre",
+      "source": "PaulPerigault/design-system",
+      "url": "https://github.com/PaulPerigault/design-system",
+      "path": ".claude/skills/encre-veille",
+      "sha": "44badf1cdd7536cfc0b98014b6feec78936065af",
+      "licence": "MIT (c) 2026 Paul Perigault",
+      "licenceFile": "_licenses/maison/LICENSE",
+      "auditDate": "2026-11-12",
+      "trigger": "manual",
+      "audit_level": "full-read",
+      "profils": [
+        "core"
+      ],
+      "files": {
+        "PROVENANCE.md": "3d6f651ef01673c229eceeed9d74798df77d9850f9c7504fbf5a7272caf9a53d",
+        "SKILL.md": "f7f99e145ddaae63fc0c78069cff88158361fe0f95edf594b9bbf3389dc0e69c"
+      },
+      "treeSha256": "03388f94a9f404a8e0bc637b8f1724ece8d05852dbf0fd091a984794765a6d92",
+      "notes": "Written for the design-system repo: some paths (apps/docs, crates pp-*) are specific to it; the consuming repo's AGENTS.md translates them."
+    },
+    "encre-voix": {
+      "origine": "encre",
+      "source": "PaulPerigault/design-system",
+      "url": "https://github.com/PaulPerigault/design-system",
+      "path": ".claude/skills/encre-voix",
+      "sha": "44badf1cdd7536cfc0b98014b6feec78936065af",
+      "licence": "MIT (c) 2026 Paul Perigault",
+      "licenceFile": "_licenses/maison/LICENSE",
+      "auditDate": "2026-11-12",
+      "trigger": "auto",
+      "audit_level": "full-read",
+      "profils": [
+        "copy-fr-en",
+        "docs"
+      ],
+      "files": {
+        "SKILL.md": "2f46e8a90a139e926714e029225ca763d9bad31fb17a21a6f9279fb0b8e0b107"
+      },
+      "treeSha256": "6e6eda66c7a303fb7825678c89de1fa3877fe4af8463c33b9938de5278ef2022",
+      "notes": "Written for the design-system repo: some paths (apps/docs, crates pp-*) are specific to it; the consuming repo's AGENTS.md translates them."
+    },
+    "humanizer": {
+      "origine": "tiers",
+      "source": "blader/humanizer",
+      "url": "https://github.com/blader/humanizer",
+      "path": ".",
+      "sha": "b48c832f0f809c1b5658edbb838c2521b72f2413",
+      "licence": "MIT",
+      "licenceFile": "_licenses/blader/LICENSE",
+      "auditDate": "2026-11-12",
+      "trigger": "manual",
+      "audit_level": "full-read",
+      "profils": [
+        "copy-fr-en",
+        "docs"
+      ],
+      "files": {
+        "LICENSE": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96",
+        "SKILL.md": "804a119e924ac30295b298213e0b71b3e38b2667b8ef4fb7b69e9246369b9045"
+      },
+      "treeSha256": "3ce27d22220bd0733f4ccc65ed6913dee55b0627741c05356e89b2b6cb34a775",
+      "notes": "Skill is the repo root: only SKILL.md and LICENSE vendored. Not vendored (dev tooling, not part of the skill): scripts/validate-package.py, agents/openai.yaml, .github/, package.json, plugin manifests. Trigger set to manual 2026-11-12: file mode rewrites files; style tool."
+    }
+  }
+}

@@ -1,0 +1,16 @@
+# Local development only (loaded automatically next to compose.yaml): web UIs and the source mount.
+# Nothing here is needed for the stack to run.
+
+services:
+  namenode:
+    # Hadoop 2.7.4: the web port of the namenode is 50070.
+    ports:
+      - "127.0.0.1:50070:50070"
+
+  datanode:
+    ports:
+      - "127.0.0.1:50075:50075"
+
+  jupyter:
+    volumes:
+      - ./src:/home/jovyan/work

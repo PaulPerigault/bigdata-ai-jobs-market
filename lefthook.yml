@@ -1,0 +1,26 @@
+# Git hooks. Installed by `task setup` with the pinned Lefthook (tools/go.mod).
+# Hooks call only pinned tools: `go tool -modfile=tools/go.mod ...`, and uv for the locked Python environment.
+output: [failure, summary]
+
+pre-commit:
+  parallel: false
+  commands:
+    secrets:
+      run: go tool -modfile=tools/go.mod gitleaks git --pre-commit --staged --redact --no-banner
+    format:
+      glob: '*.{py,go,ipynb}'
+      # Through Task: an inline `sh -c` loses its inner quotes under Lefthook on Windows.
+      run: go tool -modfile=tools/go.mod task fmt:check
+    lint:
+      glob: '*.{py,sql,go}'
+      run: go tool -modfile=tools/go.mod task lint
+
+commit-msg:
+  commands:
+    conventional-commits:
+      run: go run ./dev/commitlint {1}
+
+pre-push:
+  commands:
+    verify:
+      run: go tool -modfile=tools/go.mod task verify

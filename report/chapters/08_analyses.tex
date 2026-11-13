@@ -1,0 +1,196 @@
+\chapter{Analyses Hive SQL et Spark SQL}
+% Pour chaque analyse : question -> tables -> requête -> résultat -> interprétation.
+% Requêtes obligatoires Jour 2 (jointures + GROUP BY/HAVING) et
+% comparaison Hive SQL/Spark SQL couvertes (Étape 3). KPI Jour 3 et les
+% 4 analyses au choix restent au chapitre~9 (issues #94, #95).
+
+\section{Jointure offres $\leftrightarrow$ metiers (vérifiée via Beeline)}
+
+\textbf{Question} : quels sont les métiers avec le plus d'offres et
+leur salaire moyen associé ?
+
+\textbf{Requête} (Hive SQL, exécutée via Beeline sur
+\texttt{hive-server}) :
+
+\begin{verbatim}
+SELECT m.job_title, COUNT(*) AS n,
+       ROUND(AVG(o.annual_salary_usd),0) AS avg_sal
+FROM processed.offres o
+JOIN processed.metiers m ON o.metier_id = m.metier_id
+GROUP BY m.job_title
+ORDER BY n DESC
+LIMIT 5;
+\end{verbatim}
+
+\textbf{Résultat réel} :
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Métier & Offres & Salaire moyen (\$) \\
+\midrule
+LLM Engineer & 75 & 240\,960 \\
+Robotics Engineer (AI) & 74 & 170\,851 \\
+Prompt Engineer & 71 & 151\,451 \\
+Generative AI Engineer & 71 & 206\,761 \\
+AI Product Manager & 70 & 194\,571 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{constat}[Interprétation]
+La jointure \texttt{offres} $\leftrightarrow$ \texttt{metiers} via
+\texttt{metier\_id} fonctionne correctement de bout en bout (HDFS
+Parquet $\to$ tables Hive externes $\to$ requête SQL avec jointure et
+agrégation). \textbf{LLM Engineer} arrive en tête à la fois en volume
+(75 offres, le plus demandé du dataset) et en rémunération (240\,960\$
+en moyenne, largement au-dessus des autres métiers du top 5) — cohérent
+avec la prime salariale généralement associée aux compétences LLM/GenAI
+observée par ailleurs dans le dataset (\texttt{ai\_salary\_premium\_pct},
+\texttt{is\_llm\_role}), à creuser au chapitre~9.
+\end{constat}
+
+\section{Jointure offres $\leftrightarrow$ competences (requête dédiée)}
+
+\textbf{Question} : quelles compétences sont associées au plus grand
+nombre d'offres, et à quel salaire moyen ?
+
+\textbf{Requête} (\texttt{sql/hive/01\_analyses.sql}, exécutée via Beeline) :
+
+\begin{verbatim}
+SELECT c.competence, COUNT(DISTINCT o.job_id) AS nb_offres,
+       ROUND(AVG(o.annual_salary_usd), 0) AS salaire_moyen
+FROM processed.offres o
+JOIN processed.competences c ON o.job_id = c.job_id
+GROUP BY c.competence
+ORDER BY nb_offres DESC, c.competence ASC
+LIMIT 10;
+\end{verbatim}
+
+\textbf{Résultat réel} (ré-exécuté le 18/09/2026 après correction du
+dédoublonnage de \texttt{processed.competences}, voir chapitre~7) :
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Compétence & Offres & Salaire moyen (\$) \\
+\midrule
+Python & 942 & 197\,500 \\
+SQL & 422 & 188\,921 \\
+Cloud & 402 & 198\,644 \\
+Communication & 365 & 184\,460 \\
+Leadership & 363 & 199\,056 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{constat}[Correction du 18/09/2026]
+\texttt{nb\_offres} (\texttt{COUNT(DISTINCT job\_id)}) était déjà correct
+avant la correction du chapitre~7. \texttt{salaire\_moyen} en revanche
+\emph{était légèrement faussé} : les 120 lignes en double de
+\texttt{processed.competences} faisaient compter deux fois le salaire
+de certaines offres dans la moyenne (\texttt{AVG} porte sur toutes les
+lignes jointes, y compris les doublons, contrairement à
+\texttt{COUNT(DISTINCT job\_id)}). Écarts observés : SQL 188\,484\$
+$\to$ 188\,921\$, Cloud 201\,822\$ $\to$ 198\,644\$, Communication
+182\,952\$ $\to$ 184\,460\$, Leadership 198\,950\$ $\to$ 199\,056\$ —
+des écarts de moins de 2\,\%, sans changement de classement. Python,
+seule compétence sans doublon dans le dataset, reste inchangé
+(197\,500\$).
+\end{constat}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_join_offres_competences.png}
+\caption{Jointure \texttt{offres}$\leftrightarrow$\texttt{competences}
+via Beeline — capture régénérée par \texttt{task screenshots-cli}.}
+\end{figure}
+
+\begin{constat}[Interprétation]
+Python apparaît dans 942 des 1500 offres (63\,\%), largement devant
+toute autre compétence — cohérent avec son statut de socle universel du
+poste IA, indépendamment du métier précis. Les compétences techniques
+(SQL, Cloud) et non techniques (Communication, Leadership) se
+mélangent dans le top 10, signe que les postes IA valorisés dans ce
+dataset ne sont pas uniquement des postes techniques « pures ».
+\end{constat}
+
+\section{Requête GROUP BY + HAVING}
+
+\textbf{Question} : quels pays combinent un volume d'offres important
+(> 50) et une rémunération moyenne élevée (> 150\,000\$) ?
+
+\begin{verbatim}
+SELECT country, COUNT(*) AS nb_offres,
+       ROUND(AVG(annual_salary_usd), 0) AS salaire_moyen
+FROM processed.offres
+GROUP BY country
+HAVING COUNT(*) > 50 AND AVG(annual_salary_usd) > 150000
+ORDER BY salaire_moyen DESC;
+\end{verbatim}
+
+\textbf{Résultat réel} : 12 pays satisfont les deux conditions, de
+\textbf{USA} (515 offres, 226\,190\$ en moyenne) à \textbf{Japon}
+(76 offres, 170\,132\$) — voir table complète en annexe
+(journal d'exécution du 16/09/2026, non repris dans ce dépôt). Les États-Unis dominent à la
+fois en volume (plus du tiers des offres du dataset) et en rémunération
+moyenne du top 12.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_group_by_having.png}
+\caption{Requête \texttt{GROUP BY} + \texttt{HAVING} via Beeline —
+capture régénérée par \texttt{task screenshots-cli}.}
+\end{figure}
+
+\section{Hive SQL vs Spark SQL : même requête, deux moteurs}
+
+\textbf{Requête} (identique dans les deux cas) : salaire moyen par
+niveau d'expérience, sur \texttt{processed.offres}.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+Niveau d'expérience & Offres & Salaire moyen (\$) \\
+\midrule
+Lead (10+ yrs) & 381 & 240\,055 \\
+Senior (6-9 yrs) & 364 & 214\,280 \\
+Mid (3-5 yrs) & 370 & 175\,984 \\
+Entry (0-2 yrs) & 385 & 150\,039 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/etape3_hive_vs_spark_sql.png}
+\caption{Même requête exécutée via Beeline (Hive-on-MR) puis
+\texttt{spark.sql(...)} (Spark SQL) — capture régénérée par
+\texttt{task screenshots-cli}, avec les temps mesurés sur ce run.}
+\end{figure}
+
+\begin{constat}[Interprétation]
+Les deux moteurs renvoient exactement le même résultat, comme attendu
+(même source de données, même sémantique SQL) — mais avec un écart de
+temps d'exécution notable, mesuré en conditions réelles sur cette
+machine (stack sous émulation QEMU, voir chapitre~3) :
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Hive SQL} (Beeline, moteur Hive-on-MR) : 57 secondes.
+  \item \textbf{Spark SQL} (\texttt{spark.sql(...)} depuis Jupyter) :
+    15 secondes — SparkSession déjà chaude comprise.
+\end{itemize}
+
+Ces chiffres varient d'un run à l'autre (émulation QEMU sur Apple
+Silicon, charge de la machine — un run antérieur avait mesuré 33\,s et
+8,8\,s) mais l'écart qualitatif est systématique : Spark SQL est
+toujours nettement plus rapide, dans un rapport de 3 à 4$\times$.
+L'écart s'explique par le moteur d'exécution sous-jacent : Hive-on-MR
+(déprécié depuis Hive 2, message d'avertissement affiché à chaque
+requête) matérialise des étapes MapReduce sur disque, alors que Spark
+SQL exécute un plan Catalyst optimisé en mémoire. Ce n'est pas une
+surprise architecturale mais une illustration concrète, chiffrée sur ce
+dataset, de pourquoi Spark reste le moteur de calcul recommandé pour
+l'analytique interactive malgré la présence de Hive comme couche de
+métadonnées/requêtage SQL classique.
+\end{constat}

@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for looking. This is a small project with a strict method; the rules are written once in
+This is a small project with a strict method; the rules are written once in
 [AGENTS.md](AGENTS.md) and checked by CI.
 
 ## Set up
@@ -9,9 +9,8 @@ Thanks for looking. This is a small project with a strict method; the rules are 
 git clone https://github.com/PaulPerigault/bigdata-ai-jobs-market.git
 cd bigdata-ai-jobs-market
 pip install uv==0.13.8
-go install github.com/go-task/task/v3/cmd/task@latest   # or: go tool -modfile=tools/go.mod task
-task setup     # locked Python environment, .env, pinned tools, Git hooks (Lefthook)
-task verify    # everything CI runs
+go tool -modfile=tools/go.mod task setup    # pinned Task, no global install; locked Python environment, .env, pinned tools, Git hooks (Lefthook)
+go tool -modfile=tools/go.mod task verify   # everything CI runs
 ```
 
 You need Go (dev tools), Python 3.11 and uv, and Java 11 or 17 (`JAVA_HOME`) for the Spark tests. On Windows, Git for

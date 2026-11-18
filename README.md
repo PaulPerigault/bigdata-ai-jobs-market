@@ -118,7 +118,7 @@ What runs, and what does not:
 
 - **Run on 2026-11-13:** `task verify` (format, lint, 12 tests with Spark 3.5.0 on a JDK 17, docs check, sample check, gitleaks) and `docker compose config`.
 - **Not run in this rebuild:** the Docker stack (`task up`, `task demo`, `task etl`, `task docker:scan`, `task report`) because no Docker daemon was available. The stack ran on the original authors' machines in September 2026 (project notes); it has not been re-run since the rebuild.
-- **CI has never run on GitHub runners** at the time of writing.
+- **CI runs on GitHub** (`ci.yml`, required check `ci`): lint, tests with Spark, docs and sample checks, Compose validation, gitleaks, Trivy, CodeQL and zizmor. It does not build the report or start the Docker stack.
 - The **real dataset is not in the repository** and its licence is not stated on its public page. The figures in the report come from it; the repository can only reproduce them if you download it and `task data:raw:check` passes.
 - The **images are old and unpatched**: Hadoop 2.7.4, Hive 2.3.2, amd64 only (emulated on Apple Silicon, slow). They carry known vulnerabilities; this is a local teaching stack, not a service. `task docker:scan` scans the repository files, not these images.
 - **PySpark 3.5 (pinned 3.5.9) needs Java 11 or 17 and, on Windows, CPython 3.11** ([ADR 0003](docs/adr/0003-java-and-python-pins-for-spark-tests.md)).

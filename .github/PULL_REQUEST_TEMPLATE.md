@@ -16,9 +16,9 @@ Closes #
 - [ ] `task verify`
 - [ ] Other commands, with their output:
 
-## Impact on findings or output
+## Impact on data or output
 
-None, or describe: finding IDs added or changed, JSON fields, exit codes, `testdata/` regenerated.
+None, or describe: tables, columns, query results, README output or report figures changed.
 
 ## Notes for the merge
 

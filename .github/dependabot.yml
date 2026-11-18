@@ -36,6 +36,11 @@ updates:
     cooldown: {default-days: 7}
     commit-message: {prefix: 'chore(deps)'}
     labels: [dependencies, 'pkg:compose']
+    ignore:
+      # postgres:13 holds the Hive 2.3.2 metastore (old JDBC driver, schema created by hand): a new major is a
+      # deliberate migration of the compose and the metastore together, not an image bump. Patch and minor stay.
+      - dependency-name: postgres
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule: {interval: weekly, day: monday}
